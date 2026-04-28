@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 
@@ -25,6 +26,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
 import { LoadingScreen } from 'src/components/loading-screen';
 
+import { TREE_DATA } from 'src/api/dummy/default';
 import { getTreeData, saveTreeData } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
@@ -38,6 +40,7 @@ export function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
   const confirmDialog = useBoolean();
+  const resetDialog = useBoolean();
   const newFilesDialog = useBoolean();
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(
     'file-manager-sidebar-collapsed',
@@ -192,6 +195,26 @@ export function FileManagerView() {
     [currentFolderId]
   );
 
+  const handleDownload = useCallback(() => {
+    const dataStr = JSON.stringify(treeData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = window.URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `file-manager-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    toast.success('Download success!');
+  }, [treeData]);
+
+  const handleReset = useCallback(() => {
+    setTreeData(TREE_DATA);
+    toast.success('Reset success!');
+    resetDialog.onFalse();
+  }, [resetDialog]);
+
   const handleDeleteItem = useCallback(
     (id: string) => {
       const item = flattenedTree.find((f) => f.id === id);
@@ -291,6 +314,20 @@ export function FileManagerView() {
     />
   );
 
+  const renderResetDialog = () => (
+    <ConfirmDialog
+      open={resetDialog.value}
+      onClose={resetDialog.onFalse}
+      title="Reset"
+      content="Are you sure you want to reset all data to default?"
+      action={
+        <Button variant="contained" color="error" onClick={handleReset}>
+          Reset
+        </Button>
+      }
+    />
+  );
+
   const renderBreadcrumbs = () => {
     if (!currentFolderId) return null;
 
@@ -367,13 +404,31 @@ export function FileManagerView() {
               <Typography variant="h4" sx={{ mb: 1 }}>File manager</Typography>
               {renderBreadcrumbs()}
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-              onClick={newFilesDialog.onTrue}
-            >
-              Upload
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <IconButton
+                color="error"
+                onClick={resetDialog.onTrue}
+                sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
+              >
+                <Iconify icon="solar:restart-bold" />
+              </IconButton>
+
+              <IconButton
+                color="info"
+                onClick={newFilesDialog.onTrue}
+                sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
+              >
+                <Iconify icon="eva:cloud-upload-fill" />
+              </IconButton>
+
+              <IconButton
+                color="success"
+                onClick={handleDownload}
+                sx={{ bgcolor: 'success.main', color: 'success.contrastText', '&:hover': { bgcolor: 'success.dark' } }}
+              >
+                <Iconify icon="eva:download-fill" />
+              </IconButton>
+            </Stack>
           </Box>
 
           <Stack spacing={2.5} sx={{ p: 3 }}>
@@ -408,6 +463,7 @@ export function FileManagerView() {
 
       {renderUploadFilesDialog()}
       {renderConfirmDialog()}
+      {renderResetDialog()}
     </>
   );
 }
