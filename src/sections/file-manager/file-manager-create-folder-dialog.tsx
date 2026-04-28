@@ -72,27 +72,33 @@ export function FileManagerCreateFolderDialog({
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
-      <DialogTitle sx={[(theme) => ({ p: theme.spacing(3, 3, 2, 3) })]}>{title}</DialogTitle>
+    <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>
+      <DialogTitle sx={{ p: (theme) => theme.spacing(3, 3, 1, 3) }}>{title}</DialogTitle>
 
-      <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
+      <DialogContent sx={{ p: (theme) => theme.spacing(0, 3, 2, 3) }}>
         {(onCreate || onUpdate) && (
           <TextField
             fullWidth
-            label="Folder name"
+            autoFocus
             value={folderName}
             onChange={onChangeFolderName}
-            sx={{ mb: 3 }}
             {...textFieldProps}
+            sx={{ mt: 1 }}
           />
         )}
 
         {!hideUpload && (
-          <Upload multiple value={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
+          <Upload
+            multiple
+            value={files}
+            onDrop={handleDrop}
+            onRemove={handleRemoveFile}
+            sx={{ mt: (onCreate || onUpdate) ? 2 : 0 }}
+          />
         )}
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ p: (theme) => theme.spacing(1, 3, 3, 3) }}>
         {!hideUpload && (
           <Button
             variant="contained"
@@ -110,11 +116,9 @@ export function FileManagerCreateFolderDialog({
         )}
 
         {(onCreate || onUpdate) && (
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="soft" onClick={onCreate || onUpdate}>
-              {onUpdate ? 'Save' : 'Create'}
-            </Button>
-          </Box>
+          <Button variant="contained" color="inherit" onClick={onCreate || onUpdate}>
+            {onUpdate ? 'Save' : 'Create'}
+          </Button>
         )}
       </DialogActions>
     </Dialog>

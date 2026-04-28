@@ -29,6 +29,7 @@ import {
 type Props = FileItemProps & {
   selected?: boolean;
   onDelete: () => void;
+  onEdit: () => void;
   onSelect?: () => void;
   onNavigate?: VoidFunction;
   folder: IFolderManager;
@@ -40,22 +41,16 @@ export function FileManagerFolderItem({
   selected,
   onSelect,
   onDelete,
+  onEdit,
   onNavigate,
   ...other
  }: Props) {
   const confirmDialog = useBoolean();
-  const editFolderDialog = useBoolean();
 
   const checkbox = useBoolean();
   const favorite = useBoolean(folder.isFavorited);
 
   const menuActions = usePopover();
-
-  const [folderName, setFolderName] = useState(folder.name);
-
-  const handleChangeFolderName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setFolderName(event.target.value);
-  }, []);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -68,11 +63,11 @@ export function FileManagerFolderItem({
         <MenuItem
           onClick={() => {
             menuActions.onClose();
-            editFolderDialog.onTrue();
+            onEdit();
           }}
         >
           <Iconify icon="solar:pen-bold" />
-          Edit
+          Rename
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
@@ -104,21 +99,6 @@ export function FileManagerFolderItem({
           Delete
         </Button>
       }
-    />
-  );
-
-  const renderEditFolderDialog = () => (
-    <FileManagerCreateFolderDialog
-      open={editFolderDialog.value}
-      onClose={editFolderDialog.onFalse}
-      title="Edit Folder"
-      onUpdate={() => {
-        editFolderDialog.onFalse();
-        setFolderName(folderName);
-        console.info('UPDATE FOLDER', folderName);
-      }}
-      folderName={folderName}
-      onChangeFolderName={handleChangeFolderName}
     />
   );
 
@@ -161,7 +141,6 @@ export function FileManagerFolderItem({
       {renderMenuActions()}
 
       {renderConfirmDialog()}
-      {renderEditFolderDialog()}
 
     </>
   );

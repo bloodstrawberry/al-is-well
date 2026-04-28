@@ -31,6 +31,7 @@ type Props = {
   dataFiltered: IFile[];
   onOpenConfirm: () => void;
   onDeleteItem: (id: string) => void;
+  onUpdateItem: (id: string, name: string) => void;
   onNavigate: (id: string | null) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   notFound?: boolean;
@@ -40,6 +41,7 @@ export function FileManagerGridView({
   table,
   dataFiltered,
   onDeleteItem,
+  onUpdateItem,
   onOpenConfirm,
   onNavigate,
   onCreateItem,
@@ -54,10 +56,13 @@ export function FileManagerGridView({
   const newFilesDialog = useBoolean();
 
   const newFolderDialog = useBoolean();
+  const renameDialog = useBoolean();
 
   const menuActions = usePopover();
 
   const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
+
+  const [renameItem, setRenameItem] = useState<IFile | null>(null);
 
   const [itemName, setItemName] = useState('');
 
@@ -77,16 +82,17 @@ export function FileManagerGridView({
       if (INVALID_CHARACTERS.test(value)) {
         setErrorMessage('Invalid characters: < > : " / \\ | ? *');
       } else if (
-        dataFiltered.some(
-          (item) => item.name.toLowerCase() === value.toLowerCase() && item.type === createType
-        )
+        dataFiltered.some((item) => {
+          if (renameItem && item.id === renameItem.id) return false;
+          return item.name.toLowerCase() === value.toLowerCase() && item.type === (renameItem?.type || createType);
+        })
       ) {
-        setErrorMessage(`A ${createType} with this name already exists in this folder`);
+        setErrorMessage(`A ${renameItem?.type || createType} with this name already exists in this folder`);
       } else {
         setErrorMessage('');
       }
     },
-    [dataFiltered]
+    [dataFiltered, renameItem, createType]
   );
 
   const sortedData = [...dataFiltered].sort((a, b) => {
@@ -139,6 +145,42 @@ export function FileManagerGridView({
         error: !!errorMessage,
         helperText: errorMessage,
         label: createType === 'folder' ? 'Folder name' : 'File name',
+      }}
+    />
+  );
+
+  const renderRenameDialog = () => (
+    <FileManagerCreateFolderDialog
+      open={renameDialog.value}
+      onClose={() => {
+        renameDialog.onFalse();
+        setRenameItem(null);
+        setItemName('');
+        setErrorMessage('');
+      }}
+      title="Rename"
+      onUpdate={() => {
+        if (!itemName) {
+          setErrorMessage('Name is required');
+          return;
+        }
+        if (errorMessage) return;
+
+        if (renameItem) {
+          onUpdateItem(renameItem.id, itemName);
+        }
+        renameDialog.onFalse();
+        setRenameItem(null);
+        setItemName('');
+        setErrorMessage('');
+      }}
+      folderName={itemName}
+      onChangeFolderName={handleChangeItemName}
+      hideUpload
+      textFieldProps={{
+        error: !!errorMessage,
+        helperText: errorMessage,
+        label: renameItem?.type === 'folder' ? 'Folder name' : 'File name',
       }}
     />
   );
@@ -255,6 +297,11 @@ export function FileManagerGridView({
                 selected={selected.includes(item.id)}
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
+                onEdit={() => {
+                  setRenameItem(item);
+                  setItemName(item.name);
+                  renameDialog.onTrue();
+                }}
                 onNavigate={() => onNavigate(item.id)}
               />
             ) : (
@@ -264,6 +311,11 @@ export function FileManagerGridView({
                 selected={selected.includes(item.id)}
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
+                onEdit={() => {
+                  setRenameItem(item);
+                  setItemName(item.name);
+                  renameDialog.onTrue();
+                }}
               />
             )
           )}
@@ -275,6 +327,7 @@ export function FileManagerGridView({
       {renderShareDialog()}
       {renderUploadFilesDialog()}
       {renderCreateFolderDialog()}
+      {renderRenameDialog()}
       {renderMenuActions()}
     </>
   );

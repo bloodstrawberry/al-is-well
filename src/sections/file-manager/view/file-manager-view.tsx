@@ -354,6 +354,20 @@ export function FileManagerView() {
               table={table}
               dataFiltered={dataFiltered}
               onDeleteItem={handleDeleteItem}
+              onUpdateItem={(id, name) => {
+                const updateNameInTree = (nodes: any[]): any[] =>
+                  nodes.map((node) => {
+                    if (node.id === id) {
+                      return { ...node, label: name };
+                    }
+                    if (node.children) {
+                      return { ...node, children: updateNameInTree(node.children) };
+                    }
+                    return node;
+                  });
+                setTreeData((prev) => updateNameInTree(prev));
+                toast.success('Rename success!');
+              }}
               onCreateItem={handleCreateItem}
               onOpenConfirm={confirmDialog.onTrue}
               onNavigate={handleNavigate}

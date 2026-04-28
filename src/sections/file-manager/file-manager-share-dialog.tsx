@@ -38,14 +38,14 @@ export function FileManagerShareDialog({
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} sx={sx} {...other}>
-      <DialogTitle>Share</DialogTitle>
+      <DialogTitle sx={{ p: (theme) => theme.spacing(3, 3, 1.5, 3) }}>Share</DialogTitle>
 
-      <Box sx={{ px: 3 }}>
+      <Box sx={{ px: 3, pb: 2 }}>
         {onChangeInvite && (
           <TextField
             fullWidth
             value={inviteEmail}
-            placeholder="Email"
+            placeholder="Email address"
             onChange={onChangeInvite}
             slotProps={{
               input: {
@@ -57,13 +57,12 @@ export function FileManagerShareDialog({
                       disabled={!inviteEmail}
                       sx={{ mr: -0.75 }}
                     >
-                      Send Invite
+                      Send
                     </Button>
                   </InputAdornment>
                 ),
               },
             }}
-            sx={{ mb: 2 }}
           />
         )}
       </Box>
@@ -78,7 +77,7 @@ export function FileManagerShareDialog({
         </Scrollbar>
       )}
 
-      <DialogActions sx={{ justifyContent: 'space-between' }}>
+      <DialogActions sx={{ p: (theme) => theme.spacing(1.5, 3, 3, 3), justifyContent: 'space-between' }}>
         {onCopyLink && (
           <Button startIcon={<Iconify icon="eva:link-2-fill" />} onClick={onCopyLink}>
             Copy link

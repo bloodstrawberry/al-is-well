@@ -31,22 +31,16 @@ type Props = FileItemProps & {
   selected?: boolean;
   file: IFileManager;
   onDelete: () => void;
+  onEdit: () => void;
   onSelect?: () => void;
 };
 
-export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }: Props) {
+export function FileManagerFileItem({ file, selected, onSelect, onDelete, onEdit, sx, ...other }: Props) {
   const confirmDialog = useBoolean();
-  const editFileDialog = useBoolean();
   const menuActions = usePopover();
 
   const checkbox = useBoolean();
   const favorite = useBoolean(file.isFavorited);
-
-  const [fileName, setFileName] = useState(file.name);
-
-  const handleChangeFileName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setFileName(event.target.value);
-  }, []);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -59,11 +53,11 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
         <MenuItem
           onClick={() => {
             menuActions.onClose();
-            editFileDialog.onTrue();
+            onEdit();
           }}
         >
           <Iconify icon="solar:pen-bold" />
-          Edit
+          Rename
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
@@ -94,20 +88,6 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
           Delete
         </Button>
       }
-    />
-  );
-
-  const renderEditFileDialog = () => (
-    <FileManagerCreateFolderDialog
-      open={editFileDialog.value}
-      onClose={editFileDialog.onFalse}
-      title="Edit File"
-      onUpdate={() => {
-        editFileDialog.onFalse();
-        console.info('UPDATE FILE', fileName);
-      }}
-      folderName={fileName}
-      onChangeFolderName={handleChangeFileName}
     />
   );
 
@@ -145,7 +125,6 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
       {renderMenuActions()}
 
       {renderConfirmDialog()}
-      {renderEditFileDialog()}
 
     </>
   );
