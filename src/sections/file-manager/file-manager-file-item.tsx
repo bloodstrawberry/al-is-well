@@ -22,7 +22,6 @@ import {
   FileItem,
   FileItemIcon,
   FileItemInfo,
-  FileItemAvatar,
   FileItemActions,
 } from './file-manager-file-item-slots';
 
@@ -149,7 +148,6 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
           values={[fData(file.size), fDateTime(file.modifiedAt)]}
         />
 
-        <FileItemAvatar sharedUsers={file.shared} />
 
         <FileItemActions
           id={file.id}

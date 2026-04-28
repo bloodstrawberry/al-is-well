@@ -1,19 +1,16 @@
 import type { BoxProps } from '@mui/material/Box';
 import type { CheckboxProps } from '@mui/material/Checkbox';
 import type { UsePopoverReturn } from 'minimal-shared/hooks';
-import type { AvatarGroupProps } from '@mui/material/AvatarGroup';
 import type { IFileManager } from 'src/types/file';
 import type { FileThumbnailProps } from 'src/components/file-thumbnail';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
-import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
 
 import { CONFIG } from 'src/global-config';
 
@@ -249,35 +246,4 @@ export function FileItemActions({
   );
 }
 
-// ----------------------------------------------------------------------
 
-export type FileItemAvatarProps = AvatarGroupProps & {
-  sharedUsers: IFileManager['shared'];
-};
-
-export function FileItemAvatar({ sharedUsers, sx, ...other }: FileItemAvatarProps) {
-  if (!sharedUsers?.length) {
-    return null;
-  }
-
-  return (
-    <AvatarGroup
-      max={3}
-      sx={[
-        {
-          display: 'inline-flex',
-          [`& .${avatarGroupClasses.avatar}`]: {
-            width: 24,
-            height: 24,
-          },
-        },
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-      {...other}
-    >
-      {sharedUsers.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
-      ))}
-    </AvatarGroup>
-  );
-}

@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-import { fIsAfter, fIsBetween } from 'src/utils/format-time';
+import { fIsBetween } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { _allFiles, FILE_TYPE_OPTIONS } from 'src/_mock';
@@ -33,7 +33,6 @@ import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dia
 export function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-  const dateRange = useBoolean();
   const confirmDialog = useBoolean();
   const newFilesDialog = useBoolean();
 
@@ -48,13 +47,10 @@ export function FileManagerView() {
   });
   const { state: currentFilters } = filters;
 
-  const dateError = fIsAfter(currentFilters.startDate, currentFilters.endDate);
-
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters: currentFilters,
-    dateError,
   });
 
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
@@ -101,12 +97,7 @@ export function FileManagerView() {
     >
       <FileManagerFilters
         filters={filters}
-        dateError={dateError}
         onResetPage={table.onResetPage}
-        openDateRange={dateRange.value}
-        onOpenDateRange={dateRange.onTrue}
-        onCloseDateRange={dateRange.onFalse}
-        options={{ types: FILE_TYPE_OPTIONS }}
       />
     </Box>
   );
@@ -188,13 +179,12 @@ export function FileManagerView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  dateError: boolean;
   inputData: IFile[];
   filters: IFileFilters;
   comparator: (a: any, b: any) => number;
 };
 
-function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterProps) {
+function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   const { name, type, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
@@ -215,10 +205,8 @@ function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterP
     inputData = inputData.filter((file) => type.includes(fileFormat(file.type)));
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter((file) => fIsBetween(file.createdAt, startDate, endDate));
-    }
+  if (startDate && endDate) {
+    inputData = inputData.filter((file) => fIsBetween(file.createdAt, startDate, endDate));
   }
 
   return inputData;

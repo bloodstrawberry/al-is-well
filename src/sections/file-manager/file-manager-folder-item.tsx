@@ -22,7 +22,6 @@ import {
   FileItem,
   FileItemIcon,
   FileItemInfo,
-  FileItemAvatar,
   FileItemActions,
 } from './file-manager-file-item-slots';
 
@@ -187,7 +186,6 @@ export function FileManagerFolderItem({
           values={[fData(folder.size), `${folder.totalFiles} files`]}
         />
 
-        <FileItemAvatar sharedUsers={folder.shared} />
 
         <FileItemActions
           id={folder.id}

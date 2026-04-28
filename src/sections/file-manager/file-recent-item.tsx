@@ -20,7 +20,6 @@ import { FileManagerShareDialog } from './file-manager-share-dialog';
 import {
   FileItem,
   FileItemInfo,
-  FileItemAvatar,
   FileItemActions,
 } from './file-manager-file-item-slots';
 
@@ -132,7 +131,6 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
           values={[fData(file.size), fDateTime(file.modifiedAt)]}
         />
 
-        <FileItemAvatar sharedUsers={file.shared} />
 
         <FileItemActions
           id={file.id}
