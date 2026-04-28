@@ -75,8 +75,19 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   color: theme.vars.palette.text.secondary,
   [`& .${treeItemClasses.content}`]: {
-    paddingRight: theme.spacing(1),
+    paddingRight: theme.spacing(0.5),
+    paddingTop: 0,
+    paddingBottom: 0,
+    minHeight: 20,
     fontWeight: theme.typography.fontWeightMedium,
+    [`& .${treeItemClasses.iconContainer}`]: {
+      marginRight: 0,
+      width: 10,
+      '& svg': {
+        width: 12,
+        height: 12,
+      },
+    },
     '&.Mui-expanded': {
       fontWeight: theme.typography.fontWeightRegular,
     },
@@ -88,13 +99,15 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
       color: 'var(--tree-view-color)',
     },
     [`& .${treeItemClasses.label}`]: {
+      fontSize: theme.typography.pxToRem(13),
       fontWeight: 'inherit',
       color: 'inherit',
+      minWidth: 0,
     },
   },
   [`& .${treeItemClasses.groupTransition}`]: {
-    marginLeft: 15,
-    paddingLeft: 18,
+    marginLeft: 4,
+    paddingLeft: 6,
     borderLeft: `1px solid ${theme.vars.palette.divider}`,
   },
 }));
@@ -231,19 +244,29 @@ export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelect
         }
       }}
       label={
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+        <Stack direction="row" alignItems="center" spacing={0.3} sx={{ py: 0, minWidth: 0 }}>
           <Iconify
             icon={
               nodes.type === 'folder'
                 ? 'solar:folder-2-bold-duotone'
                 : 'solar:document-text-bold-duotone'
             }
-            width={18}
+            width={14}
             sx={{
+              flexShrink: 0,
               color: nodes.type === 'folder' ? 'warning.main' : 'text.disabled',
             }}
           />
-          <Typography variant="body2" sx={{ fontWeight: 'inherit', flexGrow: 1 }}>
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
+              flexGrow: 1,
+              minWidth: 0,
+            }}
+          >
             {nodes.label}
           </Typography>
         </Stack>
@@ -263,9 +286,9 @@ export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelect
         introFinished={introFinished}
       >
         <Stack
-          spacing={2}
+          spacing={1.5}
           sx={{
-            p: 2,
+            p: 1.5,
             width: displayWidth,
             minWidth: displayWidth,
             opacity: isMounted ? 1 : 0,
