@@ -343,12 +343,13 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
           <Button
             startIcon={<Iconify icon="mingcute:add-line" />}
             onClick={handleAddLine}
-            variant="dashed"
+            variant="outlined"
             fullWidth
             size="large"
             sx={{ 
               py: 2, 
               borderWidth: 2, 
+              borderStyle: 'dashed',
               borderRadius: 2,
               borderColor: 'divider',
               '&:hover': { borderColor: 'primary.main', bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04) }
