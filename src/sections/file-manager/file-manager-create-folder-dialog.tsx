@@ -15,12 +15,18 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
+import type { TextFieldProps } from '@mui/material/TextField';
+
+// ----------------------------------------------------------------------
+
 type Props = DialogProps & {
   title?: string;
   folderName?: string;
   onClose: () => void;
   onCreate?: () => void;
   onUpdate?: () => void;
+  hideUpload?: boolean;
+  textFieldProps?: TextFieldProps;
   onChangeFolderName?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -30,6 +36,8 @@ export function FileManagerCreateFolderDialog({
   onCreate,
   onUpdate,
   folderName,
+  hideUpload,
+  textFieldProps,
   onChangeFolderName,
   title = 'Add files',
   ...other
@@ -75,20 +83,25 @@ export function FileManagerCreateFolderDialog({
             value={folderName}
             onChange={onChangeFolderName}
             sx={{ mb: 3 }}
+            {...textFieldProps}
           />
         )}
 
-        <Upload multiple value={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
+        {!hideUpload && (
+          <Upload multiple value={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
+        )}
       </DialogContent>
 
       <DialogActions>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={handleUpload}
-        >
-          Upload
-        </Button>
+        {!hideUpload && (
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+            onClick={handleUpload}
+          >
+            Upload
+          </Button>
+        )}
 
         {!!files.length && (
           <Button variant="outlined" color="inherit" onClick={handleRemoveAllFiles}>

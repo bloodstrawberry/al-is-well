@@ -1,13 +1,16 @@
 import type { IFile } from 'src/types/file';
 import type { UseTableReturn } from 'src/components/table';
 
-import { useBoolean } from 'minimal-shared/hooks';
+import { useBoolean, usePopover } from 'minimal-shared/hooks';
 import { useRef, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
 
 import { Iconify } from 'src/components/iconify';
+import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerPanel } from './file-manager-panel';
 import { FileManagerFileItem } from './file-manager-file-item';
@@ -15,6 +18,10 @@ import { FileManagerFolderItem } from './file-manager-folder-item';
 import { FileManagerShareDialog } from './file-manager-share-dialog';
 import { FileManagerActionSelected } from './file-manager-action-selected';
 import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
+
+// ----------------------------------------------------------------------
+
+const INVALID_CHARACTERS = /[<>:"/\\|?*]/;
 
 // ----------------------------------------------------------------------
 
@@ -43,16 +50,29 @@ export function FileManagerGridView({
 
   const newFolderDialog = useBoolean();
 
-  const [folderName, setFolderName] = useState('');
+  const menuActions = usePopover();
+
+  const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
+
+  const [itemName, setItemName] = useState('');
 
   const [inviteEmail, setInviteEmail] = useState('');
+
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setInviteEmail(event.target.value);
   }, []);
 
-  const handleChangeFolderName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setFolderName(event.target.value);
+  const handleChangeItemName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setItemName(value);
+
+    if (INVALID_CHARACTERS.test(value)) {
+      setErrorMessage('Invalid characters: < > : " / \\ | ? *');
+    } else {
+      setErrorMessage('');
+    }
   }, []);
 
   const sortedData = [...dataFiltered].sort((a, b) => {
@@ -80,16 +100,66 @@ export function FileManagerGridView({
   const renderCreateFolderDialog = () => (
     <FileManagerCreateFolderDialog
       open={newFolderDialog.value}
-      onClose={newFolderDialog.onFalse}
-      title="Add folder"
-      onCreate={() => {
+      onClose={() => {
         newFolderDialog.onFalse();
-        setFolderName('');
-        console.info('CREATE NEW FOLDER', folderName);
+        setItemName('');
+        setErrorMessage('');
       }}
-      folderName={folderName}
-      onChangeFolderName={handleChangeFolderName}
+      title={createType === 'folder' ? 'New folder' : 'New file'}
+      onCreate={() => {
+        if (!itemName) {
+          setErrorMessage('Name is required');
+          return;
+        }
+        if (errorMessage) return;
+
+        newFolderDialog.onFalse();
+        setItemName('');
+        setErrorMessage('');
+        console.info(createType === 'folder' ? 'CREATE NEW FOLDER' : 'CREATE NEW FILE', itemName);
+      }}
+      folderName={itemName}
+      onChangeFolderName={handleChangeItemName}
+      hideUpload
+      textFieldProps={{
+        error: !!errorMessage,
+        helperText: errorMessage,
+        label: createType === 'folder' ? 'Folder name' : 'File name',
+      }}
     />
+  );
+
+  const renderMenuActions = () => (
+    <CustomPopover
+      open={menuActions.open}
+      anchorEl={menuActions.anchorEl}
+      onClose={menuActions.onClose}
+      slotProps={{ arrow: { placement: 'top-center' } }}
+    >
+      <MenuList>
+        <MenuItem
+          onClick={() => {
+            setCreateType('folder');
+            newFolderDialog.onTrue();
+            menuActions.onClose();
+          }}
+        >
+          <Iconify icon="solar:folder-plus-bold" />
+          New folder
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            setCreateType('file');
+            newFolderDialog.onTrue();
+            menuActions.onClose();
+          }}
+        >
+          <Iconify icon="solar:file-plus-bold" />
+          New file
+        </MenuItem>
+      </MenuList>
+    </CustomPopover>
   );
 
   const renderSelectedActions = () =>
@@ -137,7 +207,7 @@ export function FileManagerGridView({
         <FileManagerPanel
           title="All files"
           subtitle={`${dataFiltered.length} items`}
-          onOpen={newFolderDialog.onTrue}
+          onOpen={menuActions.onOpen}
         />
 
         <Box
@@ -180,6 +250,7 @@ export function FileManagerGridView({
       {renderShareDialog()}
       {renderUploadFilesDialog()}
       {renderCreateFolderDialog()}
+      {renderMenuActions()}
     </>
   );
 }
