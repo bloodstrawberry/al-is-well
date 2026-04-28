@@ -23,8 +23,9 @@ import { fileFormat } from 'src/components/file-thumbnail';
 import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
+import { LoadingScreen } from 'src/components/loading-screen';
 
-import { TREE_DATA } from 'src/api/dummy/default';
+import { getTreeData, saveTreeData } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
@@ -45,7 +46,31 @@ export function FileManagerView() {
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
-  const [treeData, setTreeData] = useState<any[]>(TREE_DATA);
+  const [treeData, setTreeData] = useState<any[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await getTreeData();
+        setTreeData(data);
+        setIsLoaded(true);
+      } catch (error) {
+        console.error('Failed to load tree data from IndexedDB', error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveTreeData(treeData).catch((error) => {
+        console.error('Failed to save tree data to IndexedDB', error);
+      });
+    }
+  }, [treeData, isLoaded]);
 
   const filters = useSetState<IFileFilters>({
     name: '',
@@ -298,6 +323,10 @@ export function FileManagerView() {
       </Breadcrumbs>
     );
   };
+
+  if (!isLoaded) {
+    return <LoadingScreen sx={{ minHeight: '60vh' }} />;
+  }
 
   return (
     <>

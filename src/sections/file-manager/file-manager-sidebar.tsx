@@ -195,6 +195,22 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
     };
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
+  const sortedData = useMemo(() => {
+    const sortNodes = (nodes: any[]): any[] => {
+      return [...nodes]
+        .sort((a, b) => {
+          if (a.type === 'folder' && b.type !== 'folder') return -1;
+          if (a.type !== 'folder' && b.type === 'folder') return 1;
+          return a.label.localeCompare(b.label);
+        })
+        .map((node) => ({
+          ...node,
+          children: node.children ? sortNodes(node.children) : undefined,
+        }));
+    };
+    return sortNodes(data);
+  }, [data]);
+
   // Flatten tree for search and include parent lineage
   const flattenedData = useMemo(() => {
     const results: any[] = [];
@@ -208,9 +224,9 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
         }
       });
     };
-    flatten(data);
+    flatten(sortedData);
     return results;
-  }, [data]);
+  }, [sortedData]);
 
   // Effect to expand parents when selectedId changes externally (e.g. from Grid View)
   useEffect(() => {
@@ -302,12 +318,9 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
           }}
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+            <Typography variant="overline" sx={{ color: 'text.secondary', textTransform: 'none' }}>
               Explorer
             </Typography>
-            <IconButton size="small">
-              <Iconify icon="solar:menu-dots-bold" width={16} />
-            </IconButton>
           </Stack>
 
           <Autocomplete
@@ -372,7 +385,7 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
                 overflowY: 'auto',
               }}
             >
-              {data.map((node) => renderTree(node))}
+              {sortedData.map((node) => renderTree(node))}
             </SimpleTreeView>
           </Box>
         </Stack>
