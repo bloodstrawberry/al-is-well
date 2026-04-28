@@ -98,52 +98,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 const WIDTH_KEY = 'file-manager-sidebar-width';
 const COLLAPSED_KEY = 'file-manager-sidebar-collapsed';
 
-const TREE_DATA = [
-  {
-    id: '1',
-    label: 'src',
-    type: 'folder',
-    children: [
-      {
-        id: '2',
-        label: 'components',
-        type: 'folder',
-        children: [
-          { id: '3', label: 'button.tsx', type: 'file' },
-          { id: '4', label: 'input.tsx', type: 'file' },
-        ],
-      },
-      {
-        id: '5',
-        label: 'sections',
-        type: 'folder',
-        children: [
-          {
-            id: '6',
-            label: 'file-manager',
-            type: 'folder',
-            children: [
-              { id: '7', label: 'file-manager-sidebar.tsx', type: 'file' },
-              { id: '8', label: 'file-manager-grid.tsx', type: 'file' },
-            ],
-          },
-        ],
-      },
-      { id: '9', label: 'app.tsx', type: 'file' },
-    ],
-  },
-  {
-    id: '10',
-    label: 'public',
-    type: 'folder',
-    children: [
-      { id: '11', label: 'favicon.ico', type: 'file' },
-      { id: '12', label: 'logo.png', type: 'file' },
-    ],
-  },
-  { id: '13', label: 'package.json', type: 'file' },
-  { id: '14', label: 'tsconfig.json', type: 'file' },
-];
+import { TREE_DATA } from './file-manager-tree-data';
 
 export function FileManagerSidebar() {
   const [isMounted, setIsMounted] = useState(false);
