@@ -15,7 +15,7 @@ type Props = BoxProps & {
   link?: string;
   subtitle?: string;
   collapse?: boolean;
-  onOpen?: () => void;
+  onOpen?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onCollapse?: () => void;
 };
 
