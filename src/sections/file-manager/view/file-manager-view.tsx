@@ -9,8 +9,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { fIsAfter, fIsBetween } from 'src/utils/format-time';
 
@@ -24,7 +22,7 @@ import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
 
-import { FileManagerTable } from '../file-manager-table';
+
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
@@ -39,7 +37,6 @@ export function FileManagerView() {
   const confirmDialog = useBoolean();
   const newFilesDialog = useBoolean();
 
-  const [displayMode, setDisplayMode] = useState('list');
 
   const [tableData, setTableData] = useState<IFile[]>(_allFiles);
 
@@ -69,14 +66,6 @@ export function FileManagerView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleChangeView = useCallback(
-    (event: React.MouseEvent<HTMLElement>, newView: string | null) => {
-      if (newView !== null) {
-        setDisplayMode(newView);
-      }
-    },
-    []
-  );
 
   const handleDeleteItem = useCallback(
     (id: string) => {
@@ -119,16 +108,6 @@ export function FileManagerView() {
         onCloseDateRange={dateRange.onFalse}
         options={{ types: FILE_TYPE_OPTIONS }}
       />
-
-      <ToggleButtonGroup size="small" value={displayMode} exclusive onChange={handleChangeView}>
-        <ToggleButton value="list">
-          <Iconify icon="solar:list-bold" />
-        </ToggleButton>
-
-        <ToggleButton value="grid">
-          <Iconify icon="mingcute:dot-grid-fill" />
-        </ToggleButton>
-      </ToggleButtonGroup>
     </Box>
   );
 
@@ -169,23 +148,14 @@ export function FileManagerView() {
     />
   );
 
-  const renderList = () =>
-    displayMode === 'list' ? (
-      <FileManagerTable
-        table={table}
-        dataFiltered={dataFiltered}
-        onDeleteRow={handleDeleteItem}
-        notFound={notFound}
-        onOpenConfirm={confirmDialog.onTrue}
-      />
-    ) : (
-      <FileManagerGridView
-        table={table}
-        dataFiltered={dataFiltered}
-        onDeleteItem={handleDeleteItem}
-        onOpenConfirm={confirmDialog.onTrue}
-      />
-    );
+  const renderList = () => (
+    <FileManagerGridView
+      table={table}
+      dataFiltered={dataFiltered}
+      onDeleteItem={handleDeleteItem}
+      onOpenConfirm={confirmDialog.onTrue}
+    />
+  );
 
   return (
     <>
