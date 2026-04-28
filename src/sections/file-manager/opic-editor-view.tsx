@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { Iconify } from 'src/components/iconify';
@@ -40,6 +45,8 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
   });
 
   const [loading, setLoading] = useState(true);
+  const [bulkText, setBulkText] = useState('');
+  const bulkModal = useBoolean();
 
   useEffect(() => {
     const loadScript = async () => {
@@ -91,6 +98,28 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
     });
   };
 
+  const handleBulkApply = () => {
+    const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean);
+    const newLines: Line[] = [];
+    for (let i = 0; i < lines.length; i += 2) {
+      if (lines[i + 1]) {
+        newLines.push({ ko: lines[i], en: lines[i + 1] });
+      }
+    }
+
+    if (newLines.length > 0) {
+      setScriptData((prev) => ({
+        ...prev,
+        lines: newLines,
+      }));
+      setBulkText('');
+      bulkModal.onFalse();
+      toast.success(`${newLines.length} lines applied!`);
+    } else {
+      toast.error('Invalid format. Please provide Korean and English pairs.');
+    }
+  };
+
   if (loading) {
     return <Box sx={{ p: 3 }}>Loading...</Box>;
   }
@@ -105,7 +134,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
         <Button variant="contained" color="primary" onClick={handleSave}>Save Changes</Button>
       </Stack>
 
-      <Stack spacing={4} sx={{ maxWidth: 800 }}>
+      <Stack spacing={4} sx={{ maxWidth: 800, mx: 'auto' }}>
         <TextField
           fullWidth
           label="OPIc Question"
@@ -140,7 +169,19 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
         )}
 
         <Stack spacing={2}>
-          <Typography variant="subtitle1">Script Lines</Typography>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="subtitle1">Script Lines</Typography>
+            <Button
+              size="small"
+              variant="soft"
+              color="info"
+              startIcon={<Iconify icon="solar:import-bold" />}
+              onClick={bulkModal.onTrue}
+            >
+              Bulk Import
+            </Button>
+          </Stack>
+
           {scriptData.lines.map((line, index) => (
             <Stack key={index} direction="row" spacing={2} alignItems="flex-start" sx={{ p: 2, borderRadius: 1, bgcolor: 'background.neutral' }}>
               <Stack spacing={2} sx={{ flexGrow: 1 }}>
@@ -179,6 +220,34 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
       <Stack direction="row" justifyContent="flex-end" sx={{ mt: 5, pb: 10 }}>
         <Button variant="contained" size="large" color="primary" onClick={handleSave} sx={{ px: 5 }}>Save Changes</Button>
       </Stack>
+
+      <Dialog open={bulkModal.value} onClose={bulkModal.onFalse} fullWidth maxWidth="sm">
+        <DialogTitle>Bulk Import</DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+            Paste Korean and English pairs below. (Each pair = one script line)
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={15}
+            placeholder={"Korean line\nEnglish line\n\nKorean line\nEnglish line..."}
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={bulkModal.onFalse} color="inherit">Cancel</Button>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleBulkApply}
+            disabled={!bulkText.trim()}
+          >
+            Apply to Script
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

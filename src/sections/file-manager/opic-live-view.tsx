@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -21,6 +21,8 @@ type Props = {
 export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [scriptData, setScriptData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [revealedLines, setRevealedLines] = useState<Record<number, boolean>>({});
+  const [allRevealed, setAllRevealed] = useState(true);
 
   useEffect(() => {
     const loadScript = async () => {
@@ -37,6 +39,25 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     loadScript();
   }, [fileId]);
 
+  const toggleLine = useCallback((index: number) => {
+    setRevealedLines((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  }, []);
+
+  const toggleAll = () => {
+    const newState = !allRevealed;
+    setAllRevealed(newState);
+    const newRevealed: Record<number, boolean> = {};
+    if (scriptData?.lines) {
+      scriptData.lines.forEach((_: any, index: number) => {
+        newRevealed[index] = newState;
+      });
+    }
+    setRevealedLines(newRevealed);
+  };
+
   if (loading) {
     return <Box sx={{ p: 3 }}>Loading...</Box>;
   }
@@ -48,13 +69,25 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>{fileName}</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="solar:pen-bold" />}
-          onClick={onEdit}
-        >
-          Edit Script
-        </Button>
+        
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="soft"
+            color={allRevealed ? 'warning' : 'success'}
+            startIcon={<Iconify icon={allRevealed ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />}
+            onClick={toggleAll}
+          >
+            {allRevealed ? 'Memorize Mode' : 'Show All'}
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="solar:pen-bold" />}
+            onClick={onEdit}
+          >
+            Edit Script
+          </Button>
+        </Stack>
       </Stack>
 
       <Stack spacing={4}>
@@ -73,13 +106,57 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         )}
 
         <Stack spacing={2}>
-          <Typography variant="overline" sx={{ color: 'text.secondary' }}>Script</Typography>
-          {scriptData?.lines?.map((line: any, index: number) => (
-            <Box key={index} sx={{ p: 2, borderRadius: 1.5, bgcolor: 'background.neutral', border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
-              <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>{line.ko}</Typography>
-              <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>{line.en}</Typography>
-            </Box>
-          )) || (
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="overline" sx={{ color: 'text.secondary' }}>Script</Typography>
+            {!allRevealed && (
+              <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                * Click each box to reveal English
+              </Typography>
+            )}
+          </Stack>
+          
+          {scriptData?.lines?.map((line: any, index: number) => {
+            const isRevealed = revealedLines[index] ?? allRevealed;
+            
+            return (
+              <Box
+                key={index}
+                onClick={() => toggleLine(index)}
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  borderRadius: 1.5,
+                  bgcolor: 'background.neutral',
+                  border: (theme) => `solid 1px ${isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`,
+                  transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                  },
+                }}
+              >
+                <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>
+                  {line.ko}
+                </Typography>
+                
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: 'primary.main',
+                    transition: (theme) => theme.transitions.create(['filter', 'opacity', 'transform']),
+                    ...(!isRevealed && {
+                      filter: 'blur(8px)',
+                      opacity: 0.3,
+                      userSelect: 'none',
+                      transform: 'scale(0.98)',
+                    }),
+                  }}
+                >
+                  {line.en}
+                </Typography>
+              </Box>
+            );
+          }) || (
             <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
               No script lines available.
             </Typography>
