@@ -272,8 +272,8 @@ export function FileManagerView() {
 
   const handleReset = useCallback(async () => {
     handleDownload();
-    await clearAllScripts();
-    setTreeData(TREE_DATA);
+    await saveFullData(TREE_DATA as any);
+    setTreeData(TREE_DATA.tree);
     handleNavigate(null);
     toast.success('Reset success!');
     resetDialog.onFalse();

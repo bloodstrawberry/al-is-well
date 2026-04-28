@@ -43,7 +43,7 @@ async function getAppData(): Promise<AppData> {
       if (result) {
         resolve(result);
       } else {
-        resolve({ tree: TREE_DATA, scripts: {} });
+        resolve(TREE_DATA as AppData);
       }
     };
 
