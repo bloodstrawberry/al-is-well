@@ -3,7 +3,7 @@
 import type { IFile, IFileFilters } from 'src/types/file';
 
 import { useState, useCallback } from 'react';
-import { useBoolean, useSetState } from 'minimal-shared/hooks';
+import { useBoolean, useSetState, useLocalStorage } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -36,7 +36,7 @@ export function FileManagerView() {
 
   const confirmDialog = useBoolean();
   const newFilesDialog = useBoolean();
-
+  const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage('file-manager-sidebar-collapsed', false);
 
   const [tableData, setTableData] = useState<IFile[]>(_allFiles);
 
@@ -164,10 +164,23 @@ export function FileManagerView() {
           width: '100%',
         }}
       >
-        <FileManagerSidebar />
+        <FileManagerSidebar
+          isCollapsed={isCollapsed}
+          onToggle={() => setIsCollapsed(!isCollapsed)}
+        />
 
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 3, pb: 0 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 3,
+              pb: 0,
+              pl: isCollapsed ? 6 : 3,
+              transition: (theme) => theme.transitions.create(['padding-left']),
+            }}
+          >
             <Typography variant="h4">File manager</Typography>
             <Button
               variant="contained"

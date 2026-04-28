@@ -102,9 +102,13 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 const WIDTH_KEY = 'file-manager-sidebar-width';
-const COLLAPSED_KEY = 'file-manager-sidebar-collapsed';
 
-export function FileManagerSidebar() {
+type Props = {
+  isCollapsed: boolean;
+  onToggle: VoidFunction;
+};
+
+export function FileManagerSidebar({ isCollapsed, onToggle }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
@@ -113,7 +117,6 @@ export function FileManagerSidebar() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const { state: width, setState: setWidth } = useLocalStorage(WIDTH_KEY, 280);
-  const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(COLLAPSED_KEY, false);
 
   const [isResizing, setIsResizing] = useState(false);
 
@@ -336,7 +339,7 @@ export function FileManagerSidebar() {
       </RootStyle>
 
       <IconButton
-        onClick={() => setIsCollapsed(!displayCollapsed)}
+        onClick={onToggle}
         sx={{
           p: 0.5,
           top: 12,
