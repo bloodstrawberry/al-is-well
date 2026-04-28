@@ -37,7 +37,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
   const [testMode, setTestMode] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [testResults, setTestResults] = useState<Record<number, { words: { text: string; isCorrect: boolean }[]; masked: string }>>({});
+  const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       }
     }
 
-    const results = [];
+    const results: { uWord: string; cWord: string; isCorrect: boolean; masked: string }[] = [];
     let i = uClean.length;
     let j = cClean.length;
 
@@ -149,7 +149,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
     setTestResults(prev => ({
       ...prev,
-      [index]: results as any
+      [index]: results
     }));
 
     // Auto-reveal if all words are correct
