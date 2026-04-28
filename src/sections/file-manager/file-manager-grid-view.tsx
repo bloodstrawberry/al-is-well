@@ -6,8 +6,6 @@ import { useRef, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Collapse from '@mui/material/Collapse';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -33,13 +31,13 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
   const containerRef = useRef(null);
 
   const shareDialog = useBoolean();
-  const filesCollapse = useBoolean();
-  const foldersCollapse = useBoolean();
 
   const newFilesDialog = useBoolean();
+
   const newFolderDialog = useBoolean();
 
   const [folderName, setFolderName] = useState('');
+
   const [inviteEmail, setInviteEmail] = useState('');
 
   const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +47,12 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
   const handleChangeFolderName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setFolderName(event.target.value);
   }, []);
+
+  const sortedData = [...dataFiltered].sort((a, b) => {
+    if (a.type === 'folder' && b.type !== 'folder') return -1;
+    if (a.type !== 'folder' && b.type === 'folder') return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   const renderShareDialog = () => (
     <FileManagerShareDialog
@@ -79,84 +83,6 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
       folderName={folderName}
       onChangeFolderName={handleChangeFolderName}
     />
-  );
-
-  const renderFolders = () => (
-    <>
-      <FileManagerPanel
-        title="Folders"
-        subtitle={`${dataFiltered.filter((item) => item.type === 'folder').length} folders`}
-        onOpen={newFolderDialog.onTrue}
-        collapse={foldersCollapse.value}
-        onCollapse={foldersCollapse.onToggle}
-      />
-
-      <Collapse in={!foldersCollapse.value} unmountOnExit>
-        <Box
-          sx={{
-            gap: 3,
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
-            },
-          }}
-        >
-          {dataFiltered
-            .filter((i) => i.type === 'folder')
-            .map((folder) => (
-              <FileManagerFolderItem
-                key={folder.id}
-                folder={folder}
-                selected={selected.includes(folder.id)}
-                onSelect={() => onSelectItem(folder.id)}
-                onDelete={() => onDeleteItem(folder.id)}
-              />
-            ))}
-        </Box>
-      </Collapse>
-    </>
-  );
-
-  const renderFiles = () => (
-    <>
-      <FileManagerPanel
-        title="Files"
-        subtitle={`${dataFiltered.filter((item) => item.type !== 'folder').length} files`}
-        onOpen={newFilesDialog.onTrue}
-        collapse={filesCollapse.value}
-        onCollapse={filesCollapse.onToggle}
-      />
-
-      <Collapse in={!filesCollapse.value} unmountOnExit>
-        <Box
-          sx={{
-            gap: 3,
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
-            },
-          }}
-        >
-          {dataFiltered
-            .filter((i) => i.type !== 'folder')
-            .map((file) => (
-              <FileManagerFileItem
-                key={file.id}
-                file={file}
-                selected={selected.includes(file.id)}
-                onSelect={() => onSelectItem(file.id)}
-                onDelete={() => onDeleteItem(file.id)}
-              />
-            ))}
-        </Box>
-      </Collapse>
-    </>
   );
 
   const renderSelectedActions = () =>
@@ -201,9 +127,45 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
   return (
     <>
       <Box ref={containerRef}>
-        {renderFolders()}
-        <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
-        {renderFiles()}
+        <FileManagerPanel
+          title="All files"
+          subtitle={`${dataFiltered.length} items`}
+          onOpen={newFolderDialog.onTrue}
+        />
+
+        <Box
+          sx={{
+            gap: 3,
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(1, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            },
+          }}
+        >
+          {sortedData.map((item) =>
+            item.type === 'folder' ? (
+              <FileManagerFolderItem
+                key={item.id}
+                folder={item}
+                selected={selected.includes(item.id)}
+                onSelect={() => onSelectItem(item.id)}
+                onDelete={() => onDeleteItem(item.id)}
+              />
+            ) : (
+              <FileManagerFileItem
+                key={item.id}
+                file={item}
+                selected={selected.includes(item.id)}
+                onSelect={() => onSelectItem(item.id)}
+                onDelete={() => onDeleteItem(item.id)}
+              />
+            )
+          )}
+        </Box>
+
         {renderSelectedActions()}
       </Box>
 
@@ -213,3 +175,5 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
     </>
   );
 }
+
+
