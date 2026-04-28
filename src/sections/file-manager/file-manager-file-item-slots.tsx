@@ -148,6 +148,7 @@ export function FileItemInfo({ type, title, values, sx, ...other }: FileItemInfo
 
   const renderDetails = () => (
     <Stack
+      suppressHydrationWarning
       divider={
         <Box
           component="span"

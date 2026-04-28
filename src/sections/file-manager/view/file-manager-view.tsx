@@ -24,6 +24,7 @@ import { useTable, rowInPage, getComparator } from 'src/components/table';
 
 
 import { FileManagerFilters } from '../file-manager-filters';
+import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
@@ -150,24 +151,39 @@ export function FileManagerView() {
 
   return (
     <>
-      <DashboardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h4">File manager</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={newFilesDialog.onTrue}
-          >
-            Upload
-          </Button>
+      <DashboardContent
+        maxWidth={false}
+        disablePadding
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          flexGrow: 1,
+          minHeight: 0,
+          maxWidth: 'none!important',
+          m: 0,
+          width: '100%',
+        }}
+      >
+        <FileManagerSidebar />
+
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 3, pb: 0 }}>
+            <Typography variant="h4">File manager</Typography>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+              onClick={newFilesDialog.onTrue}
+            >
+              Upload
+            </Button>
+          </Box>
+
+          <Stack spacing={2.5} sx={{ p: 3 }}>
+            {renderFilters()}
+            {canReset && renderResults()}
+            {notFound ? <EmptyContent filled sx={{ py: 10 }} /> : renderList()}
+          </Stack>
         </Box>
-
-        <Stack spacing={2.5} sx={{ my: { xs: 3, md: 5 } }}>
-          {renderFilters()}
-          {canReset && renderResults()}
-        </Stack>
-
-        {notFound ? <EmptyContent filled sx={{ py: 10 }} /> : renderList()}
       </DashboardContent>
 
       {renderUploadFilesDialog()}
