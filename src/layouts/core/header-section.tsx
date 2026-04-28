@@ -4,6 +4,8 @@ import type { AppBarProps } from '@mui/material/AppBar';
 import type { ContainerProps } from '@mui/material/Container';
 import type { Theme, SxProps, CSSObject, Breakpoint } from '@mui/material/styles';
 
+import { usePathname } from 'src/routes/hooks';
+
 import { useScrollOffsetTop } from 'minimal-shared/hooks';
 import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 
@@ -42,7 +44,13 @@ export function HeaderSection({
   layoutQuery = 'md',
   ...other
 }: HeaderSectionProps) {
+  const pathname = usePathname();
+
   const { offsetTop: isOffset } = useScrollOffsetTop();
+
+  if (pathname !== '/') {
+    return null;
+  }
 
   return (
     <HeaderRoot
