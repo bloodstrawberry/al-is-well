@@ -19,7 +19,7 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-const MIN_WIDTH = 240;
+const MIN_WIDTH = 120;
 const MAX_WIDTH = 480;
 
 const RootStyle = styled(Box, {
@@ -132,7 +132,10 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const { state: width, setState: setWidth } = useLocalStorage(WIDTH_KEY, 280);
+  const { state: width, setState: setWidth } = useLocalStorage(
+    WIDTH_KEY,
+    typeof window !== 'undefined' && window.innerWidth < 600 ? window.innerWidth / 3 : 280
+  );
 
   const [isResizing, setIsResizing] = useState(false);
 

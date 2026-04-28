@@ -34,7 +34,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [revealedLines, setRevealedLines] = useState<Record<number, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
   const [showKoQuestion, setShowKoQuestion] = useState(false);
-  
+
   const [testMode, setTestMode] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [testResults, setTestResults] = useState<Record<number, { words: { text: string; isCorrect: boolean }[]; masked: string }>>({});
@@ -98,26 +98,65 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
     const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
 
-    const results = uWords.map((uWord: string, i: number) => {
-      const cWord = cWords[i] || "";
-      return {
-        text: uWord,
-        isCorrect: clean(uWord) === clean(cWord)
-      };
-    });
+    // LCS-based Alignment
+    const uClean = uWords.map(clean);
+    const cClean = cWords.map(clean);
 
-    const masked = cWords.map((cWord: string, i: number) => {
-      const uWord = uWords[i] || "";
-      if (clean(uWord) === clean(cWord)) {
-        return cWord;
+    const dp = Array(uClean.length + 1).fill(0).map(() => Array(cClean.length + 1).fill(0));
+    for (let i = 1; i <= uClean.length; i++) {
+      for (let j = 1; j <= cClean.length; j++) {
+        if (uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") {
+          dp[i][j] = dp[i - 1][j - 1] + 1;
+        } else {
+          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        }
       }
-      return cWord.replace(/[a-zA-Z0-9]/g, "*");
-    }).join(' ');
+    }
 
-    setTestResults(prev => ({ 
-      ...prev, 
-      [index]: { words: results, masked } 
+    const results = [];
+    let i = uClean.length;
+    let j = cClean.length;
+
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") {
+        results.unshift({
+          uWord: uWords[i - 1],
+          cWord: cWords[j - 1],
+          isCorrect: true,
+          masked: cWords[j - 1]
+        });
+        i--; j--;
+      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+        // Missing in user's answer (Gap in User)
+        results.unshift({
+          uWord: "",
+          cWord: cWords[j - 1],
+          isCorrect: false,
+          masked: cWords[j - 1].replace(/[a-zA-Z0-9]/g, "*")
+        });
+        j--;
+      } else {
+        // Extra in user's answer (Gap in Correct)
+        results.unshift({
+          uWord: uWords[i - 1],
+          cWord: "",
+          isCorrect: false,
+          masked: ""
+        });
+        i--;
+      }
+    }
+
+    setTestResults(prev => ({
+      ...prev,
+      [index]: results as any
     }));
+
+    // Auto-reveal if all words are correct
+    const isAllCorrect = results.every(r => r.isCorrect);
+    if (isAllCorrect) {
+      setRevealedAnswers(prev => ({ ...prev, [index]: true }));
+    }
   };
 
   if (loading) {
@@ -129,22 +168,22 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 2, md: 5 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
       {/* Header */}
-      <Stack 
-        direction="row" 
-        alignItems="center" 
-        spacing={2} 
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
         sx={{ mb: 4, position: 'sticky', top: 0, bgcolor: 'background.default', zIndex: 10, py: 1 }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
-        
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            flexGrow: 1, 
+
+        <Typography
+          variant="h5"
+          sx={{
+            flexGrow: 1,
             fontWeight: 800,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -167,7 +206,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   setRevealedAnswers({});
                 }
               }}
-              sx={{ 
+              sx={{
                 bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
               }}
             >
@@ -179,7 +218,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             <IconButton
               color={allRevealed ? 'warning' : 'success'}
               onClick={toggleAll}
-              sx={{ 
+              sx={{
                 bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)),
               }}
             >
@@ -210,9 +249,9 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                 {scriptData?.questionEn || scriptData?.question || 'Untitled Question'}
               </Typography>
               {(scriptData?.questionEn || scriptData?.question) && (
-                <IconButton 
-                  onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)} 
-                  size="medium" 
+                <IconButton
+                  onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)}
+                  size="medium"
                   color="primary"
                   sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
                 >
@@ -266,7 +305,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography variant="h6" sx={{ fontWeight: 800 }}>Script</Typography>
             <Typography variant="caption" sx={{ color: testMode ? 'info.main' : 'text.disabled', fontWeight: 'bold' }}>
-              {testMode ? 'TEST MODE: Typing enabled' : '* Click to reveal English'}
+              {testMode ? 'TEST MODE' : '* Click to reveal English'}
             </Typography>
           </Stack>
 
@@ -280,9 +319,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                 key={index}
                 sx={{
                   p: { xs: 2, md: 2.5 },
-                  border: (theme) => `solid 1px ${
-                    !testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
-                  }`,
+                  border: (theme) => `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
+                    }`,
                   bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
                   boxShadow: (theme) => theme.customShadows?.z1,
                   transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
@@ -290,7 +328,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               >
                 <Stack spacing={2}>
                   {/* Korean Text */}
-                  <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Stack direction="row" spacing={2} alignItems="center">
                     <Box
                       sx={{
                         width: 28,
@@ -304,7 +342,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         fontSize: 12,
                         fontWeight: 800,
                         flexShrink: 0,
-                        mt: 0.5
                       }}
                     >
                       {index + 1}
@@ -350,49 +387,79 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           },
                         }}
                       />
-                      
+
                       {result && (
-                        <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: `solid 1px ${theme.vars.palette.divider}` }}>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
-                            <Typography variant="caption" sx={{ color: 'text.disabled', width: '100%', mb: 0.5, fontWeight: 800 }}>YOUR ANSWER</Typography>
-                            {result.words.map((word, wIndex) => (
-                              <Typography 
-                                key={wIndex} 
-                                variant="body2" 
-                                sx={{ 
-                                  color: word.isCorrect ? 'success.main' : 'error.main',
+                        <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
+                          {/* Your Answer */}
+                          <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
+                            <Box
+                              sx={{
+                                px: 0.75,
+                                py: 0.25,
+                                borderRadius: 0.5,
+                                bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
+                                color: 'info.main',
+                                fontSize: 10,
+                                fontWeight: 900,
+                                mr: 0.5,
+                                flexShrink: 0
+                              }}
+                            >
+                              답변
+                            </Box>
+                            {result.map((word: any, wIndex: number) => word.uWord && (
+                              <Typography
+                                key={wIndex}
+                                variant="body1"
+                                sx={{
+                                  color: word.isCorrect ? 'info.main' : 'error.main',
                                   fontWeight: 700,
                                   textDecoration: word.isCorrect ? 'none' : 'line-through'
                                 }}
                               >
-                                {word.text}
+                                {word.uWord}
                               </Typography>
                             ))}
                           </Box>
-                          
-                          <Stack direction="row" alignItems="center" spacing={1}>
-                            <Box sx={{ flexGrow: 1 }}>
-                              <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mb: 0.5, fontWeight: 800 }}>CORRECT ANSWER</Typography>
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  fontWeight: 600,
-                                  letterSpacing: isAnswerRevealed ? 0 : 2,
-                                  fontFamily: isAnswerRevealed ? 'inherit' : 'monospace',
-                                  color: isAnswerRevealed ? 'text.primary' : 'text.disabled'
+
+                          {/* Correct Answer */}
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
+                            <Box
+                              sx={{
+                                px: 0.75,
+                                py: 0.25,
+                                borderRadius: 0.5,
+                                bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
+                                color: 'success.main',
+                                fontSize: 10,
+                                fontWeight: 900,
+                                mr: 0.5,
+                                flexShrink: 0
+                              }}
+                            >
+                              정답
+                            </Box>
+                            {result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
+                              <Typography
+                                key={wIndex}
+                                variant="body1"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: isAnswerRevealed ? 'text.primary' : 'text.disabled',
+                                  letterSpacing: isAnswerRevealed ? 0 : 1
                                 }}
                               >
-                                {isAnswerRevealed ? line.en : result.masked}
+                                {isAnswerRevealed ? word.cWord : word.masked}
                               </Typography>
-                            </Box>
-                            <IconButton 
-                              size="small" 
+                            ))}
+                            <IconButton
+                              size="small"
                               onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))}
-                              sx={{ bgcolor: 'background.paper' }}
+                              sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
                             >
-                              <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                              <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
                             </IconButton>
-                          </Stack>
+                          </Box>
                         </Box>
                       )}
                     </Stack>
@@ -447,13 +514,13 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               </Card>
             );
           }) || (
-            <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
-              <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
-              <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-                No script lines available.
-              </Typography>
-            </Box>
-          )}
+              <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
+                <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+                <Typography variant="body2" sx={{ color: 'text.disabled' }}>
+                  No script lines available.
+                </Typography>
+              </Box>
+            )}
         </Stack>
       </Stack>
     </Container>
