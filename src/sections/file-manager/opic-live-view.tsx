@@ -58,6 +58,20 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     setRevealedLines(newRevealed);
   };
 
+  const handleSpeak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9; // Slightly slower for better clarity
+      window.speechSynthesis.speak(utterance);
+    } else {
+      toast.error('Text-to-speech is not supported in this browser.');
+    }
+  };
+
   if (loading) {
     return <Box sx={{ p: 3 }}>Loading...</Box>;
   }
@@ -93,9 +107,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       <Stack spacing={4}>
         <Box>
           <Typography variant="overline" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>Question</Typography>
-          <Typography variant="h6" sx={{ whiteSpace: 'pre-wrap', fontWeight: 'medium' }}>
-            {scriptData?.question || ' '}
-          </Typography>
+          <Stack direction="row" alignItems="flex-start" spacing={1}>
+            <Typography variant="h6" sx={{ whiteSpace: 'pre-wrap', fontWeight: 'medium', flexGrow: 1 }}>
+              {scriptData?.question || ' '}
+            </Typography>
+            {scriptData?.question && (
+              <IconButton onClick={() => handleSpeak(scriptData.question)} size="small" color="primary">
+                <Iconify icon="solar:volume-loud-bold" />
+              </IconButton>
+            )}
+          </Stack>
         </Box>
 
         {scriptData?.audioUrl && (
@@ -119,42 +140,67 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             const isRevealed = revealedLines[index] ?? allRevealed;
             
             return (
-              <Box
+              <Stack
                 key={index}
-                onClick={() => toggleLine(index)}
-                sx={{
-                  p: 2,
-                  cursor: 'pointer',
-                  borderRadius: 1.5,
-                  bgcolor: 'background.neutral',
-                  border: (theme) => `solid 1px ${isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`,
-                  transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
-                  '&:hover': {
-                    bgcolor: 'action.hover',
-                  },
-                }}
+                direction="row"
+                alignItems="center"
+                spacing={1}
               >
-                <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>
-                  {line.ko}
-                </Typography>
-                
-                <Typography
-                  variant="h6"
+                <Box
+                  onClick={() => toggleLine(index)}
                   sx={{
-                    fontWeight: 'bold',
-                    color: 'primary.main',
-                    transition: (theme) => theme.transitions.create(['filter', 'opacity', 'transform']),
-                    ...(!isRevealed && {
-                      filter: 'blur(8px)',
-                      opacity: 0.3,
-                      userSelect: 'none',
-                      transform: 'scale(0.98)',
-                    }),
+                    p: 2,
+                    flexGrow: 1,
+                    cursor: 'pointer',
+                    borderRadius: 1.5,
+                    bgcolor: 'background.neutral',
+                    border: (theme) => `solid 1px ${isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`,
+                    transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                    },
                   }}
                 >
-                  {line.en}
-                </Typography>
-              </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 'bold',
+                      color: 'text.primary',
+                      mb: 1,
+                    }}
+                  >
+                    {line.ko}
+                  </Typography>
+                  
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 'regular',
+                      color: 'text.primary',
+                      transition: (theme) => theme.transitions.create(['filter', 'opacity', 'transform']),
+                      ...(!isRevealed && {
+                        filter: 'blur(8px)',
+                        opacity: 0.3,
+                        userSelect: 'none',
+                        transform: 'scale(0.98)',
+                      }),
+                    }}
+                  >
+                    {line.en}
+                  </Typography>
+                </Box>
+                
+                <IconButton
+                  onClick={() => handleSpeak(line.en)}
+                  color="primary"
+                  sx={{
+                    bgcolor: 'background.neutral',
+                    '&:hover': { bgcolor: 'action.selected' },
+                  }}
+                >
+                  <Iconify icon="solar:volume-loud-bold-duotone" />
+                </IconButton>
+              </Stack>
             );
           }) || (
             <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
