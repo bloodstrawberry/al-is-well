@@ -1,9 +1,9 @@
 import { TREE_DATA } from './dummy/default';
 
 const DB_NAME = 'file-manager-db';
-const DB_VERSION = 1;
-const STORE_NAME = 'tree-data';
-const KEY = 'current-tree';
+const DB_VERSION = 3; // Incremented version for unified storage
+const STORE_NAME = 'app-data';
+const KEY = 'main-state';
 
 export async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -26,7 +26,12 @@ export async function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function getTreeData(): Promise<any[]> {
+type AppData = {
+  tree: any[];
+  scripts: Record<string, any>;
+};
+
+async function getAppData(): Promise<AppData> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readonly');
@@ -38,8 +43,7 @@ export async function getTreeData(): Promise<any[]> {
       if (result) {
         resolve(result);
       } else {
-        // If not exists, return initial data
-        resolve(TREE_DATA);
+        resolve({ tree: TREE_DATA, scripts: {} });
       }
     };
 
@@ -49,7 +53,7 @@ export async function getTreeData(): Promise<any[]> {
   });
 }
 
-export async function saveTreeData(data: any[]): Promise<void> {
+async function saveAppData(data: AppData): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
@@ -64,4 +68,40 @@ export async function saveTreeData(data: any[]): Promise<void> {
       reject(request.error);
     };
   });
+}
+
+export async function getTreeData(): Promise<any[]> {
+  const data = await getAppData();
+  return data.tree;
+}
+
+export async function saveTreeData(tree: any[]): Promise<void> {
+  const data = await getAppData();
+  data.tree = tree;
+  await saveAppData(data);
+}
+
+export async function getFileScript(fileId: string): Promise<any | null> {
+  const data = await getAppData();
+  return data.scripts[fileId] || null;
+}
+
+export async function saveFileScript(fileId: string, script: any): Promise<void> {
+  const data = await getAppData();
+  data.scripts[fileId] = script;
+  await saveAppData(data);
+}
+
+export async function clearAllScripts(): Promise<void> {
+  const data = await getAppData();
+  data.scripts = {};
+  await saveAppData(data);
+}
+
+export async function getFullData(): Promise<AppData> {
+  return getAppData();
+}
+
+export async function saveFullData(data: AppData): Promise<void> {
+  await saveAppData(data);
 }

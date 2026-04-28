@@ -25,23 +25,33 @@ import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
 import { LoadingScreen } from 'src/components/loading-screen';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 import { TREE_DATA } from 'src/api/dummy/default';
-import { getTreeData, saveTreeData } from 'src/api/indexDB';
+import { getTreeData, saveTreeData, getFileScript, clearAllScripts, getFullData, saveFullData } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
+import { OpicEditorView } from '../opic-editor-view';
+import { OpicLiveView } from '../opic-live-view';
 
 // ----------------------------------------------------------------------
 
 export function FileManagerView() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const table = useTable({ defaultRowsPerPage: 10 });
 
   const confirmDialog = useBoolean();
   const resetDialog = useBoolean();
   const newFilesDialog = useBoolean();
+
+  const [viewMode, setViewMode] = useState<'list' | 'editor' | 'live'>('list');
+  const [selectedFile, setSelectedFile] = useState<{ id: string; name: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(
@@ -53,6 +63,52 @@ export function FileManagerView() {
 
   const [treeData, setTreeData] = useState<any[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Sync URL params to state on mount and when popstate occurs
+  useEffect(() => {
+    if (isLoaded) {
+      const folderId = searchParams.get('folder');
+      const view = searchParams.get('view') as 'list' | 'editor' | 'live' | null;
+      const fileId = searchParams.get('fileId');
+      const fileName = searchParams.get('fileName');
+
+      setCurrentFolderId(folderId || null);
+      setViewMode(view || 'list');
+      if (fileId && fileName) {
+        setSelectedFile({ id: fileId, name: fileName });
+      } else {
+        setSelectedFile(null);
+      }
+    }
+  }, [searchParams, isLoaded]);
+
+  const updateURL = useCallback(
+    (params: { folder?: string | null; view?: string | null; fileId?: string | null; fileName?: string | null }) => {
+      const newParams = new URLSearchParams(searchParams.toString());
+
+      if (params.folder !== undefined) {
+        if (params.folder) newParams.set('folder', params.folder);
+        else newParams.delete('folder');
+      }
+      if (params.view !== undefined) {
+        if (params.view && params.view !== 'list') newParams.set('view', params.view);
+        else newParams.delete('view');
+      }
+      if (params.fileId !== undefined) {
+        if (params.fileId) newParams.set('fileId', params.fileId);
+        else newParams.delete('fileId');
+      }
+      if (params.fileName !== undefined) {
+        if (params.fileName) newParams.set('fileName', params.fileName);
+        else newParams.delete('fileName');
+      }
+
+      const query = newParams.toString();
+      const url = query ? `${pathname}?${query}` : pathname;
+      router.push(url);
+    },
+    [pathname, router, searchParams]
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -143,21 +199,20 @@ export function FileManagerView() {
 
   const handleNavigate = useCallback(
     (id: string | null) => {
-      if (!id) {
-        setCurrentFolderId(null);
-        return;
-      }
-      const item = flattenedTree.find((f) => f.id === id);
-      if (item) {
-        if (item.type === 'folder') {
-          setCurrentFolderId(id);
-        } else if (item.parentId) {
-          setCurrentFolderId(item.parentId);
-        }
-      }
+      updateURL({ folder: id, view: 'list', fileId: null, fileName: null });
       table.onResetPage();
     },
-    [flattenedTree, table]
+    [updateURL, table]
+  );
+
+  const handleOpenFile = useCallback(
+    async (id: string) => {
+      const item = flattenedTree.find((f) => f.id === id);
+      if (item && item.type === 'file') {
+        updateURL({ view: 'live', fileId: item.id, fileName: item.label });
+      }
+    },
+    [flattenedTree, updateURL]
   );
 
   const handleCreateItem = useCallback(
@@ -197,8 +252,9 @@ export function FileManagerView() {
     [currentFolderId]
   );
 
-  const handleDownload = useCallback(() => {
-    const dataStr = JSON.stringify(treeData, null, 2);
+  const handleDownload = useCallback(async () => {
+    const fullData = await getFullData();
+    const dataStr = JSON.stringify(fullData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = window.URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -212,27 +268,35 @@ export function FileManagerView() {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
     toast.success('Download success!');
-  }, [treeData]);
+  }, []);
 
-  const handleReset = useCallback(() => {
+  const handleReset = useCallback(async () => {
     handleDownload();
+    await clearAllScripts();
     setTreeData(TREE_DATA);
+    handleNavigate(null);
     toast.success('Reset success!');
     resetDialog.onFalse();
-  }, [handleDownload, resetDialog]);
+  }, [handleDownload, resetDialog, handleNavigate]);
 
   const handleUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const json = JSON.parse(e.target?.result as string);
-          if (Array.isArray(json)) {
-            setTreeData(json);
+          if (json && typeof json === 'object' && 'tree' in json && 'scripts' in json) {
+            await saveFullData(json);
+            setTreeData(json.tree);
             toast.success('Upload success!');
+          } else if (Array.isArray(json)) {
+            // Legacy format support: only tree data
+            await saveFullData({ tree: json, scripts: {} });
+            setTreeData(json);
+            toast.success('Upload success (tree only)!');
           } else {
-            toast.error('Invalid JSON format. Expected an array.');
+            toast.error('Invalid JSON format.');
           }
         } catch (error) {
           toast.error('Failed to parse JSON');
@@ -415,86 +479,106 @@ export function FileManagerView() {
           onToggle={() => setIsCollapsed(!isCollapsed)}
           selectedId={currentFolderId}
           onSelectId={handleNavigate}
+          onOpenFile={handleOpenFile}
         />
 
-        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              p: 3,
-              pb: 0,
-              pl: isCollapsed ? 6 : 3,
-              transition: (theme) => theme.transitions.create(['padding-left']),
-            }}
-          >
-            <Box>
-              <Typography variant="h4" sx={{ mb: 1 }}>File manager</Typography>
-              {renderBreadcrumbs()}
-            </Box>
-            <Stack direction="row" spacing={1}>
-              <IconButton
-                color="error"
-                onClick={resetDialog.onTrue}
-                sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
+        <Box sx={{ flexGrow: 1, minWidth: 0, height: '100%', overflowY: 'auto' }}>
+          {viewMode === 'list' ? (
+            <>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  p: 3,
+                  pb: 0,
+                  pl: isCollapsed ? 6 : 3,
+                  transition: (theme) => theme.transitions.create(['padding-left']),
+                }}
               >
-                <Iconify icon="solar:restart-bold" />
-              </IconButton>
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 1 }}>File manager</Typography>
+                  {renderBreadcrumbs()}
+                </Box>
+                <Stack direction="row" spacing={1}>
+                  <IconButton
+                    color="error"
+                    onClick={resetDialog.onTrue}
+                    sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
+                  >
+                    <Iconify icon="solar:restart-bold" />
+                  </IconButton>
 
-              <IconButton
-                color="info"
-                onClick={() => fileInputRef.current?.click()}
-                sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
-              >
-                <Iconify icon="eva:cloud-upload-fill" />
-              </IconButton>
+                  <IconButton
+                    color="info"
+                    onClick={() => fileInputRef.current?.click()}
+                    sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
+                  >
+                    <Iconify icon="eva:cloud-upload-fill" />
+                  </IconButton>
 
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleUpload}
-                accept=".json"
-                style={{ display: 'none' }}
-              />
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleUpload}
+                    accept=".json"
+                    style={{ display: 'none' }}
+                  />
 
-              <IconButton
-                color="success"
-                onClick={handleDownload}
-                sx={{ bgcolor: 'success.main', color: 'success.contrastText', '&:hover': { bgcolor: 'success.dark' } }}
-              >
-                <Iconify icon="eva:download-fill" />
-              </IconButton>
-            </Stack>
-          </Box>
+                  <IconButton
+                    color="success"
+                    onClick={handleDownload}
+                    sx={{ bgcolor: 'success.main', color: 'success.contrastText', '&:hover': { bgcolor: 'success.dark' } }}
+                  >
+                    <Iconify icon="eva:download-fill" />
+                  </IconButton>
+                </Stack>
+              </Box>
 
-          <Stack spacing={2.5} sx={{ p: 3 }}>
-            {renderFilters()}
-            {canReset && renderResults()}
-            <FileManagerGridView
-              table={table}
-              dataFiltered={dataFiltered}
-              onDeleteItem={handleDeleteItem}
-              onUpdateItem={(id, name) => {
-                const updateNameInTree = (nodes: any[]): any[] =>
-                  nodes.map((node) => {
-                    if (node.id === id) {
-                      return { ...node, label: name };
-                    }
-                    if (node.children) {
-                      return { ...node, children: updateNameInTree(node.children) };
-                    }
-                    return node;
-                  });
-                setTreeData((prev) => updateNameInTree(prev));
-                toast.success('Rename success!');
-              }}
-              onCreateItem={handleCreateItem}
-              onOpenConfirm={confirmDialog.onTrue}
-              onNavigate={handleNavigate}
-              notFound={notFound}
+              <Stack spacing={2.5} sx={{ p: 3 }}>
+                {renderFilters()}
+                {canReset && renderResults()}
+                <FileManagerGridView
+                  table={table}
+                  dataFiltered={dataFiltered}
+                  onDeleteItem={handleDeleteItem}
+                  onUpdateItem={(id, name) => {
+                    const updateNameInTree = (nodes: any[]): any[] =>
+                      nodes.map((node) => {
+                        if (node.id === id) {
+                          return { ...node, label: name };
+                        }
+                        if (node.children) {
+                          return { ...node, children: updateNameInTree(node.children) };
+                        }
+                        return node;
+                      });
+                    setTreeData((prev) => updateNameInTree(prev));
+                    toast.success('Rename success!');
+                  }}
+                  onCreateItem={handleCreateItem}
+                  onOpenConfirm={confirmDialog.onTrue}
+                  onNavigate={handleNavigate}
+                  onOpenFile={handleOpenFile}
+                  notFound={notFound}
+                />
+              </Stack>
+            </>
+          ) : viewMode === 'editor' && selectedFile ? (
+            <OpicEditorView
+              fileId={selectedFile.id}
+              fileName={selectedFile.name}
+              onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
+              onSaveSuccess={() => updateURL({ view: 'live' })}
             />
-          </Stack>
+          ) : viewMode === 'live' && selectedFile ? (
+            <OpicLiveView
+              fileId={selectedFile.id}
+              fileName={selectedFile.name}
+              onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
+              onEdit={() => updateURL({ view: 'editor' })}
+            />
+          ) : null}
         </Box>
       </DashboardContent>
 

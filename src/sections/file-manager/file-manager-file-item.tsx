@@ -33,14 +33,28 @@ type Props = FileItemProps & {
   onDelete: () => void;
   onEdit: () => void;
   onSelect?: () => void;
+  onOpenFile?: () => void;
 };
 
-export function FileManagerFileItem({ file, selected, onSelect, onDelete, onEdit, sx, ...other }: Props) {
+export function FileManagerFileItem({
+  file,
+  selected,
+  onSelect,
+  onDelete,
+  onEdit,
+  onOpenFile,
+  sx,
+  ...other
+}: Props) {
   const confirmDialog = useBoolean();
   const menuActions = usePopover();
 
   const checkbox = useBoolean();
   const favorite = useBoolean(file.isFavorited);
+
+  const handleDoubleClick = useCallback(() => {
+    onOpenFile?.();
+  }, [onOpenFile]);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -50,6 +64,16 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, onEdit
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
+        <MenuItem
+          onClick={() => {
+            menuActions.onClose();
+            onOpenFile?.();
+          }}
+        >
+          <Iconify icon="solar:eye-bold" />
+          Open
+        </MenuItem>
+
         <MenuItem
           onClick={() => {
             menuActions.onClose();
@@ -94,7 +118,13 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, onEdit
 
   return (
     <>
-      <FileItem variant="outlined" selected={selected} sx={sx} {...other}>
+      <FileItem
+        variant="outlined"
+        selected={selected}
+        sx={sx}
+        onDoubleClick={handleDoubleClick}
+        {...other}
+      >
 
         <FileItemIcon
           id={file.id}

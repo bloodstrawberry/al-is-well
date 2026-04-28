@@ -33,6 +33,7 @@ type Props = {
   onDeleteItem: (id: string) => void;
   onUpdateItem: (id: string, name: string) => void;
   onNavigate: (id: string | null) => void;
+  onOpenFile?: (id: string) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   notFound?: boolean;
 };
@@ -44,6 +45,7 @@ export function FileManagerGridView({
   onUpdateItem,
   onOpenConfirm,
   onNavigate,
+  onOpenFile,
   onCreateItem,
   notFound,
 }: Props) {
@@ -311,6 +313,7 @@ export function FileManagerGridView({
                 selected={selected.includes(item.id)}
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
+                onOpenFile={() => onOpenFile?.(item.id)}
                 onEdit={() => {
                   setRenameItem(item);
                   setItemName(item.name);

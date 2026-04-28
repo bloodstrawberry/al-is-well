@@ -122,9 +122,10 @@ type Props = {
   onToggle: VoidFunction;
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
+  onOpenFile?: (id: string) => void;
 };
 
-export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, onSelectId }: Props) {
+export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, onSelectId, onOpenFile }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
@@ -264,6 +265,9 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
           onClick={(event) => {
             event.stopPropagation();
             onSelectId(nodes.id);
+            if (nodes.type === 'file') {
+              onOpenFile?.(nodes.id);
+            }
           }}
         >
           <Iconify
