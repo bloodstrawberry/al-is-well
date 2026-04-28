@@ -23,9 +23,16 @@ type Props = {
   dataFiltered: IFile[];
   onOpenConfirm: () => void;
   onDeleteItem: (id: string) => void;
+  onNavigate: (id: string | null) => void;
 };
 
-export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenConfirm }: Props) {
+export function FileManagerGridView({
+  table,
+  dataFiltered,
+  onDeleteItem,
+  onOpenConfirm,
+  onNavigate,
+}: Props) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
   const containerRef = useRef(null);
@@ -153,6 +160,7 @@ export function FileManagerGridView({ table, dataFiltered, onDeleteItem, onOpenC
                 selected={selected.includes(item.id)}
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
+                onNavigate={() => onNavigate(item.id)}
               />
             ) : (
               <FileManagerFileItem

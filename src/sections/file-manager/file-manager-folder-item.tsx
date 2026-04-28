@@ -31,6 +31,7 @@ type Props = FileItemProps & {
   selected?: boolean;
   onDelete: () => void;
   onSelect?: () => void;
+  onNavigate?: VoidFunction;
   folder: IFolderManager;
 };
 
@@ -40,6 +41,7 @@ export function FileManagerFolderItem({
   selected,
   onSelect,
   onDelete,
+  onNavigate,
   ...other
 }: Props) {
   const shareDialog = useBoolean();
@@ -169,7 +171,13 @@ export function FileManagerFolderItem({
 
   return (
     <>
-      <FileItem variant="outlined" selected={selected} sx={sx} {...other}>
+      <FileItem
+        variant="outlined"
+        selected={selected}
+        onDoubleClick={onNavigate}
+        sx={{ ...sx, cursor: 'pointer' }}
+        {...other}
+      >
 
         <FileItemIcon
           id={folder.id}

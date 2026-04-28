@@ -106,15 +106,16 @@ const WIDTH_KEY = 'file-manager-sidebar-width';
 type Props = {
   isCollapsed: boolean;
   onToggle: VoidFunction;
+  selectedId: string | null;
+  onSelectId: (id: string | null) => void;
 };
 
-export function FileManagerSidebar({ isCollapsed, onToggle }: Props) {
+export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelectId }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const { state: width, setState: setWidth } = useLocalStorage(WIDTH_KEY, 280);
 
@@ -197,14 +198,22 @@ export function FileManagerSidebar({ isCollapsed, onToggle }: Props) {
     return results;
   }, []);
 
+  // Effect to expand parents when selectedId changes externally (e.g. from Grid View)
+  useEffect(() => {
+    if (selectedId) {
+      const item = flattenedData.find((f) => f.id === selectedId);
+      if (item) {
+        setExpandedItems((prev) => {
+          const newExpanded = [...new Set([...prev, ...item.parentIds])];
+          return newExpanded;
+        });
+      }
+    }
+  }, [selectedId, flattenedData]);
+
   const handleAutocompleteChange = (event: any, newValue: any) => {
     if (newValue) {
-      setSelectedItem(newValue.id);
-      // Expand all parents of the selected item
-      setExpandedItems((prev) => {
-        const newExpanded = [...new Set([...prev, ...newValue.parentIds])];
-        return newExpanded;
-      });
+      onSelectId(newValue.id);
     }
   };
 
@@ -216,6 +225,11 @@ export function FileManagerSidebar({ isCollapsed, onToggle }: Props) {
     <StyledTreeItem
       key={nodes.id}
       itemId={nodes.id}
+      onClick={() => {
+        if (nodes.type === 'folder') {
+          onSelectId(nodes.id);
+        }
+      }}
       label={
         <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
           <Iconify
@@ -323,8 +337,8 @@ export function FileManagerSidebar({ isCollapsed, onToggle }: Props) {
               aria-label="file system navigator"
               expandedItems={expandedItems}
               onExpandedItemsChange={(event, items) => setExpandedItems(items)}
-              selectedItems={selectedItem}
-              onSelectedItemsChange={(event, itemId) => setSelectedItem(itemId)}
+              selectedItems={selectedId}
+              onSelectedItemsChange={(event, itemId) => onSelectId(itemId)}
               sx={{
                 flexGrow: 1,
                 overflowY: 'auto',
