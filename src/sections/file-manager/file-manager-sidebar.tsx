@@ -6,6 +6,8 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -64,10 +66,84 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
   },
 }));
 
+const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
+  color: theme.vars.palette.text.secondary,
+  [`& .${treeItemClasses.content}`]: {
+    paddingRight: theme.spacing(1),
+    fontWeight: theme.typography.fontWeightMedium,
+    '&.Mui-expanded': {
+      fontWeight: theme.typography.fontWeightRegular,
+    },
+    '&:hover': {
+      backgroundColor: theme.vars.palette.action.hover,
+    },
+    '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
+      backgroundColor: `var(--tree-view-bg-color, ${theme.vars.palette.action.selected})`,
+      color: 'var(--tree-view-color)',
+    },
+    [`& .${treeItemClasses.label}`]: {
+      fontWeight: 'inherit',
+      color: 'inherit',
+    },
+  },
+  [`& .${treeItemClasses.groupTransition}`]: {
+    marginLeft: 15,
+    paddingLeft: 18,
+    borderLeft: `1px solid ${theme.vars.palette.divider}`,
+  },
+}));
+
 // ----------------------------------------------------------------------
 
 const WIDTH_KEY = 'file-manager-sidebar-width';
 const COLLAPSED_KEY = 'file-manager-sidebar-collapsed';
+
+const TREE_DATA = [
+  {
+    id: '1',
+    label: 'src',
+    type: 'folder',
+    children: [
+      {
+        id: '2',
+        label: 'components',
+        type: 'folder',
+        children: [
+          { id: '3', label: 'button.tsx', type: 'file' },
+          { id: '4', label: 'input.tsx', type: 'file' },
+        ],
+      },
+      {
+        id: '5',
+        label: 'sections',
+        type: 'folder',
+        children: [
+          {
+            id: '6',
+            label: 'file-manager',
+            type: 'folder',
+            children: [
+              { id: '7', label: 'file-manager-sidebar.tsx', type: 'file' },
+              { id: '8', label: 'file-manager-grid.tsx', type: 'file' },
+            ],
+          },
+        ],
+      },
+      { id: '9', label: 'app.tsx', type: 'file' },
+    ],
+  },
+  {
+    id: '10',
+    label: 'public',
+    type: 'folder',
+    children: [
+      { id: '11', label: 'favicon.ico', type: 'file' },
+      { id: '12', label: 'logo.png', type: 'file' },
+    ],
+  },
+  { id: '13', label: 'package.json', type: 'file' },
+  { id: '14', label: 'tsconfig.json', type: 'file' },
+];
 
 export function FileManagerSidebar() {
   const [isMounted, setIsMounted] = useState(false);
@@ -76,7 +152,7 @@ export function FileManagerSidebar() {
 
   const { state: width, setState: setWidth } = useLocalStorage(WIDTH_KEY, 280);
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(COLLAPSED_KEY, false);
-  
+
   const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
@@ -93,21 +169,27 @@ export function FileManagerSidebar() {
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsResizing(true);
-    startXRef.current = e.clientX;
-    startWidthRef.current = width;
-  }, [width]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      setIsResizing(true);
+      startXRef.current = e.clientX;
+      startWidthRef.current = width;
+    },
+    [width]
+  );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing) return;
-    
-    window.requestAnimationFrame(() => {
-      const deltaX = e.clientX - startXRef.current;
-      const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidthRef.current + deltaX));
-      setWidth(newWidth);
-    });
-  }, [isResizing, setWidth]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      window.requestAnimationFrame(() => {
+        const deltaX = e.clientX - startXRef.current;
+        const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidthRef.current + deltaX));
+        setWidth(newWidth);
+      });
+    },
+    [isResizing, setWidth]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
@@ -137,6 +219,33 @@ export function FileManagerSidebar() {
   const displayWidth = isMounted ? width : 280;
   const displayCollapsed = isMounted ? isCollapsed : true;
 
+  const renderTree = (nodes: any) => (
+    <StyledTreeItem
+      key={nodes.id}
+      itemId={nodes.id}
+      label={
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+          <Iconify
+            icon={
+              nodes.type === 'folder'
+                ? 'solar:folder-2-bold-duotone'
+                : 'solar:document-text-bold-duotone'
+            }
+            width={18}
+            sx={{
+              color: nodes.type === 'folder' ? 'warning.main' : 'text.disabled',
+            }}
+          />
+          <Typography variant="body2" sx={{ fontWeight: 'inherit', flexGrow: 1 }}>
+            {nodes.label}
+          </Typography>
+        </Stack>
+      }
+    >
+      {Array.isArray(nodes.children) ? nodes.children.map((node: any) => renderTree(node)) : null}
+    </StyledTreeItem>
+  );
+
   return (
     <Box sx={{ position: 'relative', display: 'flex' }}>
       <RootStyle
@@ -156,28 +265,25 @@ export function FileManagerSidebar() {
             transition: (theme) => theme.transitions.create(['opacity']),
           }}
         >
-          <Typography variant="h6">Folders</Typography>
-
-          <Stack spacing={1}>
-            {['Images', 'Documents', 'Videos', 'Audio'].map((folder) => (
-              <Stack
-                key={folder}
-                direction="row"
-                alignItems="center"
-                spacing={1.5}
-                sx={{
-                  px: 1.5,
-                  py: 1,
-                  borderRadius: 1,
-                  cursor: 'pointer',
-                  '&:hover': { bgcolor: 'action.hover' },
-                }}
-              >
-                <Iconify icon="eva:folder-fill" width={24} sx={{ color: 'warning.main' }} />
-                <Typography variant="body2">{folder}</Typography>
-              </Stack>
-            ))}
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+              Explorer
+            </Typography>
+            <IconButton size="small">
+              <Iconify icon="solar:menu-dots-bold" width={16} />
+            </IconButton>
           </Stack>
+
+          <SimpleTreeView
+            aria-label="file system navigator"
+            sx={{
+              flexGrow: 1,
+              maxWidth: 400,
+              overflowY: 'auto',
+            }}
+          >
+            {TREE_DATA.map((node) => renderTree(node))}
+          </SimpleTreeView>
         </Stack>
 
         {!displayCollapsed && <ResizeHandle onMouseDown={handleMouseDown} />}
