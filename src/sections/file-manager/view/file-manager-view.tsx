@@ -27,7 +27,7 @@ import { useTable, rowInPage, getComparator } from 'src/components/table';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
-import { TREE_DATA } from 'src/api/dummy/default';
+import TREE_DATA from 'src/api/dummy/default.json';
 import { getTreeData, saveTreeData, getFileScript, clearAllScripts, getFullData, saveFullData } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';

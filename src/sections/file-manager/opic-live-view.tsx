@@ -89,7 +89,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
     const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
 
-    const results = uWords.map((uWord, i) => {
+    const results = uWords.map((uWord: string, i: number) => {
       const cWord = cWords[i] || "";
       return {
         text: uWord,
@@ -97,7 +97,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       };
     });
 
-    const masked = cWords.map((cWord, i) => {
+    const masked = cWords.map((cWord: string, i: number) => {
       const uWord = uWords[i] || "";
       if (clean(uWord) === clean(cWord)) {
         return cWord;

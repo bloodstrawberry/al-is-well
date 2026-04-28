@@ -1,4 +1,4 @@
-import { TREE_DATA } from './dummy/default';
+import TREE_DATA from './dummy/default.json';
 
 const DB_NAME = 'file-manager-db';
 const DB_VERSION = 3; // Incremented version for unified storage
