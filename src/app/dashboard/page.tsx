@@ -4,7 +4,7 @@ import { OverviewAppView } from 'src/sections/overview/app/view';
 
 // ----------------------------------------------------------------------
 
-export const metadata: Metadata = { title: `Lotto Viewer | Home` };
+export const metadata: Metadata = { title: `AL is well | Home` };
 
 export default function Page() {
   return <OverviewAppView />;

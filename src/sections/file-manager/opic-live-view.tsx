@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
+import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
 import { getFileScript } from 'src/api/indexDB';
@@ -22,6 +27,8 @@ type Props = {
 };
 
 export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
+  const theme = useTheme();
+
   const [scriptData, setScriptData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [revealedLines, setRevealedLines] = useState<Record<number, boolean>>({});
@@ -73,7 +80,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.9;
+      utterance.rate = 0.85; // Slightly slower for better clarity
       window.speechSynthesis.speak(utterance);
     } else {
       toast.error('Text-to-speech is not supported in this browser.');
@@ -83,6 +90,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const handleCheckAnswer = (index: number) => {
     const userAnswer = (userAnswers[index] || '').trim();
     const correctAnswer = (scriptData.lines[index].en || '').trim();
+
+    if (!userAnswer) return;
 
     const uWords = userAnswer.split(/\s+/);
     const cWords = correctAnswer.split(/\s+/);
@@ -112,63 +121,101 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   };
 
   if (loading) {
-    return <Box sx={{ p: 3 }}>Loading...</Box>;
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <Typography variant="h6" color="text.secondary">Loading script...</Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <IconButton onClick={onBack}>
+    <Container maxWidth="md" sx={{ py: { xs: 2, md: 5 } }}>
+      {/* Header */}
+      <Stack 
+        direction="row" 
+        alignItems="center" 
+        spacing={2} 
+        sx={{ mb: 4, position: 'sticky', top: 0, bgcolor: 'background.default', zIndex: 10, py: 1 }}
+      >
+        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>{fileName}</Typography>
+        
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            flexGrow: 1, 
+            fontWeight: 800,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {fileName}
+        </Typography>
 
         <Stack direction="row" spacing={1}>
-          <IconButton
-            color={testMode ? 'info' : 'default'}
-            onClick={() => {
-              setTestMode(!testMode);
-              if (!testMode) {
-                setAllRevealed(false);
-                setUserAnswers({});
-                setTestResults({});
-                setRevealedAnswers({});
-              }
-            }}
-            sx={{ bgcolor: (theme) => (testMode ? 'info.lighter' : 'background.neutral'), borderRadius: 1 }}
-          >
-            <Iconify icon="solar:pen-new-square-bold" />
-          </IconButton>
+          <Tooltip title="Test Mode">
+            <IconButton
+              color={testMode ? 'info' : 'default'}
+              onClick={() => {
+                setTestMode(!testMode);
+                if (!testMode) {
+                  setAllRevealed(false);
+                  setUserAnswers({});
+                  setTestResults({});
+                  setRevealedAnswers({});
+                }
+              }}
+              sx={{ 
+                bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
+              }}
+            >
+              <Iconify icon="solar:pen-new-square-bold" />
+            </IconButton>
+          </Tooltip>
 
-          <IconButton
-            color={allRevealed ? 'warning' : 'success'}
-            onClick={toggleAll}
-            sx={{ bgcolor: (theme) => (allRevealed ? 'warning.lighter' : 'success.lighter'), borderRadius: 1 }}
-          >
-            <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-          </IconButton>
+          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
+            <IconButton
+              color={allRevealed ? 'warning' : 'success'}
+              onClick={toggleAll}
+              sx={{ 
+                bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)),
+              }}
+            >
+              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+            </IconButton>
+          </Tooltip>
 
-          <IconButton
-            color="primary"
-            onClick={onEdit}
-            sx={{ bgcolor: 'primary.lighter', borderRadius: 1 }}
-          >
-            <Iconify icon="solar:pen-bold" />
-          </IconButton>
+          <Tooltip title="Edit">
+            <IconButton
+              color="primary"
+              onClick={onEdit}
+              sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}
+            >
+              <Iconify icon="solar:pen-bold" />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
 
       <Stack spacing={4}>
-        <Box>
-          <Typography variant="overline" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>Question</Typography>
+        {/* Question Section */}
+        <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+          <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
-          <Stack spacing={1.5}>
-            <Stack direction="row" alignItems="flex-start" spacing={1}>
-              <Typography variant="h6" sx={{ whiteSpace: 'pre-wrap', fontWeight: 'medium', flexGrow: 1 }}>
-                {scriptData?.questionEn || scriptData?.question || ' '}
+          <Stack spacing={2.5}>
+            <Stack direction="row" alignItems="flex-start" spacing={2}>
+              <Typography variant="h6" sx={{ lineHeight: 1.5, fontWeight: 700, flexGrow: 1, color: 'text.primary' }}>
+                {scriptData?.questionEn || scriptData?.question || 'Untitled Question'}
               </Typography>
               {(scriptData?.questionEn || scriptData?.question) && (
-                <IconButton onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)} size="small" color="primary">
+                <IconButton 
+                  onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)} 
+                  size="medium" 
+                  color="primary"
+                  sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
+                >
                   <Iconify icon="solar:volume-loud-bold" />
                 </IconButton>
               )}
@@ -178,21 +225,20 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               <Box
                 onClick={() => setShowKoQuestion(!showKoQuestion)}
                 sx={{
-                  p: 1.5,
+                  p: 2,
                   cursor: 'pointer',
-                  borderRadius: 1,
-                  bgcolor: 'background.neutral',
+                  borderRadius: 1.5,
+                  bgcolor: 'background.paper',
                   border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
-                  transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                  ...(!showKoQuestion && {
-                    '&:hover': { bgcolor: 'action.hover' }
-                  })
+                  transition: (theme) => theme.transitions.create(['background-color']),
+                  '&:hover': { bgcolor: 'action.hover' }
                 }}
               >
                 <Typography
                   variant="body2"
                   sx={{
                     color: 'text.secondary',
+                    textAlign: 'justify',
                     transition: (theme) => theme.transitions.create(['filter', 'opacity']),
                     ...(!showKoQuestion && {
                       filter: 'blur(6px)',
@@ -206,29 +252,22 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               </Box>
             )}
           </Stack>
-        </Box>
 
-        {scriptData?.audioUrl && (
-          <Box>
-            <Typography variant="overline" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>Audio Player</Typography>
-            <audio controls src={scriptData.audioUrl} style={{ width: '100%', maxWidth: 500 }} />
-          </Box>
-        )}
+          {scriptData?.audioUrl && (
+            <Box sx={{ mt: 3 }}>
+              <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
+              <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
+            </Box>
+          )}
+        </Card>
 
-        <Stack spacing={2}>
+        {/* Script Lines */}
+        <Stack spacing={2.5}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="overline" sx={{ color: 'text.secondary' }}>Script</Typography>
-            {testMode ? (
-              <Typography variant="caption" sx={{ color: 'info.main', fontWeight: 'bold' }}>
-                TEST MODE: Type English and press Enter
-              </Typography>
-            ) : (
-              !allRevealed && (
-                <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-                  * Click each box to reveal English
-                </Typography>
-              )
-            )}
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>Script</Typography>
+            <Typography variant="caption" sx={{ color: testMode ? 'info.main' : 'text.disabled', fontWeight: 'bold' }}>
+              {testMode ? 'TEST MODE: Typing enabled' : '* Click to reveal English'}
+            </Typography>
           </Stack>
 
           {scriptData?.lines?.map((line: any, index: number) => {
@@ -237,48 +276,60 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             const isAnswerRevealed = revealedAnswers[index];
 
             return (
-              <Stack
+              <Card
                 key={index}
-                direction="row"
-                alignItems="flex-start"
-                spacing={1}
+                sx={{
+                  p: { xs: 2, md: 2.5 },
+                  border: (theme) => `solid 1px ${
+                    !testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
+                  }`,
+                  bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
+                  boxShadow: (theme) => theme.customShadows?.z1,
+                  transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+                }}
               >
-                <Box
-                  onClick={testMode ? undefined : () => toggleLine(index)}
-                  sx={{
-                    p: 2,
-                    flexGrow: 1,
-                    cursor: testMode ? 'default' : 'pointer',
-                    borderRadius: 1.5,
-                    bgcolor: 'background.neutral',
-                    border: (theme) => `solid 1px ${
-                      !testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
-                    }`,
-                    transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
-                    ...(!testMode && {
-                      '&:hover': {
-                        bgcolor: 'action.hover',
-                      },
-                    })
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 'bold',
-                      color: 'text.primary',
-                      mb: testMode ? 2 : 1,
-                    }}
-                  >
-                    {line.ko}
-                  </Typography>
+                <Stack spacing={2}>
+                  {/* Korean Text */}
+                  <Stack direction="row" spacing={2} alignItems="flex-start">
+                    <Box
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 12,
+                        fontWeight: 800,
+                        flexShrink: 0,
+                        mt: 0.5
+                      }}
+                    >
+                      {index + 1}
+                    </Box>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        lineHeight: 1.5,
+                        flexGrow: 1
+                      }}
+                    >
+                      {line.ko}
+                    </Typography>
+                  </Stack>
 
+                  <Divider sx={{ borderStyle: 'dashed' }} />
+
+                  {/* English Text / Input */}
                   {testMode ? (
                     <Stack spacing={2}>
                       <TextField
                         fullWidth
-                        size="small"
-                        placeholder="Type English here..."
+                        placeholder="Listen and type English..."
                         value={userAnswers[index] || ''}
                         onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
                         onKeyDown={(e) => {
@@ -287,19 +338,31 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           }
                         }}
                         autoComplete="off"
+                        slotProps={{
+                          input: {
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton onClick={() => handleSpeak(line.en)} size="small" color="primary">
+                                  <Iconify icon="solar:volume-loud-bold" />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          },
+                        }}
                       />
                       
                       {result && (
-                        <Stack spacing={1} sx={{ bgcolor: 'background.paper', p: 1.5, borderRadius: 1, border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', mr: 1, fontWeight: 'bold' }}>나의 답변:</Typography>
+                        <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: `solid 1px ${theme.vars.palette.divider}` }}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5 }}>
+                            <Typography variant="caption" sx={{ color: 'text.disabled', width: '100%', mb: 0.5, fontWeight: 800 }}>YOUR ANSWER</Typography>
                             {result.words.map((word, wIndex) => (
                               <Typography 
                                 key={wIndex} 
                                 variant="body2" 
                                 sx={{ 
                                   color: word.isCorrect ? 'success.main' : 'error.main',
-                                  fontWeight: 'medium'
+                                  fontWeight: 700,
+                                  textDecoration: word.isCorrect ? 'none' : 'line-through'
                                 }}
                               >
                                 {word.text}
@@ -308,69 +371,91 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           </Box>
                           
                           <Stack direction="row" alignItems="center" spacing={1}>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>정답:</Typography>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                flexGrow: 1, 
-                                fontFamily: 'monospace',
-                                color: isAnswerRevealed ? 'text.primary' : 'text.disabled'
-                              }}
-                            >
-                              {isAnswerRevealed ? line.en : result.masked}
-                            </Typography>
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mb: 0.5, fontWeight: 800 }}>CORRECT ANSWER</Typography>
+                              <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                  fontWeight: 600,
+                                  letterSpacing: isAnswerRevealed ? 0 : 2,
+                                  fontFamily: isAnswerRevealed ? 'inherit' : 'monospace',
+                                  color: isAnswerRevealed ? 'text.primary' : 'text.disabled'
+                                }}
+                              >
+                                {isAnswerRevealed ? line.en : result.masked}
+                              </Typography>
+                            </Box>
                             <IconButton 
                               size="small" 
                               onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))}
+                              sx={{ bgcolor: 'background.paper' }}
                             >
                               <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                             </IconButton>
                           </Stack>
-                        </Stack>
+                        </Box>
                       )}
                     </Stack>
                   ) : (
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontWeight: 'regular',
-                        color: 'text.primary',
-                        transition: (theme) => theme.transitions.create(['filter', 'opacity', 'transform']),
-                        ...(!isRevealed && {
-                          filter: 'blur(8px)',
-                          opacity: 0.3,
-                          userSelect: 'none',
-                          transform: 'scale(0.98)',
-                        }),
-                      }}
-                    >
-                      {line.en}
-                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                      <Box
+                        onClick={() => toggleLine(index)}
+                        sx={{
+                          p: 1.5,
+                          flexGrow: 1,
+                          cursor: 'pointer',
+                          borderRadius: 1,
+                          bgcolor: isRevealed ? 'transparent' : (theme) => alpha(theme.palette.action.hover, 0.04),
+                          transition: (theme) => theme.transitions.create(['filter', 'opacity', 'background-color']),
+                          '&:hover': {
+                            bgcolor: (theme) => isRevealed ? 'transparent' : alpha(theme.palette.action.hover, 0.08),
+                          },
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 500,
+                            color: 'text.primary',
+                            lineHeight: 1.6,
+                            ...(!isRevealed && {
+                              filter: 'blur(8px)',
+                              opacity: 0.3,
+                              userSelect: 'none',
+                              transform: 'scale(0.99)',
+                            }),
+                          }}
+                        >
+                          {line.en}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        onClick={() => handleSpeak(line.en)}
+                        color="primary"
+                        size="small"
+                        sx={{
+                          mt: 1,
+                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                          '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) },
+                        }}
+                      >
+                        <Iconify icon="solar:volume-loud-bold" />
+                      </IconButton>
+                    </Stack>
                   )}
-                </Box>
-
-                {!testMode && (
-                  <IconButton
-                    onClick={() => handleSpeak(line.en)}
-                    color="primary"
-                    sx={{
-                      mt: 1,
-                      bgcolor: 'background.neutral',
-                      '&:hover': { bgcolor: 'action.selected' },
-                    }}
-                  >
-                    <Iconify icon="solar:volume-loud-bold-duotone" />
-                  </IconButton>
-                )}
-              </Stack>
+                </Stack>
+              </Card>
             );
           }) || (
-              <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
+            <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
+              <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+              <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                 No script lines available.
               </Typography>
-            )}
+            </Box>
+          )}
         </Stack>
       </Stack>
-    </Box>
+    </Container>
   );
 }

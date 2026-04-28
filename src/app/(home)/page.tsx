@@ -5,9 +5,9 @@ import { HomeView } from 'src/sections/home/view';
 // ----------------------------------------------------------------------
 
 export const metadata: Metadata = {
-  title: 'Lotto Viewer',
+  title: 'AL is well',
   description:
-    '세상의 모든 로또 정보',
+    '오픽 스크립트 암기 노트',
 };
 
 export default function Page() {
