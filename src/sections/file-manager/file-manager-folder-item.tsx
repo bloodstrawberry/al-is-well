@@ -2,7 +2,7 @@ import type { IFolderManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
 import { useState, useCallback } from 'react';
-import { useBoolean, usePopover, useCopyToClipboard } from 'minimal-shared/hooks';
+import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -16,7 +16,6 @@ import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
-import { FileManagerShareDialog } from './file-manager-share-dialog';
 import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
 import {
   FileItem,
@@ -43,8 +42,7 @@ export function FileManagerFolderItem({
   onDelete,
   onNavigate,
   ...other
-}: Props) {
-  const shareDialog = useBoolean();
+ }: Props) {
   const confirmDialog = useBoolean();
   const editFolderDialog = useBoolean();
 
@@ -53,23 +51,11 @@ export function FileManagerFolderItem({
 
   const menuActions = usePopover();
 
-  const { copy } = useCopyToClipboard();
-
-  const [inviteEmail, setInviteEmail] = useState('');
   const [folderName, setFolderName] = useState(folder.name);
-
-  const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setInviteEmail(event.target.value);
-  }, []);
 
   const handleChangeFolderName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setFolderName(event.target.value);
   }, []);
-
-  const handleCopy = useCallback(() => {
-    toast.success('Copied!');
-    copy(folder.url);
-  }, [copy, folder.url]);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -79,26 +65,6 @@ export function FileManagerFolderItem({
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        <MenuItem
-          onClick={() => {
-            menuActions.onClose();
-            handleCopy();
-          }}
-        >
-          <Iconify icon="eva:link-2-fill" />
-          Copy Link
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            menuActions.onClose();
-            shareDialog.onTrue();
-          }}
-        >
-          <Iconify icon="solar:share-bold" />
-          Share
-        </MenuItem>
-
         <MenuItem
           onClick={() => {
             menuActions.onClose();
@@ -125,19 +91,6 @@ export function FileManagerFolderItem({
     </CustomPopover>
   );
 
-  const renderShareDialog = () => (
-    <FileManagerShareDialog
-      open={shareDialog.value}
-      shared={folder.shared}
-      inviteEmail={inviteEmail}
-      onChangeInvite={handleChangeInvite}
-      onCopyLink={handleCopy}
-      onClose={() => {
-        shareDialog.onFalse();
-        setInviteEmail('');
-      }}
-    />
-  );
 
   const renderConfirmDialog = () => (
     <ConfirmDialog
@@ -206,7 +159,6 @@ export function FileManagerFolderItem({
 
       {renderMenuActions()}
 
-      {renderShareDialog()}
       {renderConfirmDialog()}
       {renderEditFolderDialog()}
 

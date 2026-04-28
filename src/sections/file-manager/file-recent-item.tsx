@@ -2,7 +2,7 @@ import type { IFileManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
 import { useState, useCallback } from 'react';
-import { useBoolean, usePopover, useCopyToClipboard } from 'minimal-shared/hooks';
+import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Divider from '@mui/material/Divider';
 import MenuList from '@mui/material/MenuList';
@@ -15,8 +15,7 @@ import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { FileThumbnail } from 'src/components/file-thumbnail';
 import { CustomPopover } from 'src/components/custom-popover';
-
-import { FileManagerShareDialog } from './file-manager-share-dialog';
+import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
 import {
   FileItem,
   FileItemInfo,
@@ -31,24 +30,18 @@ type Props = FileItemProps & {
 };
 
 export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
-  const { copy } = useCopyToClipboard();
-
   const menuActions = usePopover();
 
-  const shareDialog = useBoolean();
+  const editFileDialog = useBoolean();
   const detailsDrawer = useBoolean();
   const favorite = useBoolean(file.isFavorited);
 
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [fileName, setFileName] = useState(file.name);
 
-  const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setInviteEmail(event.target.value);
+  const handleChangeFileName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setFileName(event.target.value);
   }, []);
 
-  const handleCopy = useCallback(() => {
-    toast.success('Copied!');
-    copy(file.url);
-  }, [copy, file.url]);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -61,21 +54,11 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
         <MenuItem
           onClick={() => {
             menuActions.onClose();
-            handleCopy();
+            editFileDialog.onTrue();
           }}
         >
-          <Iconify icon="eva:link-2-fill" />
-          Copy link
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            menuActions.onClose();
-            shareDialog.onTrue();
-          }}
-        >
-          <Iconify icon="solar:share-bold" />
-          Share
+          <Iconify icon="solar:pen-bold" />
+          Edit
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
@@ -94,19 +77,20 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
     </CustomPopover>
   );
 
-  const renderShareDialog = () => (
-    <FileManagerShareDialog
-      open={shareDialog.value}
-      shared={file.shared}
-      inviteEmail={inviteEmail}
-      onChangeInvite={handleChangeInvite}
-      onCopyLink={handleCopy}
-      onClose={() => {
-        shareDialog.onFalse();
-        setInviteEmail('');
+  const renderEditFileDialog = () => (
+    <FileManagerCreateFolderDialog
+      open={editFileDialog.value}
+      onClose={editFileDialog.onFalse}
+      title="Edit File"
+      onUpdate={() => {
+        editFileDialog.onFalse();
+        console.info('UPDATE FILE', fileName);
       }}
+      folderName={fileName}
+      onChangeFolderName={handleChangeFileName}
     />
   );
+
 
 
   return (
@@ -143,7 +127,7 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
       </FileItem>
 
       {renderMenuActions()}
-      {renderShareDialog()}
+      {renderEditFileDialog()}
     </>
   );
 }
