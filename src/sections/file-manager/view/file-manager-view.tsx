@@ -2,7 +2,7 @@
 
 import type { IFile, IFileFilters } from 'src/types/file';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useBoolean, useSetState, useLocalStorage } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -42,6 +42,8 @@ export function FileManagerView() {
   const confirmDialog = useBoolean();
   const resetDialog = useBoolean();
   const newFilesDialog = useBoolean();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(
     'file-manager-sidebar-collapsed',
     false
@@ -201,7 +203,10 @@ export function FileManagerView() {
     const url = window.URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `file-manager-backup-${new Date().toISOString().split('T')[0]}.json`;
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+    link.download = `file-manager-backup-${date}-${time}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -210,10 +215,34 @@ export function FileManagerView() {
   }, [treeData]);
 
   const handleReset = useCallback(() => {
+    handleDownload();
     setTreeData(TREE_DATA);
     toast.success('Reset success!');
     resetDialog.onFalse();
-  }, [resetDialog]);
+  }, [handleDownload, resetDialog]);
+
+  const handleUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target?.result as string);
+          if (Array.isArray(json)) {
+            setTreeData(json);
+            toast.success('Upload success!');
+          } else {
+            toast.error('Invalid JSON format. Expected an array.');
+          }
+        } catch (error) {
+          toast.error('Failed to parse JSON');
+        }
+      };
+      reader.readAsText(file);
+    }
+    // Reset input value to allow uploading the same file again
+    event.target.value = '';
+  }, []);
 
   const handleDeleteItem = useCallback(
     (id: string) => {
@@ -415,11 +444,19 @@ export function FileManagerView() {
 
               <IconButton
                 color="info"
-                onClick={newFilesDialog.onTrue}
+                onClick={() => fileInputRef.current?.click()}
                 sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
               >
                 <Iconify icon="eva:cloud-upload-fill" />
               </IconButton>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleUpload}
+                accept=".json"
+                style={{ display: 'none' }}
+              />
 
               <IconButton
                 color="success"
