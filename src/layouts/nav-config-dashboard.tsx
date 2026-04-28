@@ -69,6 +69,7 @@ export const navData: NavSectionProps['data'] = [
     subheader: 'Overview',
     items: [
       { title: 'Home', path: paths.dashboard.root, icon: ICONS.dashboard },
+      { title: 'Drive', path: paths.dashboard.fileManager, icon: ICONS.folder },
       { title: '패턴분석', path: paths.dashboard.general.pattern, icon: ICONS.pattern },
       { title: '통계분석', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
       { title: '과거순위', path: paths.dashboard.general.history, icon: ICONS.banking },
@@ -161,7 +162,6 @@ export const navData: NavSectionProps['data'] = [
           { title: 'Edit', path: paths.dashboard.tour.demo.edit },
         ],
       },
-      { title: 'File manager', path: paths.dashboard.fileManager, icon: ICONS.folder },
       {
         title: 'Mail',
         path: paths.dashboard.mail,
