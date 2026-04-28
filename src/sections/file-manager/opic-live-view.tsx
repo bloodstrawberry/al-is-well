@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 
 import { Iconify } from 'src/components/iconify';
 import { getFileScript } from 'src/api/indexDB';
+import { toast } from 'src/components/snackbar';
 
 // ----------------------------------------------------------------------
 
@@ -22,7 +23,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [scriptData, setScriptData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [revealedLines, setRevealedLines] = useState<Record<number, boolean>>({});
-  const [allRevealed, setAllRevealed] = useState(true);
+  const [allRevealed, setAllRevealed] = useState(false);
+  const [showKoQuestion, setShowKoQuestion] = useState(false);
 
   useEffect(() => {
     const loadScript = async () => {
@@ -49,6 +51,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const toggleAll = () => {
     const newState = !allRevealed;
     setAllRevealed(newState);
+    setShowKoQuestion(newState);
     const newRevealed: Record<number, boolean> = {};
     if (scriptData?.lines) {
       scriptData.lines.forEach((_: any, index: number) => {
@@ -62,7 +65,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     if ('speechSynthesis' in window) {
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();
-      
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.9; // Slightly slower for better clarity
@@ -83,38 +86,72 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
         <Typography variant="h4" sx={{ flexGrow: 1 }}>{fileName}</Typography>
-        
-        <Stack direction="row" spacing={1}>
-          <Button
-            variant="soft"
-            color={allRevealed ? 'warning' : 'success'}
-            startIcon={<Iconify icon={allRevealed ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />}
-            onClick={toggleAll}
-          >
-            {allRevealed ? 'Memorize Mode' : 'Show All'}
-          </Button>
 
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="solar:pen-bold" />}
-            onClick={onEdit}
+        <Stack direction="row" spacing={1}>
+          <IconButton
+            color={allRevealed ? 'warning' : 'success'}
+            onClick={toggleAll}
+            sx={{ bgcolor: (theme) => (allRevealed ? 'warning.lighter' : 'success.lighter'), borderRadius: 1 }}
           >
-            Edit Script
-          </Button>
+            <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+          </IconButton>
+
+          <IconButton
+            color="primary"
+            onClick={onEdit}
+            sx={{ bgcolor: 'primary.lighter', borderRadius: 1 }}
+          >
+            <Iconify icon="solar:pen-bold" />
+          </IconButton>
         </Stack>
       </Stack>
 
       <Stack spacing={4}>
         <Box>
           <Typography variant="overline" sx={{ color: 'text.secondary', display: 'block', mb: 1 }}>Question</Typography>
-          <Stack direction="row" alignItems="flex-start" spacing={1}>
-            <Typography variant="h6" sx={{ whiteSpace: 'pre-wrap', fontWeight: 'medium', flexGrow: 1 }}>
-              {scriptData?.question || ' '}
-            </Typography>
-            {scriptData?.question && (
-              <IconButton onClick={() => handleSpeak(scriptData.question)} size="small" color="primary">
-                <Iconify icon="solar:volume-loud-bold" />
-              </IconButton>
+
+          <Stack spacing={1.5}>
+            <Stack direction="row" alignItems="flex-start" spacing={1}>
+              <Typography variant="h6" sx={{ whiteSpace: 'pre-wrap', fontWeight: 'medium', flexGrow: 1 }}>
+                {scriptData?.questionEn || scriptData?.question || ' '}
+              </Typography>
+              {(scriptData?.questionEn || scriptData?.question) && (
+                <IconButton onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)} size="small" color="primary">
+                  <Iconify icon="solar:volume-loud-bold" />
+                </IconButton>
+              )}
+            </Stack>
+
+            {scriptData?.questionKo && (
+              <Box
+                onClick={() => setShowKoQuestion(!showKoQuestion)}
+                sx={{
+                  p: 1.5,
+                  cursor: 'pointer',
+                  borderRadius: 1,
+                  bgcolor: 'background.neutral',
+                  border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
+                  transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                  ...(!showKoQuestion && {
+                    '&:hover': { bgcolor: 'action.hover' }
+                  })
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                    transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                    ...(!showKoQuestion && {
+                      filter: 'blur(6px)',
+                      opacity: 0.4,
+                      userSelect: 'none'
+                    })
+                  }}
+                >
+                  {scriptData.questionKo}
+                </Typography>
+              </Box>
             )}
           </Stack>
         </Box>
@@ -135,10 +172,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               </Typography>
             )}
           </Stack>
-          
+
           {scriptData?.lines?.map((line: any, index: number) => {
             const isRevealed = revealedLines[index] ?? allRevealed;
-            
+
             return (
               <Stack
                 key={index}
@@ -171,7 +208,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   >
                     {line.ko}
                   </Typography>
-                  
+
                   <Typography
                     variant="body1"
                     sx={{
@@ -189,7 +226,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                     {line.en}
                   </Typography>
                 </Box>
-                
+
                 <IconButton
                   onClick={() => handleSpeak(line.en)}
                   color="primary"
@@ -203,10 +240,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               </Stack>
             );
           }) || (
-            <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
-              No script lines available.
-            </Typography>
-          )}
+              <Typography variant="body2" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
+                No script lines available.
+              </Typography>
+            )}
         </Stack>
       </Stack>
     </Box>

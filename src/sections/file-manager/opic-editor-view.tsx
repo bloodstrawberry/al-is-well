@@ -25,7 +25,8 @@ type Line = {
 };
 
 type ScriptData = {
-  question: string;
+  questionEn: string;
+  questionKo: string;
   audioUrl: string;
   lines: Line[];
 };
@@ -39,7 +40,8 @@ type Props = {
 
 export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Props) {
   const [scriptData, setScriptData] = useState<ScriptData>({
-    question: '',
+    questionEn: '',
+    questionKo: '',
     audioUrl: '',
     lines: [{ ko: '', en: '' }],
   });
@@ -54,7 +56,12 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
       try {
         const data = await getFileScript(fileId);
         if (data) {
-          setScriptData(data);
+          setScriptData({
+            questionEn: data.questionEn || data.question || '', // Migrating old question to questionEn
+            questionKo: data.questionKo || '',
+            audioUrl: data.audioUrl || '',
+            lines: data.lines || [{ ko: '', en: '' }],
+          });
         }
       } catch (error) {
         console.error('Failed to load script', error);
@@ -135,14 +142,25 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
       </Stack>
 
       <Stack spacing={4} sx={{ maxWidth: 800, mx: 'auto' }}>
-        <TextField
-          fullWidth
-          label="OPIc Question"
-          value={scriptData.question}
-          onChange={(e) => setScriptData({ ...scriptData, question: e.target.value })}
-          multiline
-          rows={4}
-        />
+        <Stack spacing={2}>
+          <Typography variant="subtitle1">Question</Typography>
+          <TextField
+            fullWidth
+            label="English Question"
+            value={scriptData.questionEn}
+            onChange={(e) => setScriptData({ ...scriptData, questionEn: e.target.value })}
+            multiline
+            rows={2}
+          />
+          <TextField
+            fullWidth
+            label="Korean Question"
+            value={scriptData.questionKo}
+            onChange={(e) => setScriptData({ ...scriptData, questionKo: e.target.value })}
+            multiline
+            rows={2}
+          />
+        </Stack>
 
         <TextField
           fullWidth
