@@ -17,13 +17,11 @@ import { FileThumbnail } from 'src/components/file-thumbnail';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
 import {
   FileItem,
   FileItemInfo,
   FileItemAvatar,
   FileItemActions,
-  FileItemActionOverlay,
 } from './file-manager-file-item-slots';
 
 // ----------------------------------------------------------------------
@@ -111,20 +109,6 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
     />
   );
 
-  const renderFileDetailsDrawer = () => (
-    <FileManagerFileDetails
-      file={file}
-      favorited={favorite.value}
-      onFavorite={favorite.onToggle}
-      onCopyLink={handleCopy}
-      open={detailsDrawer.value}
-      onClose={detailsDrawer.onFalse}
-      onDelete={() => {
-        detailsDrawer.onFalse();
-        onDelete();
-      }}
-    />
-  );
 
   return (
     <>
@@ -140,8 +124,6 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
         ]}
         {...other}
       >
-        <FileItemActionOverlay onClick={detailsDrawer.onTrue} />
-
         <FileThumbnail file={file.type} />
 
         <FileItemInfo
@@ -163,7 +145,6 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
       </FileItem>
 
       {renderMenuActions()}
-      {renderFileDetailsDrawer()}
       {renderShareDialog()}
     </>
   );

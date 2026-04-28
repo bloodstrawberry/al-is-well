@@ -18,14 +18,12 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
 import {
   FileItem,
   FileItemIcon,
   FileItemInfo,
   FileItemAvatar,
   FileItemActions,
-  FileItemActionOverlay,
 } from './file-manager-file-item-slots';
 
 // ----------------------------------------------------------------------
@@ -40,7 +38,6 @@ type Props = FileItemProps & {
 export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }: Props) {
   const shareDialog = useBoolean();
   const confirmDialog = useBoolean();
-  const detailsDrawer = useBoolean();
   const menuActions = usePopover();
 
   const checkbox = useBoolean();
@@ -131,25 +128,10 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
     />
   );
 
-  const renderFileDetailsDrawer = () => (
-    <FileManagerFileDetails
-      file={file}
-      favorited={favorite.value}
-      onFavorite={favorite.onToggle}
-      onCopyLink={handleCopy}
-      open={detailsDrawer.value}
-      onClose={detailsDrawer.onFalse}
-      onDelete={() => {
-        detailsDrawer.onFalse();
-        onDelete();
-      }}
-    />
-  );
 
   return (
     <>
       <FileItem variant="outlined" selected={selected} sx={sx} {...other}>
-        <FileItemActionOverlay onClick={detailsDrawer.onTrue} />
 
         <FileItemIcon
           id={file.id}
@@ -183,7 +165,6 @@ export function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ..
       {renderShareDialog()}
       {renderConfirmDialog()}
 
-      {renderFileDetailsDrawer()}
     </>
   );
 }

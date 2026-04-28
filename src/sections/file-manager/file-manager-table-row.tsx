@@ -27,7 +27,6 @@ import { FileThumbnail } from 'src/components/file-thumbnail';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
 import { FileItemAvatar, FileItemActions } from './file-manager-file-item-slots';
 
 // ----------------------------------------------------------------------
@@ -56,12 +55,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
     setInviteEmail(event.target.value);
   }, []);
 
-  const handleClick = useDoubleClick({
-    click: () => {
-      detailsDrawer.onTrue();
-    },
-    doubleClick: () => console.info('DOUBLE CLICK'),
-  });
 
   const handleCopy = useCallback(() => {
     toast.success('Copied!');
@@ -127,17 +120,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
     </CustomPopover>
   );
 
-  const renderFileDetailsDrawer = () => (
-    <FileManagerFileDetails
-      file={row}
-      favorited={favorite.value}
-      onFavorite={favorite.onToggle}
-      onCopyLink={handleCopy}
-      open={detailsDrawer.value}
-      onClose={detailsDrawer.onFalse}
-      onDelete={onDeleteRow}
-    />
-  );
 
   const renderShareDialog = () => (
     <FileManagerShareDialog
@@ -187,11 +169,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
           [`& .${tableCellClasses.root}`]: {
             ...defaultStyles,
           },
-          ...(detailsDrawer.value && {
-            [`& .${tableCellClasses.root}`]: {
-              ...defaultStyles,
-            },
-          }),
         }}
       >
         <TableCell padding="checkbox">
@@ -208,7 +185,7 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
           />
         </TableCell>
 
-        <TableCell onClick={handleClick}>
+        <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
             <FileThumbnail file={row.type} />
 
@@ -218,7 +195,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
               sx={{
                 maxWidth: 360,
                 cursor: 'pointer',
-                ...(detailsDrawer.value && { fontWeight: 'fontWeightBold' }),
               }}
             >
               {row.name}
@@ -226,15 +202,15 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
           </Box>
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {fData(row.size)}
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {row.type}
         </TableCell>
 
-        <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
           <ListItemText
             primary={fDate(row.modifiedAt)}
             secondary={fTime(row.modifiedAt)}
@@ -247,7 +223,7 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
           />
         </TableCell>
 
-        <TableCell align="right" onClick={handleClick}>
+        <TableCell align="right">
           <FileItemAvatar sharedUsers={row.shared} />
         </TableCell>
 
@@ -263,7 +239,6 @@ export function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }:
         </TableCell>
       </TableRow>
 
-      {renderFileDetailsDrawer()}
       {renderShareDialog()}
 
       {renderMenuActions()}

@@ -17,7 +17,6 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerShareDialog } from './file-manager-share-dialog';
-import { FileManagerFileDetails } from './file-manager-file-details';
 import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
 import {
   FileItem,
@@ -25,7 +24,6 @@ import {
   FileItemInfo,
   FileItemAvatar,
   FileItemActions,
-  FileItemActionOverlay,
 } from './file-manager-file-item-slots';
 
 // ----------------------------------------------------------------------
@@ -47,7 +45,6 @@ export function FileManagerFolderItem({
 }: Props) {
   const shareDialog = useBoolean();
   const confirmDialog = useBoolean();
-  const detailsDrawer = useBoolean();
   const editFolderDialog = useBoolean();
 
   const checkbox = useBoolean();
@@ -170,25 +167,10 @@ export function FileManagerFolderItem({
     />
   );
 
-  const renderFileDetailsDrawer = () => (
-    <FileManagerFileDetails
-      file={folder}
-      favorited={favorite.value}
-      onFavorite={favorite.onToggle}
-      onCopyLink={handleCopy}
-      open={detailsDrawer.value}
-      onClose={detailsDrawer.onFalse}
-      onDelete={() => {
-        detailsDrawer.onFalse();
-        onDelete();
-      }}
-    />
-  );
 
   return (
     <>
       <FileItem variant="outlined" selected={selected} sx={sx} {...other}>
-        <FileItemActionOverlay onClick={detailsDrawer.onTrue} />
 
         <FileItemIcon
           id={folder.id}
@@ -222,7 +204,6 @@ export function FileManagerFolderItem({
       {renderConfirmDialog()}
       {renderEditFolderDialog()}
 
-      {renderFileDetailsDrawer()}
     </>
   );
 }
