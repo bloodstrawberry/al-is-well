@@ -238,13 +238,17 @@ export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelect
     <StyledTreeItem
       key={nodes.id}
       itemId={nodes.id}
-      onClick={() => {
-        if (nodes.type === 'folder') {
-          onSelectId(nodes.id);
-        }
-      }}
       label={
-        <Stack direction="row" alignItems="center" spacing={0.3} sx={{ py: 0, minWidth: 0 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.3}
+          sx={{ py: 0.5, minWidth: 0 }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelectId(nodes.id);
+          }}
+        >
           <Iconify
             icon={
               nodes.type === 'folder'

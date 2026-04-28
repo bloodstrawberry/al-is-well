@@ -111,9 +111,24 @@ export function FileManagerView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleNavigate = useCallback((id: string | null) => {
-    setCurrentFolderId(id);
-  }, []);
+  const handleNavigate = useCallback(
+    (id: string | null) => {
+      if (!id) {
+        setCurrentFolderId(null);
+        return;
+      }
+      const item = flattenedTree.find((f) => f.id === id);
+      if (item) {
+        if (item.type === 'folder') {
+          setCurrentFolderId(id);
+        } else if (item.parentId) {
+          setCurrentFolderId(item.parentId);
+        }
+      }
+      table.onResetPage();
+    },
+    [flattenedTree, table]
+  );
 
   const handleDeleteItem = useCallback(
     (id: string) => {
