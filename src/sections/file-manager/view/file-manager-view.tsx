@@ -350,16 +350,15 @@ export function FileManagerView() {
           <Stack spacing={2.5} sx={{ p: 3 }}>
             {renderFilters()}
             {canReset && renderResults()}
-            {notFound ? <EmptyContent filled sx={{ py: 10 }} /> : (
-              <FileManagerGridView
-                table={table}
-                dataFiltered={dataFiltered}
-                onDeleteItem={handleDeleteItem}
-                onCreateItem={handleCreateItem}
-                onOpenConfirm={confirmDialog.onTrue}
-                onNavigate={handleNavigate}
-              />
-            )}
+            <FileManagerGridView
+              table={table}
+              dataFiltered={dataFiltered}
+              onDeleteItem={handleDeleteItem}
+              onCreateItem={handleCreateItem}
+              onOpenConfirm={confirmDialog.onTrue}
+              onNavigate={handleNavigate}
+              notFound={notFound}
+            />
           </Stack>
         </Box>
       </DashboardContent>

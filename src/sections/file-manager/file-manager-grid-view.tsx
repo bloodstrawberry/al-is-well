@@ -17,6 +17,7 @@ import { FileManagerFileItem } from './file-manager-file-item';
 import { FileManagerFolderItem } from './file-manager-folder-item';
 import { FileManagerShareDialog } from './file-manager-share-dialog';
 import { FileManagerActionSelected } from './file-manager-action-selected';
+import { EmptyContent } from 'src/components/empty-content';
 import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
 
 // ----------------------------------------------------------------------
@@ -32,6 +33,7 @@ type Props = {
   onDeleteItem: (id: string) => void;
   onNavigate: (id: string | null) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
+  notFound?: boolean;
 };
 
 export function FileManagerGridView({
@@ -41,6 +43,7 @@ export function FileManagerGridView({
   onOpenConfirm,
   onNavigate,
   onCreateItem,
+  notFound,
 }: Props) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
@@ -73,8 +76,12 @@ export function FileManagerGridView({
 
       if (INVALID_CHARACTERS.test(value)) {
         setErrorMessage('Invalid characters: < > : " / \\ | ? *');
-      } else if (dataFiltered.some((item) => item.name.toLowerCase() === value.toLowerCase())) {
-        setErrorMessage('Name already exists in this folder');
+      } else if (
+        dataFiltered.some(
+          (item) => item.name.toLowerCase() === value.toLowerCase() && item.type === createType
+        )
+      ) {
+        setErrorMessage(`A ${createType} with this name already exists in this folder`);
       } else {
         setErrorMessage('');
       }
@@ -225,6 +232,8 @@ export function FileManagerGridView({
           subtitle={`${dataFiltered.length} items`}
           onOpen={menuActions.onOpen}
         />
+
+        {notFound && <EmptyContent filled sx={{ py: 10 }} />}
 
         <Box
           sx={{
