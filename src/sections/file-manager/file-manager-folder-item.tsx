@@ -82,6 +82,7 @@ export function FileManagerFolderItem({
             confirmDialog.onTrue();
             menuActions.onClose();
           }}
+          disabled={folder.totalFiles ? folder.totalFiles > 0 : false}
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" />

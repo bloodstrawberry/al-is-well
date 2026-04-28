@@ -31,6 +31,7 @@ type Props = {
   onOpenConfirm: () => void;
   onDeleteItem: (id: string) => void;
   onNavigate: (id: string | null) => void;
+  onCreateItem?: (name: string, type: 'folder' | 'file') => void;
 };
 
 export function FileManagerGridView({
@@ -39,6 +40,7 @@ export function FileManagerGridView({
   onDeleteItem,
   onOpenConfirm,
   onNavigate,
+  onCreateItem,
 }: Props) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
@@ -64,16 +66,21 @@ export function FileManagerGridView({
     setInviteEmail(event.target.value);
   }, []);
 
-  const handleChangeItemName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setItemName(value);
+  const handleChangeItemName = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setItemName(value);
 
-    if (INVALID_CHARACTERS.test(value)) {
-      setErrorMessage('Invalid characters: < > : " / \\ | ? *');
-    } else {
-      setErrorMessage('');
-    }
-  }, []);
+      if (INVALID_CHARACTERS.test(value)) {
+        setErrorMessage('Invalid characters: < > : " / \\ | ? *');
+      } else if (dataFiltered.some((item) => item.name.toLowerCase() === value.toLowerCase())) {
+        setErrorMessage('Name already exists in this folder');
+      } else {
+        setErrorMessage('');
+      }
+    },
+    [dataFiltered]
+  );
 
   const sortedData = [...dataFiltered].sort((a, b) => {
     if (a.type === 'folder' && b.type !== 'folder') return -1;
@@ -114,9 +121,9 @@ export function FileManagerGridView({
         if (errorMessage) return;
 
         newFolderDialog.onFalse();
+        onCreateItem?.(itemName, createType);
         setItemName('');
         setErrorMessage('');
-        console.info(createType === 'folder' ? 'CREATE NEW FOLDER' : 'CREATE NEW FILE', itemName);
       }}
       folderName={itemName}
       onChangeFolderName={handleChangeItemName}
@@ -162,44 +169,53 @@ export function FileManagerGridView({
     </CustomPopover>
   );
 
-  const renderSelectedActions = () =>
-    !!selected?.length && (
-      <FileManagerActionSelected
-        numSelected={selected.length}
-        rowCount={dataFiltered.length}
-        selected={selected}
-        onSelectAllItems={(checked) =>
-          onSelectAllItems(
-            checked,
-            dataFiltered.map((row) => row.id)
-          )
-        }
-        action={
-          <>
-            <Button
-              size="small"
-              color="error"
-              variant="contained"
-              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={onOpenConfirm}
-              sx={{ mr: 1 }}
-            >
-              Delete
-            </Button>
-
-            <Button
-              color="primary"
-              size="small"
-              variant="contained"
-              startIcon={<Iconify icon="solar:share-bold" />}
-              onClick={shareDialog.onTrue}
-            >
-              Share
-            </Button>
-          </>
-        }
-      />
+  const renderSelectedActions = () => {
+    const selectedItems = dataFiltered.filter((item) => selected.includes(item.id));
+    const hasNonEmptyFolder = selectedItems.some(
+      (item) => item.type === 'folder' && (item as any).totalFiles > 0
     );
+
+    return (
+      !!selected?.length && (
+        <FileManagerActionSelected
+          numSelected={selected.length}
+          rowCount={dataFiltered.length}
+          selected={selected}
+          onSelectAllItems={(checked) =>
+            onSelectAllItems(
+              checked,
+              dataFiltered.map((row) => row.id)
+            )
+          }
+          action={
+            <>
+              <Button
+                size="small"
+                color="error"
+                variant="contained"
+                startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                onClick={onOpenConfirm}
+                disabled={hasNonEmptyFolder}
+                sx={{ mr: 1 }}
+              >
+                Delete
+              </Button>
+
+              <Button
+                color="primary"
+                size="small"
+                variant="contained"
+                startIcon={<Iconify icon="solar:share-bold" />}
+                onClick={shareDialog.onTrue}
+              >
+                Share
+              </Button>
+            </>
+          }
+        />
+      )
+    );
+  };
 
   return (
     <>

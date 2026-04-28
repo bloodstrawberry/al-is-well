@@ -15,7 +15,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 
 import { Iconify } from 'src/components/iconify';
 
-import { TREE_DATA } from './file-manager-tree-data';
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -117,13 +117,14 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 const WIDTH_KEY = 'file-manager-sidebar-width';
 
 type Props = {
+  data: any[];
   isCollapsed: boolean;
   onToggle: VoidFunction;
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
 };
 
-export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelectId }: Props) {
+export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, onSelectId }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
@@ -207,9 +208,9 @@ export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelect
         }
       });
     };
-    flatten(TREE_DATA);
+    flatten(data);
     return results;
-  }, []);
+  }, [data]);
 
   // Effect to expand parents when selectedId changes externally (e.g. from Grid View)
   useEffect(() => {
@@ -371,7 +372,7 @@ export function FileManagerSidebar({ isCollapsed, onToggle, selectedId, onSelect
                 overflowY: 'auto',
               }}
             >
-              {TREE_DATA.map((node) => renderTree(node))}
+              {data.map((node) => renderTree(node))}
             </SimpleTreeView>
           </Box>
         </Stack>

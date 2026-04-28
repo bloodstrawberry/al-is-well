@@ -2,7 +2,7 @@
 
 import type { IFile, IFileFilters } from 'src/types/file';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useBoolean, useSetState, useLocalStorage } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -45,7 +45,7 @@ export function FileManagerView() {
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
-  const [tableData, setTableData] = useState<IFile[]>(_allFiles);
+  const [treeData, setTreeData] = useState<any[]>(TREE_DATA);
 
   const filters = useSetState<IFileFilters>({
     name: '',
@@ -66,9 +66,9 @@ export function FileManagerView() {
         }
       });
     };
-    flatten(TREE_DATA);
+    flatten(treeData);
     return results;
-  }, []);
+  }, [treeData]);
 
   const currentFolder = useMemo(
     () => flattenedTree.find((f) => f.id === currentFolderId),
@@ -79,7 +79,7 @@ export function FileManagerView() {
   const dataForGrid = useMemo(() => {
     const nodes = currentFolderId
       ? flattenedTree.find((f) => f.id === currentFolderId)?.children || []
-      : TREE_DATA;
+      : treeData;
 
     return nodes.map((node: any) => ({
       id: node.id,
@@ -130,17 +130,91 @@ export function FileManagerView() {
     [flattenedTree, table]
   );
 
+  const handleCreateItem = useCallback(
+    (name: string, type: 'folder' | 'file') => {
+      const newItem = {
+        id: Date.now().toString(),
+        label: name,
+        type,
+        ...(type === 'folder' && { children: [] }),
+      };
+
+      const updateTree = (nodes: any[]): any[] => {
+        if (!currentFolderId) {
+          return [...nodes, newItem];
+        }
+
+        return nodes.map((node) => {
+          if (node.id === currentFolderId) {
+            return {
+              ...node,
+              children: [...(node.children || []), newItem],
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: updateTree(node.children),
+            };
+          }
+          return node;
+        });
+      };
+
+      setTreeData((prev) => updateTree(prev));
+      toast.success(`Create ${type} success!`);
+    },
+    [currentFolderId]
+  );
+
   const handleDeleteItem = useCallback(
     (id: string) => {
+      const item = flattenedTree.find((f) => f.id === id);
+
+      if (item?.type === 'folder' && item.children?.length > 0) {
+        toast.error('Cannot delete a folder that is not empty!');
+        return;
+      }
+
+      const deleteFromTree = (nodes: any[]): any[] =>
+        nodes
+          .filter((node) => node.id !== id)
+          .map((node) => ({
+            ...node,
+            children: node.children ? deleteFromTree(node.children) : undefined,
+          }));
+
+      setTreeData((prev) => deleteFromTree(prev));
       toast.success('Delete success!');
-      // In a real app, we would update the source data
     },
-    []
+    [flattenedTree]
   );
 
   const handleDeleteItems = useCallback(() => {
+    const idsToDelete = table.selected;
+
+    const hasNonEmptyFolder = idsToDelete.some((id) => {
+      const item = flattenedTree.find((f) => f.id === id);
+      return item?.type === 'folder' && item.children?.length > 0;
+    });
+
+    if (hasNonEmptyFolder) {
+      toast.error('Some selected folders are not empty!');
+      return;
+    }
+
+    const deleteFromTree = (nodes: any[]): any[] =>
+      nodes
+        .filter((node) => !idsToDelete.includes(node.id))
+        .map((node) => ({
+          ...node,
+          children: node.children ? deleteFromTree(node.children) : undefined,
+        }));
+
+    setTreeData((prev) => deleteFromTree(prev));
+    table.onSelectAllRows(false, []);
     toast.success('Delete success!');
-  }, []);
+  }, [table, flattenedTree]);
 
   const renderFilters = () => (
     <Box
@@ -241,6 +315,7 @@ export function FileManagerView() {
         }}
       >
         <FileManagerSidebar
+          data={treeData}
           isCollapsed={isCollapsed}
           onToggle={() => setIsCollapsed(!isCollapsed)}
           selectedId={currentFolderId}
@@ -280,6 +355,7 @@ export function FileManagerView() {
                 table={table}
                 dataFiltered={dataFiltered}
                 onDeleteItem={handleDeleteItem}
+                onCreateItem={handleCreateItem}
                 onOpenConfirm={confirmDialog.onTrue}
                 onNavigate={handleNavigate}
               />
