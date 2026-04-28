@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useLocalStorage } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -6,10 +6,16 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import ListItemText from '@mui/material/ListItemText';
+import InputAdornment from '@mui/material/InputAdornment';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 
 import { Iconify } from 'src/components/iconify';
+
+import { TREE_DATA } from './file-manager-tree-data';
 
 // ----------------------------------------------------------------------
 
@@ -98,12 +104,13 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 const WIDTH_KEY = 'file-manager-sidebar-width';
 const COLLAPSED_KEY = 'file-manager-sidebar-collapsed';
 
-import { TREE_DATA } from './file-manager-tree-data';
-
 export function FileManagerSidebar() {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
+
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const { state: width, setState: setWidth } = useLocalStorage(WIDTH_KEY, 280);
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(COLLAPSED_KEY, false);
@@ -170,6 +177,34 @@ export function FileManagerSidebar() {
     };
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
+  // Flatten tree for search and include parent lineage
+  const flattenedData = useMemo(() => {
+    const results: any[] = [];
+    const flatten = (nodes: any[], parentPath = '', parents: string[] = []) => {
+      nodes.forEach((node) => {
+        const currentPath = parentPath ? `${parentPath}/${node.label}` : node.label;
+        const currentParents = [...parents];
+        results.push({ ...node, path: currentPath, parentIds: currentParents });
+        if (node.children) {
+          flatten(node.children, currentPath, [...currentParents, node.id]);
+        }
+      });
+    };
+    flatten(TREE_DATA);
+    return results;
+  }, []);
+
+  const handleAutocompleteChange = (event: any, newValue: any) => {
+    if (newValue) {
+      setSelectedItem(newValue.id);
+      // Expand all parents of the selected item
+      setExpandedItems((prev) => {
+        const newExpanded = [...new Set([...prev, ...newValue.parentIds])];
+        return newExpanded;
+      });
+    }
+  };
+
   // Use default values until mounted to avoid hydration mismatch
   const displayWidth = isMounted ? width : 280;
   const displayCollapsed = isMounted ? isCollapsed : true;
@@ -217,6 +252,7 @@ export function FileManagerSidebar() {
             width: displayWidth,
             minWidth: displayWidth,
             opacity: isMounted ? 1 : 0,
+            height: '100%',
             transition: (theme) => theme.transitions.create(['opacity']),
           }}
         >
@@ -229,16 +265,71 @@ export function FileManagerSidebar() {
             </IconButton>
           </Stack>
 
-          <SimpleTreeView
-            aria-label="file system navigator"
-            sx={{
-              flexGrow: 1,
-              maxWidth: 400,
-              overflowY: 'auto',
+          <Autocomplete
+            fullWidth
+            size="small"
+            options={flattenedData}
+            getOptionLabel={(option) => option.label}
+            onChange={handleAutocompleteChange}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Search..."
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            )}
+            renderOption={(props, option) => {
+              const { key, ...optionProps } = props as any;
+              return (
+                <li key={key} {...optionProps}>
+                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: 1 }}>
+                    <Iconify
+                      icon={
+                        option.type === 'folder'
+                          ? 'solar:folder-2-bold-duotone'
+                          : 'solar:document-text-bold-duotone'
+                      }
+                      width={18}
+                      sx={{
+                        color: option.type === 'folder' ? 'warning.main' : 'text.disabled',
+                      }}
+                    />
+                    <ListItemText
+                      primary={option.label}
+                      secondary={option.path}
+                      primaryTypographyProps={{ variant: 'body2', noWrap: true }}
+                      secondaryTypographyProps={{ variant: 'caption', noWrap: true, sx: { opacity: 0.6 } }}
+                    />
+                  </Stack>
+                </li>
+              );
             }}
-          >
-            {TREE_DATA.map((node) => renderTree(node))}
-          </SimpleTreeView>
+          />
+
+          <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <SimpleTreeView
+              aria-label="file system navigator"
+              expandedItems={expandedItems}
+              onExpandedItemsChange={(event, items) => setExpandedItems(items)}
+              selectedItems={selectedItem}
+              onSelectedItemsChange={(event, itemId) => setSelectedItem(itemId)}
+              sx={{
+                flexGrow: 1,
+                overflowY: 'auto',
+              }}
+            >
+              {TREE_DATA.map((node) => renderTree(node))}
+            </SimpleTreeView>
+          </Box>
         </Stack>
 
         {!displayCollapsed && <ResizeHandle onMouseDown={handleMouseDown} />}
