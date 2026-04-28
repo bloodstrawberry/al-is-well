@@ -24,7 +24,7 @@ import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
 
-import { TREE_DATA } from 'src/api/dummy/file-manager-tree-data';
+import { TREE_DATA } from 'src/api/dummy/default';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
@@ -270,7 +270,7 @@ export function FileManagerView() {
     if (!currentFolderId) return null;
 
     const pathNodes = currentFolder?.parentIds.map((pid: string) => flattenedTree.find((f) => f.id === pid)) || [];
-    
+
     return (
       <Breadcrumbs separator={<Iconify icon="eva:chevron-right-fill" width={16} />} sx={{ mb: 2 }}>
         <Link
