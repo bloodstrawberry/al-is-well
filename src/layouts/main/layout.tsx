@@ -127,7 +127,15 @@ export function MainLayout({
        * @Styles
        *************************************** */
       cssVars={cssVars}
-      sx={sx}
+      sx={[
+        isHomePage && {
+          height: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
       {renderMain()}
     </LayoutSection>

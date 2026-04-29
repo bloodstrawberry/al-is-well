@@ -185,8 +185,6 @@ export function PlusIcon() {
 
 // ----------------------------------------------------------------------
 
-const TEXT = 'Minimal Design System';
-
 export function Texts({ sx, ...other }: BoxProps & MotionProps) {
   return (
     <Box
@@ -204,35 +202,6 @@ export function Texts({ sx, ...other }: BoxProps & MotionProps) {
       ]}
       {...other}
     >
-      <Box
-        component="svg"
-        sx={[
-          (theme) => ({
-            width: 1,
-            height: 1,
-            '& text': {
-              fill: 'none',
-              fontSize: 200,
-              fontWeight: 800,
-              strokeDasharray: 4,
-              textTransform: 'uppercase',
-              stroke: 'var(--hero-text-stroke-color)',
-              strokeWidth: 'var(--hero-text-stroke-width)',
-              fontFamily: theme.typography.fontSecondaryFamily,
-            },
-          }),
-        ]}
-      >
-        <m.text
-          x="0"
-          y="12px"
-          dominantBaseline="hanging"
-          animate={{ x: ['0%', '-50%'] }}
-          transition={{ duration: 64, ease: 'linear', repeat: Infinity }}
-        >
-
-        </m.text>
-      </Box>
     </Box>
   );
 }
@@ -323,7 +292,7 @@ export function Dots() {
       <Dot
         color="success"
         animate={{ y: [0, 24] }}
-        sx={{ transform: 'translate(calc(50% + 136px), calc(50% + 332px))' }}
+        sx={{ transform: 'translate(calc(50% + 136px), calc(50% + 200px))' }}
       />
     </>
   );

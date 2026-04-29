@@ -11,15 +11,249 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
-import { varFade, MotionViewport } from 'src/components/animate';
+import { varFade, varContainer, MotionViewport } from 'src/components/animate';
 
 import { HeroBackground } from './components/hero-background';
+
+// ----------------------------------------------------------------------
+
+const FEATURES = [
+  { icon: 'solar:document-text-bold-duotone', label: '스크립트 관리', desc: '오픽 스크립트를 체계적으로 정리' },
+  { icon: 'solar:pen-new-round-bold-duotone', label: '암기 연습', desc: '테스트 모드로 반복 학습' },
+  { icon: 'solar:microphone-3-bold-duotone', label: '음성 지원', desc: 'TTS/STT로 발음 연습' },
+];
 
 // ----------------------------------------------------------------------
 
 export function HomeHero() {
   const theme = useTheme();
   const router = useRouter();
+
+  const renderTitle = () => (
+    <Stack spacing={2} alignItems="center">
+      {/* Top badge */}
+      <m.div variants={varFade('inDown')}>
+        <Box
+          sx={{
+            px: 2.5,
+            py: 0.75,
+            borderRadius: 5,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: (t) => alpha(t.palette.primary.main, 0.08),
+            border: (t) => `1px solid ${alpha(t.palette.primary.main, 0.16)}`,
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: 'success.main',
+              boxShadow: (t) => `0 0 8px ${t.palette.success.main}`,
+              animation: 'pulse 2s ease-in-out infinite',
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                '50%': { opacity: 0.6, transform: 'scale(1.3)' },
+              },
+            }}
+          />
+          <Typography
+            variant="caption"
+            sx={{ fontWeight: 700, color: 'primary.main', letterSpacing: 0.5 }}
+          >
+            OPIc Script Trainer
+          </Typography>
+        </Box>
+      </m.div>
+
+      {/* Main Title */}
+      <m.div variants={varFade('inUp')}>
+        <Typography
+          variant="h1"
+          sx={{
+            fontSize: { xs: '3.2rem', sm: '4rem', md: '5.5rem' },
+            fontWeight: 900,
+            letterSpacing: { xs: -1, md: -2 },
+            lineHeight: 1,
+            fontFamily: theme.typography.fontSecondaryFamily,
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.primary.dark} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            AL
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              mx: { xs: 0.5, md: 1.5 },
+              color: 'text.disabled',
+              fontWeight: 300,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
+              fontStyle: 'italic',
+            }}
+          >
+            is
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.primary.main} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            WELL
+          </Box>
+        </Typography>
+      </m.div>
+
+      {/* Subtitle */}
+      <m.div variants={varFade('inUp')}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          sx={{ mt: 1 }}
+        >
+          <Box
+            sx={{
+              width: { xs: 24, md: 40 },
+              height: '1px',
+              background: `linear-gradient(90deg, transparent, ${alpha(theme.palette.text.primary, 0.3)})`,
+            }}
+          />
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: 'text.secondary',
+              fontWeight: 500,
+              letterSpacing: { xs: 3, md: 6 },
+              fontSize: { xs: '0.85rem', md: '1.1rem' },
+              textTransform: 'uppercase',
+            }}
+          >
+            스크립트 암기 노트
+          </Typography>
+          <Box
+            sx={{
+              width: { xs: 24, md: 40 },
+              height: '1px',
+              background: `linear-gradient(90deg, ${alpha(theme.palette.text.primary, 0.3)}, transparent)`,
+            }}
+          />
+        </Stack>
+      </m.div>
+    </Stack>
+  );
+
+  const renderFeatures = () => (
+    <m.div variants={varFade('inUp')}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={{ xs: 2, sm: 3 }}
+        sx={{ mt: 2 }}
+      >
+        {FEATURES.map((item) => (
+          <Box
+            key={item.label}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              px: 2.5,
+              py: 1.5,
+              borderRadius: 2,
+              bgcolor: (t) => alpha(t.palette.background.paper, 0.5),
+              backdropFilter: 'blur(8px)',
+              border: (t) => `1px solid ${alpha(t.palette.divider, 0.08)}`,
+              transition: theme.transitions.create(['all'], { duration: 300 }),
+              '&:hover': {
+                bgcolor: (t) => alpha(t.palette.background.paper, 0.8),
+                border: (t) => `1px solid ${alpha(t.palette.primary.main, 0.2)}`,
+                transform: 'translateY(-2px)',
+                boxShadow: (t) => `0 4px 12px ${alpha(t.palette.common.black, 0.08)}`,
+              },
+            }}
+          >
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)} 0%, ${alpha(theme.palette.primary.main, 0.04)} 100%)`,
+              }}
+            >
+              <Iconify icon={item.icon} width={22} sx={{ color: 'primary.main' }} />
+            </Box>
+            <Stack spacing={0}>
+              <Typography variant="subtitle2" sx={{ fontSize: '0.8rem' }}>
+                {item.label}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem' }}>
+                {item.desc}
+              </Typography>
+            </Stack>
+          </Box>
+        ))}
+      </Stack>
+    </m.div>
+  );
+
+  const renderCTA = () => (
+    <m.div variants={varFade('inUp')}>
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
+        <Button
+          variant="contained"
+          size="large"
+          color="primary"
+          onClick={() => router.push(paths.dashboard.fileManager)}
+          endIcon={
+            <Iconify
+              icon="solar:arrow-right-linear"
+              width={20}
+              sx={{
+                transition: 'transform 0.3s',
+              }}
+            />
+          }
+          sx={{
+            px: { xs: 4, md: 5 },
+            py: { xs: 1.5, md: 2 },
+            fontSize: { xs: '0.95rem', md: '1.1rem' },
+            fontWeight: 700,
+            borderRadius: 2,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            '&:hover': {
+              boxShadow: `0 12px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              '& .MuiButton-endIcon': {
+                transform: 'translateX(4px)',
+              },
+            },
+            '& .MuiButton-endIcon': {
+              transition: theme.transitions.create(['transform']),
+            },
+          }}
+        >
+          드라이브로 이동
+        </Button>
+      </Stack>
+    </m.div>
+  );
 
   return (
     <Box
@@ -28,100 +262,24 @@ export function HomeHero() {
         position: 'relative',
         overflow: 'hidden',
         bgcolor: 'background.default',
-        pt: { xs: 10, md: 15 },
-        pb: { xs: 10, md: 15 },
+        flex: '1 1 auto',
+        display: 'flex',
+        alignItems: 'center',
       }}
     >
       <HeroBackground />
 
-      <Container component={MotionViewport}>
+      <Container component={MotionViewport} sx={{ position: 'relative', zIndex: 9 }}>
         <Stack
-          spacing={5}
+          component={m.div}
+          variants={varContainer()}
+          spacing={{ xs: 3, md: 4 }}
           alignItems="center"
-          sx={{
-            textAlign: 'center',
-            position: 'relative',
-            zIndex: 9,
-          }}
+          sx={{ textAlign: 'center' }}
         >
-          <m.div variants={varFade('inUp')}>
-            <Stack
-              spacing={3}
-              alignItems="center"
-              sx={{
-                p: { xs: 4, md: 8 },
-                borderRadius: 4,
-                position: 'relative',
-                bgcolor: alpha(theme.palette.background.paper, 0.4),
-                backdropFilter: 'blur(10px)',
-                border: `1px solid ${alpha(theme.palette.common.white, 0.12)}`,
-                boxShadow: theme.customShadows?.z24 || theme.shadows[24],
-              }}
-            >
-              <Stack spacing={2} alignItems="center">
-                <Typography
-                  variant="h1"
-                  sx={{
-                    fontSize: { xs: '3.5rem', md: '5.5rem' },
-                    fontWeight: 900,
-                    letterSpacing: -1,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    textTransform: 'uppercase',
-                    lineHeight: 1,
-                  }}
-                >
-                  AL is WELL
-                </Typography>
-
-                <Typography
-                  variant="h4"
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 'medium',
-                    letterSpacing: 6,
-                    textTransform: 'uppercase',
-                    opacity: 0.8,
-                    fontSize: { xs: '1rem', md: '1.5rem' },
-                  }}
-                >
-                  - 스크립트 암기 노트 -
-                </Typography>
-              </Stack>
-
-              <Box
-                sx={{
-                  p: 0.5,
-                  borderRadius: '50%',
-                  border: `dashed 1px ${alpha(theme.palette.primary.main, 0.3)}`,
-                }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  color="primary"
-                  onClick={() => router.push(paths.dashboard.fileManager)}
-                  startIcon={<Iconify icon="eva:arrow-forward-fill" width={24} />}
-                  sx={{
-                    px: 6,
-                    py: 2,
-                    fontSize: '1.2rem',
-                    fontWeight: 'bold',
-                    borderRadius: 2,
-                    boxShadow: `0 8px 16px 0 ${alpha(theme.palette.primary.main, 0.32)}`,
-                    '&:hover': {
-                      boxShadow: `0 12px 24px 0 ${alpha(theme.palette.primary.main, 0.48)}`,
-                      transform: 'translateY(-2px)',
-                    },
-                    transition: theme.transitions.create(['all']),
-                  }}
-                >
-                  드라이브로 이동
-                </Button>
-              </Box>
-            </Stack>
-          </m.div>
+          {renderTitle()}
+          {renderFeatures()}
+          {renderCTA()}
         </Stack>
       </Container>
     </Box>
