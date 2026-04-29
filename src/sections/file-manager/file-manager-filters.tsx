@@ -2,7 +2,7 @@ import type { UseSetStateReturn } from 'minimal-shared/hooks';
 import type { IFileFilters } from 'src/types/file';
 import type { IDatePickerControl } from 'src/types/common';
 
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
 import { usePopover } from 'minimal-shared/hooks';
 
@@ -28,18 +28,26 @@ export function FileManagerFilters({
 }: Props) {
   const { state: currentFilters, setState: updateFilters } = filters;
 
-  const handleFilterName = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onResetPage();
-      updateFilters({ name: event.target.value });
-    },
-    [onResetPage, updateFilters]
-  );
+  const [searchValue, setSearchValue] = useState(currentFilters.name);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchValue !== currentFilters.name) {
+        onResetPage();
+        updateFilters({ name: searchValue });
+      }
+    }, 400);
+    return () => clearTimeout(timeoutId);
+  }, [searchValue, currentFilters.name, onResetPage, updateFilters]);
+
+  const handleFilterName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
+  }, []);
 
 
   const renderFilterName = () => (
     <TextField
-      value={currentFilters.name}
+      value={searchValue}
       onChange={handleFilterName}
       placeholder="Search..."
       slotProps={{

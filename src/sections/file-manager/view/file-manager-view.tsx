@@ -189,11 +189,15 @@ export function FileManagerView() {
     })) as IFile[];
   }, [currentFolderId, flattenedTree, treeData]);
 
-  const dataFiltered = applyFilter({
-    inputData: dataForGrid,
-    comparator: getComparator(table.order, table.orderBy),
-    filters: currentFilters,
-  });
+  const dataFiltered = useMemo(
+    () =>
+      applyFilter({
+        inputData: dataForGrid,
+        comparator: getComparator(table.order, table.orderBy),
+        filters: currentFilters,
+      }),
+    [dataForGrid, table.order, table.orderBy, currentFilters]
+  );
 
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
@@ -409,6 +413,21 @@ export function FileManagerView() {
     [flattenedTree, renameDialog]
   );
 
+  const handleUpdateItemName = useCallback((id: string, name: string) => {
+    const updateNameInTree = (nodes: any[]): any[] =>
+      nodes.map((node) => {
+        if (node.id === id) {
+          return { ...node, label: name, modifiedAt: new Date().toISOString() };
+        }
+        if (node.children) {
+          return { ...node, children: updateNameInTree(node.children) };
+        }
+        return node;
+      });
+    setTreeData((prev) => updateNameInTree(prev));
+    toast.success('Rename success!');
+  }, []);
+
   const renderFilters = () => (
     <Box
       sx={{
@@ -444,19 +463,7 @@ export function FileManagerView() {
       title="Rename"
       onUpdate={(name) => {
         if (renameItem) {
-          const id = renameItem.id;
-          const updateNameInTree = (nodes: any[]): any[] =>
-            nodes.map((node) => {
-              if (node.id === id) {
-                return { ...node, label: name, modifiedAt: new Date().toISOString() };
-              }
-              if (node.children) {
-                return { ...node, children: updateNameInTree(node.children) };
-              }
-              return node;
-            });
-          setTreeData((prev) => updateNameInTree(prev));
-          toast.success('Rename success!');
+          handleUpdateItemName(renameItem.id, name);
         }
         renameDialog.onFalse();
         setRenameItem(null);
@@ -620,7 +627,7 @@ export function FileManagerView() {
           selectedId={currentFolderId}
           onSelectId={handleNavigate}
           onOpenFile={handleOpenFile}
-          onRename={handleOpenRename}
+          onUpdateName={handleUpdateItemName}
         />
 
         <Box sx={{ flexGrow: 1, minWidth: 0, height: '100%', overflowY: 'auto' }}>
@@ -688,6 +695,10 @@ export function FileManagerView() {
                   onDeleteItem={handleDeleteItem}
                   onFavoriteItem={handleFavoriteItem}
                   onOpenRename={handleOpenRename}
+                  onCreateItem={handleCreateItem}
+                  onOpenConfirm={confirmDialog.onTrue}
+                  onNavigate={handleNavigate}
+                  onOpenFile={handleOpenFile}
                   notFound={notFound}
                 />
               </Stack>

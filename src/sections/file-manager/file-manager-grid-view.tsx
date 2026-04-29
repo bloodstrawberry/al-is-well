@@ -31,7 +31,7 @@ type Props = {
   dataFiltered: IFile[];
   onOpenConfirm: () => void;
   onDeleteItem: (id: string) => void;
-  onUpdateItem: (id: string, name: string) => void;
+
   onNavigate: (id: string | null) => void;
   onOpenFile?: (id: string) => void;
   onFavoriteItem?: (id: string) => void;
@@ -44,7 +44,7 @@ export function FileManagerGridView({
   table,
   dataFiltered,
   onDeleteItem,
-  onUpdateItem,
+
   onOpenConfirm,
   onNavigate,
   onOpenFile,

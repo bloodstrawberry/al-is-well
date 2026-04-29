@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useLocalStorage } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -7,6 +7,7 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import InputBase from '@mui/material/InputBase';
 import Autocomplete from '@mui/material/Autocomplete';
 import ListItemText from '@mui/material/ListItemText';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -136,6 +137,138 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
+// ----------------------------------------------------------------------
+
+const SidebarTreeItem = memo(
+  ({
+    node,
+    editingId,
+    onSelect,
+    onOpenFile,
+    onSave,
+    onCancel,
+  }: {
+    node: any;
+    editingId: string | null;
+    onSelect: (id: string) => void;
+    onOpenFile?: (id: string) => void;
+    onSave: (id: string, name: string) => void;
+    onCancel: () => void;
+  }) => {
+    const isEditing = editingId === node.id;
+    const [localValue, setLocalValue] = useState(node.label);
+
+    // Sync local value when entering editing mode
+    useEffect(() => {
+      if (isEditing) {
+        setLocalValue(node.label);
+      }
+    }, [isEditing, node.label]);
+
+    const handleBlur = () => {
+      if (localValue.trim() && localValue !== node.label) {
+        onSave(node.id, localValue.trim());
+      } else {
+        onCancel();
+      }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') {
+        handleBlur();
+      }
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    };
+
+    return (
+      <StyledTreeItem
+        itemId={node.id}
+        label={
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.3}
+            sx={{ py: 0.5, minWidth: 0 }}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelect(node.id);
+              if (node.type === 'file') {
+                onOpenFile?.(node.id);
+              }
+            }}
+          >
+            <Iconify
+              icon={
+                node.type === 'folder'
+                  ? 'solar:folder-2-bold-duotone'
+                  : 'solar:document-text-bold-duotone'
+              }
+              width={14}
+              sx={{
+                flexShrink: 0,
+                color: node.type === 'folder' ? 'warning.main' : 'text.disabled',
+              }}
+            />
+            {isEditing ? (
+              <InputBase
+                fullWidth
+                autoFocus
+                value={localValue}
+                onChange={(e) => setLocalValue(e.target.value)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                sx={{
+                  fontSize: 'inherit',
+                  fontWeight: 'inherit',
+                  flexGrow: 1,
+                  minWidth: 0,
+                  backgroundColor: (theme) => theme.vars.palette.background.paper,
+                  borderRadius: 0.5,
+                  px: 0.5,
+                  '& .MuiInputBase-input': {
+                    p: 0,
+                  },
+                }}
+              />
+            ) : (
+              <Typography
+                variant="body2"
+                noWrap
+                sx={{
+                  fontSize: 'inherit',
+                  fontWeight: 'inherit',
+                  flexGrow: 1,
+                  minWidth: 0,
+                }}
+              >
+                {node.label}
+              </Typography>
+            )}
+          </Stack>
+        }
+      >
+        {Array.isArray(node.children)
+          ? node.children.map((child: any) => (
+              <SidebarTreeItem
+                key={child.id}
+                node={child}
+                editingId={editingId}
+                onSelect={onSelect}
+                onOpenFile={onOpenFile}
+                onSave={onSave}
+                onCancel={onCancel}
+              />
+            ))
+          : null}
+      </StyledTreeItem>
+    );
+  }
+);
+
 const WIDTH_KEY = 'file-manager-sidebar-width';
 
 type Props = {
@@ -145,7 +278,7 @@ type Props = {
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
   onOpenFile?: (id: string) => void;
-  onRename?: (id: string) => void;
+  onUpdateName?: (id: string, name: string) => void;
 };
 
 export function FileManagerSidebar({
@@ -155,13 +288,15 @@ export function FileManagerSidebar({
   selectedId,
   onSelectId,
   onOpenFile,
-  onRename,
+  onUpdateName,
 }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { state: width, setState: setWidth } = useLocalStorage(
     WIDTH_KEY,
@@ -310,15 +445,27 @@ export function FileManagerSidebar({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'F2' && selectedId) {
+      if (event.key === 'F2' && selectedId && !editingId) {
         event.preventDefault();
-        onRename?.(selectedId);
+        setEditingId(selectedId);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, onRename]);
+  }, [selectedId, editingId]);
+
+  const handleCancelEditing = useCallback(() => {
+    setEditingId(null);
+  }, []);
+
+  const handleSaveEditing = useCallback(
+    (id: string, name: string) => {
+      onUpdateName?.(id, name);
+      setEditingId(null);
+    },
+    [onUpdateName]
+  );
 
   const handleAutocompleteChange = (event: any, newValue: any) => {
     if (newValue) {
@@ -329,55 +476,6 @@ export function FileManagerSidebar({
   // Use default values until mounted to avoid hydration mismatch
   const displayWidth = isMounted ? width : 280;
   const displayCollapsed = isMounted ? isCollapsed : true;
-
-  const renderTree = (nodes: any) => (
-    <StyledTreeItem
-      key={nodes.id}
-      itemId={nodes.id}
-      label={
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={0.3}
-          sx={{ py: 0.5, minWidth: 0 }}
-          onClick={(event) => {
-            event.stopPropagation();
-            onSelectId(nodes.id);
-            if (nodes.type === 'file') {
-              onOpenFile?.(nodes.id);
-            }
-          }}
-        >
-          <Iconify
-            icon={
-              nodes.type === 'folder'
-                ? 'solar:folder-2-bold-duotone'
-                : 'solar:document-text-bold-duotone'
-            }
-            width={14}
-            sx={{
-              flexShrink: 0,
-              color: nodes.type === 'folder' ? 'warning.main' : 'text.disabled',
-            }}
-          />
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              fontSize: 'inherit',
-              fontWeight: 'inherit',
-              flexGrow: 1,
-              minWidth: 0,
-            }}
-          >
-            {nodes.label}
-          </Typography>
-        </Stack>
-      }
-    >
-      {Array.isArray(nodes.children) ? nodes.children.map((node: any) => renderTree(node)) : null}
-    </StyledTreeItem>
-  );
 
   return (
     <Box sx={{ position: 'relative', display: 'flex' }}>
@@ -479,7 +577,17 @@ export function FileManagerSidebar({
                 overflowY: 'auto',
               }}
             >
-              {sortedData.map((node) => renderTree(node))}
+              {sortedData.map((node) => (
+                <SidebarTreeItem
+                  key={node.id}
+                  node={node}
+                  editingId={editingId}
+                  onSelect={onSelectId}
+                  onOpenFile={onOpenFile}
+                  onSave={handleSaveEditing}
+                  onCancel={handleCancelEditing}
+                />
+              ))}
             </SimpleTreeView>
           </Box>
         </Stack>
