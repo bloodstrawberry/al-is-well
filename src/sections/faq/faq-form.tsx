@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 
 // ----------------------------------------------------------------------
 
-export function FaqsForm({ sx, ...other }: BoxProps) {
+export function FaqForm({ sx, ...other }: BoxProps) {
   return (
     <Box sx={sx} {...other}>
       <Typography variant="h4">{`Haven't found the right help?`}</Typography>

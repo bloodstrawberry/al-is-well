@@ -1,36 +1,41 @@
 'use client';
 
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+
+import { FaqHero } from '../faq-hero';
+import { FaqList } from '../faq-list';
+import { FaqForm } from '../faq-form';
+import { FaqCategory } from '../faq-category';
 
 // ----------------------------------------------------------------------
 
 export function FaqView() {
   return (
     <DashboardContent>
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        FAQ
-      </Typography>
+      <FaqHero sx={{ mb: { xs: 5, md: 10 } }} />
 
-      <Box
-        sx={{
-          mt: 5,
-          width: 1,
-          height: 320,
-          borderRadius: 2,
-          bgcolor: (theme) => theme.vars.palette.background.neutral,
-          border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-          Frequently Asked Questions Content Goes Here
+      <Container sx={{ pb: 10, position: 'relative' }}>
+        <FaqCategory />
+
+        <Typography variant="h3" sx={{ my: { xs: 5, md: 10 } }}>
+          Frequently asked questions
         </Typography>
-      </Box>
+
+        <Box
+          sx={{
+            gap: 10,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          }}
+        >
+          <FaqList />
+          <FaqForm />
+        </Box>
+      </Container>
     </DashboardContent>
   );
 }

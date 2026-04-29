@@ -4,19 +4,19 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
-import { FaqsHero } from '../faqs-hero';
-import { FaqsList } from '../faqs-list';
-import { FaqsForm } from '../faqs-form';
-import { FaqsCategory } from '../faqs-category';
+import { FaqHero } from '../faq-hero';
+import { FaqList } from '../faq-list';
+import { FaqForm } from '../faq-form';
+import { FaqCategory } from '../faq-category';
 
 // ----------------------------------------------------------------------
 
-export function FaqsView() {
+export function FaqLandingView() {
   return (
     <>
-      <FaqsHero />
+      <FaqHero />
       <Container component="section" sx={{ pb: 10, position: 'relative', pt: { xs: 10, md: 15 } }}>
-        <FaqsCategory />
+        <FaqCategory />
 
         <Typography variant="h3" sx={{ my: { xs: 5, md: 10 } }}>
           Frequently asked questions
@@ -29,8 +29,8 @@ export function FaqsView() {
             gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
           }}
         >
-          <FaqsList />
-          <FaqsForm />
+          <FaqList />
+          <FaqForm />
         </Box>
       </Container>
     </>

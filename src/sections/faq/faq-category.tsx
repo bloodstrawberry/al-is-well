@@ -40,7 +40,7 @@ const CATEGORIES = [
 
 // ----------------------------------------------------------------------
 
-export function FaqsCategory() {
+export function FaqCategory() {
   const navOpen = useBoolean();
 
   const renderMobile = () => (

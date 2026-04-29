@@ -16,7 +16,7 @@ import { varFade, AnimateText, MotionContainer, animateTextClasses } from 'src/c
 
 // ----------------------------------------------------------------------
 
-export function FaqsHero({ sx, ...other }: BoxProps) {
+export function FaqHero({ sx, ...other }: BoxProps) {
   return (
     <Box
       component="section"
@@ -32,6 +32,7 @@ export function FaqsHero({ sx, ...other }: BoxProps) {
           py: { xs: 10, md: 0 },
           overflow: 'hidden',
           position: 'relative',
+          borderRadius: 2,
         }),
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

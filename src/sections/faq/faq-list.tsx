@@ -10,7 +10,7 @@ import { _faqs } from 'src/_mock';
 
 // ----------------------------------------------------------------------
 
-export function FaqsList({ sx, ...other }: BoxProps) {
+export function FaqList({ sx, ...other }: BoxProps) {
   return (
     <Box sx={sx} {...other}>
       {_faqs.map((item) => (
