@@ -41,10 +41,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  title: 'Al-Is-Well',
+  description: 'Al-Is-Well PWA Application',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Al-Is-Well',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: [
     {
       rel: 'icon',
       url: `${CONFIG.assetsDir}/favicon.ico`,
+    },
+    {
+      rel: 'apple-touch-icon',
+      url: '/logo/logo-single.png',
     },
   ],
 };
