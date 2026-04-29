@@ -241,10 +241,10 @@ export function HomeLottoDisplay() {
         <Button
           size="large"
           variant="contained"
-          onClick={() => router.push(paths.dashboard.general.pattern)}
+          onClick={() => router.push(paths.dashboard.fileManager)}
           sx={{ mt: 5 }}
         >
-          패턴 분석하러 가기
+          드라이브로 이동
         </Button>
       </m.div>
     </Container>
