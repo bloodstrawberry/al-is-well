@@ -1,6 +1,6 @@
 {
-  "name": "Al-Is-Well",
-  "short_name": "Al-Is-Well",
+  "name": "AL is well",
+  "short_name": "AL is well",
   "description": "Progressive Web App for AL is well",
   "start_url": "/",
   "display": "standalone",

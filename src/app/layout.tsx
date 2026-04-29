@@ -41,13 +41,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Al-Is-Well',
-  description: 'Al-Is-Well PWA Application',
+  title: 'AL is well',
+  description: 'AL is well PWA Application',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Al-Is-Well',
+    title: 'AL is well',
   },
   formatDetection: {
     telephone: false,
