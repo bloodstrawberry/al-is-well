@@ -42,7 +42,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
   const [scriptData, setScriptData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [revealedLines, setRevealedLines] = useState<Record<number, boolean>>({});
+  const [revealedLines, setRevealedLines] = useState<Record<string, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
   const [showKoQuestion, setShowKoQuestion] = useState(false);
 
