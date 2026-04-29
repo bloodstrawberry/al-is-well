@@ -177,7 +177,7 @@ export function FileManagerView() {
       url: '',
       size: 0,
       tags: [],
-      isFavorited: false,
+      isFavorited: !!node.isFavorited,
       createdAt: new Date().toISOString(),
       modifiedAt: new Date().toISOString(),
       shared: null,
@@ -362,6 +362,23 @@ export function FileManagerView() {
     table.onSelectAllRows(false, []);
     toast.success('Delete success!');
   }, [table, flattenedTree]);
+
+  const handleFavoriteItem = useCallback(
+    (id: string) => {
+      const updateFavoriteInTree = (nodes: any[]): any[] =>
+        nodes.map((node) => {
+          if (node.id === id) {
+            return { ...node, isFavorited: !node.isFavorited };
+          }
+          if (node.children) {
+            return { ...node, children: updateFavoriteInTree(node.children) };
+          }
+          return node;
+        });
+      setTreeData((prev) => updateFavoriteInTree(prev));
+    },
+    []
+  );
 
   const renderFilters = () => (
     <Box
@@ -620,6 +637,7 @@ export function FileManagerView() {
                   onOpenConfirm={confirmDialog.onTrue}
                   onNavigate={handleNavigate}
                   onOpenFile={handleOpenFile}
+                  onFavoriteItem={handleFavoriteItem}
                   notFound={notFound}
                 />
               </Stack>

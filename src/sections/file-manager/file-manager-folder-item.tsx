@@ -34,6 +34,7 @@ type Props = FileItemProps & {
   onEdit: () => void;
   onSelect?: () => void;
   onNavigate?: VoidFunction;
+  onFavorite?: (id: string) => void;
   folder: IFolderManager;
 };
 
@@ -45,6 +46,7 @@ export function FileManagerFolderItem({
   onDelete,
   onEdit,
   onNavigate,
+  onFavorite,
   ...other
  }: Props) {
   const confirmDialog = useBoolean();
@@ -59,6 +61,17 @@ export function FileManagerFolderItem({
   useEffect(() => {
     setIsMobileDevice(getIsMobile());
   }, []);
+
+  useEffect(() => {
+    if (folder.isFavorited !== favorite.value) {
+      favorite.setValue(folder.isFavorited);
+    }
+  }, [folder.isFavorited, favorite]);
+
+  const handleFavorite = useCallback(() => {
+    favorite.onToggle();
+    onFavorite?.(folder.id);
+  }, [favorite, onFavorite, folder.id]);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -141,7 +154,7 @@ export function FileManagerFolderItem({
         <FileItemActions
           id={folder.id}
           checked={favorite.value}
-          onChange={favorite.onToggle}
+          onChange={handleFavorite}
           openMenu={menuActions.open}
           onOpenMenu={menuActions.onOpen}
         />

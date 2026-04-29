@@ -36,6 +36,7 @@ type Props = FileItemProps & {
   onEdit: () => void;
   onSelect?: () => void;
   onOpenFile?: () => void;
+  onFavorite?: (id: string) => void;
 };
 
 export function FileManagerFileItem({
@@ -45,6 +46,7 @@ export function FileManagerFileItem({
   onDelete,
   onEdit,
   onOpenFile,
+  onFavorite,
   sx,
   ...other
 }: Props) {
@@ -59,6 +61,17 @@ export function FileManagerFileItem({
   useEffect(() => {
     setIsMobileDevice(getIsMobile());
   }, []);
+
+  useEffect(() => {
+    if (file.isFavorited !== favorite.value) {
+      favorite.setValue(file.isFavorited);
+    }
+  }, [file.isFavorited, favorite]);
+
+  const handleFavorite = useCallback(() => {
+    favorite.onToggle();
+    onFavorite?.(file.id);
+  }, [favorite, onFavorite, file.id]);
 
   const handleDoubleClick = useCallback(() => {
     onOpenFile?.();
@@ -155,7 +168,7 @@ export function FileManagerFileItem({
         <FileItemActions
           id={file.id}
           checked={favorite.value}
-          onChange={favorite.onToggle}
+          onChange={handleFavorite}
           openMenu={menuActions.open}
           onOpenMenu={menuActions.onOpen}
         />

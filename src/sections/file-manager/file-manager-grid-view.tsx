@@ -34,6 +34,7 @@ type Props = {
   onUpdateItem: (id: string, name: string) => void;
   onNavigate: (id: string | null) => void;
   onOpenFile?: (id: string) => void;
+  onFavoriteItem?: (id: string) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   notFound?: boolean;
 };
@@ -46,6 +47,7 @@ export function FileManagerGridView({
   onOpenConfirm,
   onNavigate,
   onOpenFile,
+  onFavoriteItem,
   onCreateItem,
   notFound,
 }: Props) {
@@ -100,6 +102,10 @@ export function FileManagerGridView({
   const sortedData = [...dataFiltered].sort((a, b) => {
     if (a.type === 'folder' && b.type !== 'folder') return -1;
     if (a.type !== 'folder' && b.type === 'folder') return 1;
+
+    if (a.isFavorited && !b.isFavorited) return -1;
+    if (!a.isFavorited && b.isFavorited) return 1;
+
     return a.name.localeCompare(b.name);
   });
 
@@ -295,6 +301,7 @@ export function FileManagerGridView({
                   renameDialog.onTrue();
                 }}
                 onNavigate={() => onNavigate(item.id)}
+                onFavorite={() => onFavoriteItem?.(item.id)}
               />
             ) : (
               <FileManagerFileItem
@@ -304,6 +311,7 @@ export function FileManagerGridView({
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
                 onOpenFile={() => onOpenFile?.(item.id)}
+                onFavorite={() => onFavoriteItem?.(item.id)}
                 onEdit={() => {
                   setRenameItem(item);
                   setItemName(item.name);
