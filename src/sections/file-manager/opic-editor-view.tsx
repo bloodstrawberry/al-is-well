@@ -57,6 +57,7 @@ const SUB_CATEGORY_OPTIONS: Record<string, string[]> = {
     '첫 계기',
     '최근 경험',
     '특별한 경험',
+    '비교',
     '기타',
   ],
   '롤플레이': [
