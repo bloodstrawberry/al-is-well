@@ -172,5 +172,20 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
       },
     },
+    opicTest: {
+      root: `${ROOTS.DASHBOARD}/opic-test`,
+      myTests: `${ROOTS.DASHBOARD}/opic-test/my-tests`,
+      randomTest: `${ROOTS.DASHBOARD}/opic-test/random-test`,
+    },
+    listening: {
+      root: `${ROOTS.DASHBOARD}/listening`,
+      playlist: `${ROOTS.DASHBOARD}/listening/playlist`,
+      random: `${ROOTS.DASHBOARD}/listening/random`,
+    },
+    writing: {
+      root: `${ROOTS.DASHBOARD}/writing`,
+      dictation: `${ROOTS.DASHBOARD}/writing/dictation`,
+      random: `${ROOTS.DASHBOARD}/writing/random`,
+    },
   },
 };

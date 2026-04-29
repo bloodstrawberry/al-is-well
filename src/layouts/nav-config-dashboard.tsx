@@ -70,6 +70,33 @@ export const navData: NavSectionProps['data'] = [
     items: [
       { title: 'Home', path: paths.dashboard.root, icon: ICONS.dashboard },
       { title: 'Drive', path: paths.dashboard.fileManager, icon: ICONS.folder },
+      {
+        title: 'Speaking',
+        path: paths.dashboard.opicTest.root,
+        icon: ICONS.course,
+        children: [
+          { title: '내 모의고사', path: paths.dashboard.opicTest.myTests },
+          { title: '랜덤 모의고사', path: paths.dashboard.opicTest.randomTest },
+        ],
+      },
+      {
+        title: 'Listening',
+        path: paths.dashboard.listening.root,
+        icon: ICONS.course,
+        children: [
+          { title: 'Playlist', path: paths.dashboard.listening.playlist },
+          { title: '랜덤 듣기', path: paths.dashboard.listening.random },
+        ],
+      },
+      {
+        title: 'Writing',
+        path: paths.dashboard.writing.root,
+        icon: ICONS.course,
+        children: [
+          { title: '받아쓰기', path: paths.dashboard.writing.dictation },
+          { title: '랜덤 받아쓰기', path: paths.dashboard.writing.random },
+        ],
+      },
       { title: '패턴분석', path: paths.dashboard.general.pattern, icon: ICONS.pattern },
       { title: '통계분석', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
       { title: '과거순위', path: paths.dashboard.general.history, icon: ICONS.banking },
