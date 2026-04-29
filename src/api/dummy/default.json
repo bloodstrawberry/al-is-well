@@ -4,43 +4,101 @@
       "id": "1777443455203",
       "label": "A. 일반 주제",
       "type": "folder",
-      "createdAt": "2024-04-20T10:00:00Z",
-      "modifiedAt": "2024-04-20T10:00:00Z",
       "children": [
         {
           "id": "1777443553869",
           "label": "01. 가구 Furniture (공통)",
           "type": "folder",
-          "createdAt": "2024-04-20T10:30:00Z",
-          "modifiedAt": "2024-04-20T10:30:00Z",
           "children": [
             {
               "id": "1777443579253",
-              "label": "01. 집에 있는 가구 또는 가장 좋아하는 가구 묘사",
+              "label": "01. 사물 묘사 - 좋아하는 가구",
               "type": "file",
-              "createdAt": "2024-04-20T11:00:00Z",
-              "modifiedAt": "2024-04-20T11:00:00Z"
+              "createdAt": "2026-04-29T12:53:05.952Z",
+              "modifiedAt": "2026-04-29T12:57:00.960Z"
+            },
+            {
+              "id": "1777448409942",
+              "label": "02. 활동 묘사 - 가구 사용",
+              "type": "file",
+              "createdAt": "2026-04-29T12:53:05.952Z",
+              "modifiedAt": "2026-04-29T13:07:47.175Z"
+            },
+            {
+              "id": "1777466877999",
+              "label": "03. 비교 - 과거 가구",
+              "type": "file",
+              "createdAt": "2026-04-29T12:53:05.952Z",
+              "modifiedAt": "2026-04-29T13:06:47.368Z"
+            },
+            {
+              "id": "1777466897961",
+              "label": "04. 특별한 경험 - 가구 문제",
+              "type": "file",
+              "createdAt": "2026-04-29T12:53:05.952Z",
+              "modifiedAt": "2026-04-29T13:13:51.547Z"
+            }
+          ],
+          "createdAt": "2026-04-29T12:53:05.952Z",
+          "modifiedAt": "2026-04-29T12:53:05.952Z"
+        },
+        {
+          "id": "1777469277167",
+          "label": "02. 재활용 Recycling (공통)",
+          "type": "folder",
+          "createdAt": "2026-04-29T13:27:57.167Z",
+          "modifiedAt": "2026-04-29T13:27:57.167Z",
+          "children": [
+            {
+              "id": "1777469283917",
+              "label": "01. 활동 묘사 - 재활용",
+              "type": "file",
+              "createdAt": "2026-04-29T13:28:03.917Z",
+              "modifiedAt": "2026-04-29T13:28:03.917Z"
+            },
+            {
+              "id": "1777469289420",
+              "label": "02. 준비물 - 재활용",
+              "type": "file",
+              "createdAt": "2026-04-29T13:28:09.420Z",
+              "modifiedAt": "2026-04-29T13:28:09.420Z"
+            },
+            {
+              "id": "1777469297342",
+              "label": "03. 비교 - 재활용 과거, 현재",
+              "type": "file",
+              "createdAt": "2026-04-29T13:28:17.342Z",
+              "modifiedAt": "2026-04-29T13:28:17.342Z"
+            },
+            {
+              "id": "1777469303563",
+              "label": "04, 05. 특별한 경험 - 재활용 기억, 과거 경험",
+              "type": "file",
+              "createdAt": "2026-04-29T13:28:23.563Z",
+              "modifiedAt": "2026-04-29T13:35:05.847Z"
             }
           ]
         }
-      ]
+      ],
+      "createdAt": "2026-04-29T12:53:05.952Z",
+      "modifiedAt": "2026-04-29T12:53:05.952Z"
     },
     {
       "id": "1777443466448",
       "label": "B. 롤플레이",
       "type": "folder",
-      "createdAt": "2024-04-21T12:00:00Z",
-      "modifiedAt": "2024-04-21T12:00:00Z",
       "children": [],
-      "isFavorited": false
+      "isFavorited": false,
+      "createdAt": "2026-04-29T12:53:05.952Z",
+      "modifiedAt": "2026-04-29T12:53:05.952Z"
     },
     {
       "id": "1777443498415",
       "label": "C. 14, 15",
       "type": "folder",
-      "createdAt": "2024-04-22T14:00:00Z",
-      "modifiedAt": "2024-04-22T14:00:00Z",
-      "children": []
+      "children": [],
+      "createdAt": "2026-04-29T12:53:05.952Z",
+      "modifiedAt": "2026-04-29T12:53:05.952Z"
     }
   ],
   "scripts": {
@@ -75,9 +133,14 @@
       "questionEn": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
       "questionKo": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?",
       "audioUrl": "https://blog.kakaocdn.net/dna/C5ggF/dJMcahKE0zM/AAAAAAAAAAAAAAAAAAAAAAUKx8zSREKa5NsBI9erjT99MgZgkwjKNv347JFmzXhq/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PWScYTCoiH4XMls1Qe9mlmyDlWE%3D&attach=1&knm=tfile.mp3",
+      "category": "콤보 세트",
+      "subCategory": "사물 묘사",
+      "comboPositions": [
+        1
+      ],
       "lines": [
         {
-          "ko": "내가 소개하고자 하는 가구는 바로 만화책을 모아두는 책장이야.",
+          "ko": "내가 소개하고자 하는 가구는 바로 만화책을 모아둔 책장이야.",
           "en": "Let's talk about my bookshelf, where I keep my entire comic book collection."
         },
         {
@@ -85,7 +148,7 @@
           "en": "It is actually my favorite piece of furniture in my home."
         },
         {
-          "ko": "나는 매달 월급이 나오면 만화책을 구매하고",
+          "ko": "나는 매달 월급이 나오면 만화책을 구매해",
           "en": "Every month when I get paid, I buy new comic books."
         },
         {
@@ -93,12 +156,12 @@
           "en": "I live for the moment I put new comics on the shelf in my room."
         },
         {
-          "ko": "이 책장은 내 키보다 10인치 정도 더 큰 하얀색 슬라이딩 책장인데,",
+          "ko": "이 책장은 내 키보다 10인치 정도 더 큰 하얀색 슬라이딩 책장이야.",
           "en": "It is a white sliding shelf, and it’s actually about 10 inches taller than me!"
         },
         {
           "ko": "문을 잡아서 당기면 드르륵 하고 선반이 나와",
-          "en": "When I pull the handle, the shelves slide out with a nice 'click-clack.' sound"
+          "en": "When I pull the handle, the shelves slide out with a nice 'click-clack.' sound."
         },
         {
           "ko": "무려 첫월급으로 1000달러나 주고 샀어!!",
@@ -111,6 +174,181 @@
         {
           "ko": "내 방에서 힘들 때 마다 만화책이 쌓여가는 책장을 보기만 해도 즐거워",
           "en": "It makes me so happy just to look at my growing collection in my room."
+        }
+      ]
+    },
+    "1777448409942": {
+      "questionEn": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
+      "questionKo": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?",
+      "audioUrl": "https://blog.kakaocdn.net/dna/eBsH2o/dJMcadakx9i/AAAAAAAAAAAAAAAAAAAAAENst0TT5jeNEsPG4upbdzWBF4_0_AcCZo53FlTRdpi7/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=QuJLhkRViMbLv02%2BPgVIdJcMPCI%3D&attach=1&knm=tfile.mp3",
+      "category": "콤보 세트",
+      "subCategory": "활동 묘사",
+      "comboPositions": [
+        2
+      ],
+      "lines": [
+        {
+          "ko": "아까 말했듯이, 나는 만화책을 보관할 때, 책장을 써,",
+          "en": "Going back to my bookshelf, I usually use my bookshelf to store my comics."
+        },
+        {
+          "ko": "당연히 보관만 하지 않지!, 주로 책을 집어서 가까이 있는 소파에서 보기도 해",
+          "en": "But of course, it's not just for storage! I usually grab a book and hit the sofa nearby."
+        },
+        {
+          "ko": "우리 집에 만화책이 많아서, 사실 만화책 성지야.",
+          "en": "Since I have so many comics, my room is basically a comic sanctuary."
+        },
+        {
+          "ko": "그래서  매주 나의 친구들은 주말마다 놀러오곤 해. 책장이 있는 내 방에서 하루종일 만화책을 보고 놀곤 하지.",
+          "en": "That's why my friends love coming over every weekend. And we just get lost in comics all day."
+        },
+        {
+          "ko": "가장 좋은 점은 친구들이 항상 치킨이랑 맥주를 들고오는거야",
+          "en": "The best part is, they always bring chicken and beer."
+        },
+        {
+          "ko": "나도 친구들이 오는게 아주 좋아, 최고야.",
+          "en": "So, I love having them over! It's the best."
+        }
+      ]
+    },
+    "1777466877999": {
+      "questionEn": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
+      "questionKo": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요.",
+      "audioUrl": "https://blog.kakaocdn.net/dna/oQVIo/dJMcahKJv3P/AAAAAAAAAAAAAAAAAAAAAOyNpGesOwNNXBW6MaBVUJDU0q0Lmfpng6PVq2indFS1/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=YJpdiWO6%2BvRQdO8KEJTBvzyesmU%3D&attach=1&knm=tfile.mp3",
+      "category": "콤보 세트",
+      "subCategory": "비교",
+      "comboPositions": [
+        2,
+        3
+      ],
+      "lines": [
+        {
+          "ko": "과거에는, 즉 내가 어렸을 땐, 테이블은 그냥 테이블이었어.",
+          "en": "In the past, I mean, when I was a kid, a table was just... a table."
+        },
+        {
+          "ko": "나무로 만들었거나 플라스틱으로 만들었거나 그런 차이가 있을 뿐이지",
+          "en": "Whether it was made of wood or plastic. That was it!"
+        },
+        {
+          "ko": "하지만 현재 우리집에 있는 테이블은 변신이 가능해. 이 테이블의 이름은 리프트업 테이블이야.",
+          "en": "But the table I have now can transform! It is called a 'lift-up table.'"
+        },
+        {
+          "ko": "평소에는 바닥에 앉아서 사용하다가  필요할 때 위로 쓱 올리면 높이가 올라가서 책상처럼 쓸 수 있어.",
+          "en": "Usually, I sit on the floor to use it, but I can just lift the top, and it becomes a desk!"
+        },
+        {
+          "ko": "그럼 소파에서 사용하기 엄청 편해지지",
+          "en": "It’s perfect for using on the sofa."
+        },
+        {
+          "ko": "TV를 보면서 밥먹기 편하려고 산 테이블인데 아주 만족하고 있어.",
+          "en": "I got it to eat while watching TV, and I totally love it. It’s so worth it!"
+        }
+      ]
+    },
+    "1777466897961": {
+      "questionEn": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
+      "questionKo": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요.",
+      "audioUrl": "https://blog.kakaocdn.net/dna/bxMXe1/dJMcaipkHeg/AAAAAAAAAAAAAAAAAAAAAFeUrUVvanD0XTemE3MdLq6BIvJhhxSMOxHlI_42lBFN/tfile.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=HnkLEexl8Yq%2Bb3ExTk8daSR%2BX3M%3D",
+      "category": "콤보 세트",
+      "subCategory": "특별한 경험",
+      "comboPositions": [],
+      "lines": [
+        {
+          "ko": "내가 작년에 산 테이블에 대해 이야기해볼게.",
+          "en": "Let me tell you about my new table, a total nightmare."
+        },
+        {
+          "ko": "TV도 보고 공부도 할겸 거실에 테이블을 샀어",
+          "en": "I got it for my living room to watch TV and study at the same time."
+        },
+        {
+          "ko": "그런데 움직이다보니 모서리에 부딪혀서 무릎에 멍이 많이 들었어.",
+          "en": "But I kept hitting my knees on the corners. I had so many bruises!"
+        },
+        {
+          "ko": "집이 아니라 완전 재앙이었지",
+          "en": "It was a complete disaster in my own home."
+        },
+        {
+          "ko": "바보같이 한두번도 아니고 무려 세번이나!",
+          "en": "And seriously, not once, not twice, but three times!"
+        },
+        {
+          "ko": "너무 짜증나고 화나고 테이블을 버릴 수도 없고...",
+          "en": "I was so annoyed and angry. I couldn’t just throw the table away, right?"
+        },
+        {
+          "ko": "그런데 한국의 아마존인 다이소에 들어가보니",
+          "en": "But then, I went to Daiso, which is basically the Korean Amazon."
+        },
+        {
+          "ko": "테이블 보호재가 있더라구",
+          "en": "And you know what? They had table corner guards!"
+        },
+        {
+          "ko": "그래서 보호재를 사서 붙인 후에는 무릎에 멍이 들 일이 없어졌어",
+          "en": "So I taped them on and problem solved!"
+        },
+        {
+          "ko": "고작 1달로로 해결할 수 있었지.",
+          "en": "No more bruises since then, and the best part? just one buck."
+        }
+      ]
+    },
+    "1777469303563": {
+      "questions": [
+        {
+          "en": "Can you tell me about a story or an experience you had related to recycling?\nMaybe something went wrong with recycling, \nor you might have had a discussion with a friend who disagrees with recycling.\nDescribe your experience in detail.",
+          "ko": "재활용과 관련이 있는 여러분의 이야기나 경험에 대해 말해 주세요.\n재활용에 뭔가 문제가 생겼거나, \n재활용에 반대하는 친구와 무슨 이야기를 했을 수도 있겠죠.\n이러한 자신의 경험을 자세히 설명해 주세요.\n\n"
+        },
+        {
+          "en": "Problems sometimes occur while recycling.\nPerhaps, the pick-up service did not come as planned.\nOr, the items were too big for the containers.\nOr, the container turned over and spilled the items.\nTell me about something memorable that happened to you or your family.",
+          "ko": "재활용을 하다가 보면 문제가 가끔 발생합니다.\n어쩌면, 재활용 수거가 예정대로 되지 않았거나\n아니면, 재활용품이 너무 커서 수거통에 안 들어 갔을 수도 있습니다.\n혹은, 수거통이 쓰러져서 안에 내용물이 쏟아졌을 수도 있죠.\n당신이나 당신 가족에게 발생했던 기억에 남는 경험에 대해서 알려 주세요."
+        }
+      ],
+      "audioUrl": "https://blog.kakaocdn.net/dna/b8asll/dJMcagSuTqz/AAAAAAAAAAAAAAAAAAAAAIq7eloUx-OFdAaVoQwJJ-hcfVkPnTwpQ6GAkp5p1SDd/02-04%20%ED%8A%B9%EB%B3%84%ED%95%9C%20%EA%B2%BD%ED%97%98-%EC%9E%AC%ED%99%9C%EC%9A%A9.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PR4C6nAndvHADt2iyAji1tCF%2BzQ%3D&attach=1&knm=tfile.mp3",
+      "category": "콤보 세트",
+      "subCategory": "특별한 경험",
+      "comboPositions": [
+        3
+      ],
+      "lines": [
+        {
+          "ko": "작년에 나는 집에서 재활용을 하다가 칼에 손이 베인적이 있었어",
+          "en": "Last year, I actually cut my finger while recycling at home."
+        },
+        {
+          "ko": "뉴스 아니면 유튜브 쇼츠에서 뭘 봤었어,",
+          "en": "I saw on the news—or maybe it was a YouTube Short?"
+        },
+        {
+          "ko": "어쨌든, 거기서 재활용 뚜껑을 병과 분리해야된다고 했었어",
+          "en": "Anyway, they said we have to split the caps and bottles."
+        },
+        {
+          "ko": "어쨌든 그래서 페트병 뚜껑과 뚜껑에 남아있는 물질을 칼로 제거를 하다가 실수로 내 손을 베어버렸지..",
+          "en": "So, I was using a knife on the cap, and bam! I cut myself."
+        },
+        {
+          "ko": "나는 너무 당황했고 너무 슬펐어.",
+          "en": "I was freaking out and totally panicked."
+        },
+        {
+          "ko": "심지어 그날은 주말이어서 병원이 열었는지 의문이기도 했지.",
+          "en": "I didn't even know if a doctor was around since it was the weekend!"
+        },
+        {
+          "ko": "다행히 응급실에서 손을 꿰맬 수 있었지만.",
+          "en": "Luckily, I found an ER and got some stitches."
+        },
+        {
+          "ko": "그래서 이제는 재활용을 할 때 칼을 사용하지 않아.",
+          "en": "So from now on? No more knives for me. Never again!"
         }
       ]
     }
