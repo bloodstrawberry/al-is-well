@@ -145,9 +145,18 @@ type Props = {
   selectedId: string | null;
   onSelectId: (id: string | null) => void;
   onOpenFile?: (id: string) => void;
+  onRename?: (id: string) => void;
 };
 
-export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, onSelectId, onOpenFile }: Props) {
+export function FileManagerSidebar({
+  data,
+  isCollapsed,
+  onToggle,
+  selectedId,
+  onSelectId,
+  onOpenFile,
+  onRename,
+}: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpening, setIsOpening] = useState(true);
   const [introFinished, setIntroFinished] = useState(false);
@@ -298,6 +307,18 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
       }
     }
   }, [selectedId, flattenedData]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'F2' && selectedId) {
+        event.preventDefault();
+        onRename?.(selectedId);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, onRename]);
 
   const handleAutocompleteChange = (event: any, newValue: any) => {
     if (newValue) {

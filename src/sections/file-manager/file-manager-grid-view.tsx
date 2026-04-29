@@ -36,6 +36,7 @@ type Props = {
   onOpenFile?: (id: string) => void;
   onFavoriteItem?: (id: string) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
+  onOpenRename?: (id: string) => void;
   notFound?: boolean;
 };
 
@@ -49,6 +50,7 @@ export function FileManagerGridView({
   onOpenFile,
   onFavoriteItem,
   onCreateItem,
+  onOpenRename,
   notFound,
 }: Props) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
@@ -60,7 +62,6 @@ export function FileManagerGridView({
   const newFilesDialog = useBoolean();
 
   const newFolderDialog = useBoolean();
-  const renameDialog = useBoolean();
 
   const menuActions = usePopover();
 
@@ -71,8 +72,6 @@ export function FileManagerGridView({
   }, []);
 
   const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
-
-  const [renameItem, setRenameItem] = useState<IFile | null>(null);
 
   const sortedData = useMemo(() => {
     return [...dataFiltered].sort((a, b) => {
@@ -120,30 +119,7 @@ export function FileManagerGridView({
     />
   );
 
-  const renderRenameDialog = () => (
-    <FileManagerCreateFolderDialog
-      open={renameDialog.value}
-      onClose={() => {
-        renameDialog.onFalse();
-        setRenameItem(null);
-      }}
-      title="Rename"
-      onUpdate={(name) => {
-        if (renameItem) {
-          onUpdateItem(renameItem.id, name);
-        }
-        renameDialog.onFalse();
-        setRenameItem(null);
-      }}
-      folderName={renameItem?.name || ''}
-      existingItems={dataFiltered.filter((item) => item.id !== renameItem?.id)}
-      currentType={renameItem?.type}
-      hideUpload
-      textFieldProps={{
-        label: renameItem?.type === 'folder' ? 'Folder name' : 'File name',
-      }}
-    />
-  );
+
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -247,10 +223,7 @@ export function FileManagerGridView({
                 selected={selected.includes(item.id)}
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
-                onEdit={() => {
-                  setRenameItem(item);
-                  renameDialog.onTrue();
-                }}
+                onEdit={() => onOpenRename?.(item.id)}
                 onNavigate={() => onNavigate(item.id)}
                 onFavorite={() => onFavoriteItem?.(item.id)}
               />
@@ -263,10 +236,7 @@ export function FileManagerGridView({
                 onDelete={() => onDeleteItem(item.id)}
                 onOpenFile={() => onOpenFile?.(item.id)}
                 onFavorite={() => onFavoriteItem?.(item.id)}
-                onEdit={() => {
-                  setRenameItem(item);
-                  renameDialog.onTrue();
-                }}
+                onEdit={() => onOpenRename?.(item.id)}
               />
             )
           )}
@@ -278,7 +248,6 @@ export function FileManagerGridView({
       {renderShareDialog()}
       {renderUploadFilesDialog()}
       {renderCreateFolderDialog()}
-      {renderRenameDialog()}
       {renderMenuActions()}
     </>
   );

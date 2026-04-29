@@ -49,6 +49,9 @@ export function FileManagerView() {
   const confirmDialog = useBoolean();
   const backupConfirm = useBoolean();
   const newFilesDialog = useBoolean();
+  const renameDialog = useBoolean();
+
+  const [renameItem, setRenameItem] = useState<IFile | null>(null);
 
   const [pendingAction, setPendingAction] = useState<'upload' | 'reset' | null>(null);
   const [pendingUploadData, setPendingUploadData] = useState<any>(null);
@@ -384,6 +387,28 @@ export function FileManagerView() {
     []
   );
 
+  const handleOpenRename = useCallback(
+    (id: string) => {
+      const item = flattenedTree.find((f) => f.id === id);
+      if (item) {
+        setRenameItem({
+          id: item.id,
+          name: item.label,
+          type: item.type,
+          isFavorited: !!item.isFavorited,
+          createdAt: item.createdAt,
+          modifiedAt: item.modifiedAt,
+          url: '',
+          size: 0,
+          tags: [],
+          shared: null,
+        } as IFile);
+        renameDialog.onTrue();
+      }
+    },
+    [flattenedTree, renameDialog]
+  );
+
   const renderFilters = () => (
     <Box
       sx={{
@@ -407,6 +432,43 @@ export function FileManagerView() {
 
   const renderUploadFilesDialog = () => (
     <FileManagerCreateFolderDialog open={newFilesDialog.value} onClose={newFilesDialog.onFalse} />
+  );
+
+  const renderRenameDialog = () => (
+    <FileManagerCreateFolderDialog
+      open={renameDialog.value}
+      onClose={() => {
+        renameDialog.onFalse();
+        setRenameItem(null);
+      }}
+      title="Rename"
+      onUpdate={(name) => {
+        if (renameItem) {
+          const id = renameItem.id;
+          const updateNameInTree = (nodes: any[]): any[] =>
+            nodes.map((node) => {
+              if (node.id === id) {
+                return { ...node, label: name, modifiedAt: new Date().toISOString() };
+              }
+              if (node.children) {
+                return { ...node, children: updateNameInTree(node.children) };
+              }
+              return node;
+            });
+          setTreeData((prev) => updateNameInTree(prev));
+          toast.success('Rename success!');
+        }
+        renameDialog.onFalse();
+        setRenameItem(null);
+      }}
+      folderName={renameItem?.name || ''}
+      existingItems={dataForGrid.filter((item) => item.id !== renameItem?.id)}
+      currentType={renameItem?.type}
+      hideUpload
+      textFieldProps={{
+        label: renameItem?.type === 'folder' ? 'Folder name' : 'File name',
+      }}
+    />
   );
 
   const renderConfirmDialog = () => (
@@ -558,6 +620,7 @@ export function FileManagerView() {
           selectedId={currentFolderId}
           onSelectId={handleNavigate}
           onOpenFile={handleOpenFile}
+          onRename={handleOpenRename}
         />
 
         <Box sx={{ flexGrow: 1, minWidth: 0, height: '100%', overflowY: 'auto' }}>
@@ -623,25 +686,8 @@ export function FileManagerView() {
                   table={table}
                   dataFiltered={dataFiltered}
                   onDeleteItem={handleDeleteItem}
-                  onUpdateItem={(id, name) => {
-                    const updateNameInTree = (nodes: any[]): any[] =>
-                      nodes.map((node) => {
-                        if (node.id === id) {
-                          return { ...node, label: name, modifiedAt: new Date().toISOString() };
-                        }
-                        if (node.children) {
-                          return { ...node, children: updateNameInTree(node.children) };
-                        }
-                        return node;
-                      });
-                    setTreeData((prev) => updateNameInTree(prev));
-                    toast.success('Rename success!');
-                  }}
-                  onCreateItem={handleCreateItem}
-                  onOpenConfirm={confirmDialog.onTrue}
-                  onNavigate={handleNavigate}
-                  onOpenFile={handleOpenFile}
                   onFavoriteItem={handleFavoriteItem}
+                  onOpenRename={handleOpenRename}
                   notFound={notFound}
                 />
               </Stack>
@@ -678,6 +724,7 @@ export function FileManagerView() {
       </DashboardContent>
 
       {renderUploadFilesDialog()}
+      {renderRenameDialog()}
       {renderConfirmDialog()}
       {renderBackupConfirmDialog()}
     </>
