@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -18,6 +18,13 @@ import { getFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 
 // ----------------------------------------------------------------------
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
 
 type Props = {
   fileId: string;
@@ -39,6 +46,27 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
+
+  const [isListening, setIsListening] = useState<number | null>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Pre-load voices for mobile support
+  useEffect(() => {
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  // Cleanup recognition on unmount
+  useEffect(() => () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, []);
 
   useEffect(() => {
     const loadScript = async () => {
@@ -80,11 +108,75 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.85; // Slightly slower for better clarity
-      window.speechSynthesis.speak(utterance);
+      utterance.rate = 0.85;
+
+      // Mobile fix: Select a voice explicitly
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find((v) => v.lang.startsWith('en') && v.name.includes('Google')) ||
+                      voices.find((v) => v.lang.startsWith('en')) ||
+                      voices[0];
+      if (enVoice) utterance.voice = enVoice;
+
+      // Mobile fix: Some browsers need a short delay after cancel
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 50);
     } else {
       toast.error('Text-to-speech is not supported in this browser.');
     }
+  };
+
+  const startListening = (index: number) => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsListening(index);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+
+      setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      if (event.error !== 'no-speech') {
+        toast.error(`Speech recognition error: ${event.error}`);
+      }
+      setIsListening(null);
+    };
+
+    recognition.onend = () => {
+      setIsListening(null);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(null);
   };
 
   const handleCheckAnswer = (index: number) => {
@@ -378,7 +470,25 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         slotProps={{
                           input: {
                             endAdornment: (
-                              <InputAdornment position="end">
+                              <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                                <IconButton
+                                  size="small"
+                                  color={isListening === index ? 'error' : 'default'}
+                                  onClick={() => (isListening === index ? stopListening() : startListening(index))}
+                                  sx={{
+                                    ...(isListening === index && {
+                                      animation: 'pulse 1.5s infinite',
+                                      '@keyframes pulse': {
+                                        '0%': { transform: 'scale(1)', opacity: 1 },
+                                        '50%': { transform: 'scale(1.2)', opacity: 0.7 },
+                                        '100%': { transform: 'scale(1)', opacity: 1 },
+                                      },
+                                    }),
+                                  }}
+                                >
+                                  <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                                </IconButton>
+
                                 <IconButton onClick={() => handleSpeak(line.en)} size="small" color="primary">
                                   <Iconify icon="solar:volume-loud-bold" />
                                 </IconButton>
