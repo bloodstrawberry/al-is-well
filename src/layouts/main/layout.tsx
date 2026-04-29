@@ -67,11 +67,7 @@ export function MainLayout({
           {/** @slot Nav mobile */}
           <MenuButton
             onClick={onOpen}
-            sx={(theme) => ({
-              mr: 1,
-              ml: -1,
-              [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
-            })}
+            sx={{ mr: 1, ml: -1 }}
           />
           <NavMobile data={navData} open={open} onClose={onClose} />
 
