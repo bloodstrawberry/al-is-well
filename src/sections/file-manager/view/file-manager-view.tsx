@@ -47,8 +47,11 @@ export function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
   const confirmDialog = useBoolean();
-  const resetDialog = useBoolean();
+  const backupConfirm = useBoolean();
   const newFilesDialog = useBoolean();
+
+  const [pendingAction, setPendingAction] = useState<'upload' | 'reset' | null>(null);
+  const [pendingUploadData, setPendingUploadData] = useState<any>(null);
 
   const [viewMode, setViewMode] = useState<'list' | 'editor' | 'live'>('list');
   const [selectedFile, setSelectedFile] = useState<{ id: string; name: string } | null>(null);
@@ -271,13 +274,25 @@ export function FileManagerView() {
   }, []);
 
   const handleReset = useCallback(async () => {
-    handleDownload();
     await saveFullData(TREE_DATA as any);
     setTreeData(TREE_DATA.tree);
     handleNavigate(null);
     toast.success('Reset success!');
-    resetDialog.onFalse();
-  }, [handleDownload, resetDialog, handleNavigate]);
+  }, [handleNavigate]);
+
+  const applyUpload = useCallback(async (data: any) => {
+    if (data && typeof data === 'object' && 'tree' in data && 'scripts' in data) {
+      await saveFullData(data);
+      setTreeData(data.tree);
+      toast.success('Upload success!');
+    } else if (Array.isArray(data)) {
+      await saveFullData({ tree: data, scripts: {} });
+      setTreeData(data);
+      toast.success('Upload success (tree only)!');
+    } else {
+      toast.error('Invalid JSON format.');
+    }
+  }, []);
 
   const handleUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -286,18 +301,9 @@ export function FileManagerView() {
       reader.onload = async (e) => {
         try {
           const json = JSON.parse(e.target?.result as string);
-          if (json && typeof json === 'object' && 'tree' in json && 'scripts' in json) {
-            await saveFullData(json);
-            setTreeData(json.tree);
-            toast.success('Upload success!');
-          } else if (Array.isArray(json)) {
-            // Legacy format support: only tree data
-            await saveFullData({ tree: json, scripts: {} });
-            setTreeData(json);
-            toast.success('Upload success (tree only)!');
-          } else {
-            toast.error('Invalid JSON format.');
-          }
+          setPendingUploadData(json);
+          setPendingAction('upload');
+          backupConfirm.onTrue();
         } catch (error) {
           toast.error('Failed to parse JSON');
         }
@@ -306,7 +312,7 @@ export function FileManagerView() {
     }
     // Reset input value to allow uploading the same file again
     event.target.value = '';
-  }, []);
+  }, [backupConfirm]);
 
   const handleDeleteItem = useCallback(
     (id: string) => {
@@ -407,16 +413,67 @@ export function FileManagerView() {
     />
   );
 
-  const renderResetDialog = () => (
+  const renderBackupConfirmDialog = () => (
     <ConfirmDialog
-      open={resetDialog.value}
-      onClose={resetDialog.onFalse}
-      title="Reset"
-      content="Are you sure you want to reset all data to default?"
+      open={backupConfirm.value}
+      onClose={() => {
+        backupConfirm.onFalse();
+        setPendingAction(null);
+        setPendingUploadData(null);
+      }}
+      title="백업 확인"
+      content="업로드/초기화 전에 파일을 백업하시겠습니까?"
+      cancelLabel="취소"
       action={
-        <Button variant="contained" color="error" onClick={handleReset}>
-          Reset
-        </Button>
+        <>
+          {pendingAction === 'reset' ? (
+            <Button
+              variant="contained"
+              color="error"
+              onClick={async () => {
+                await handleReset();
+                backupConfirm.onFalse();
+                setPendingAction(null);
+                setPendingUploadData(null);
+              }}
+            >
+              초기화
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={async () => {
+                if (pendingUploadData) {
+                  await applyUpload(pendingUploadData);
+                }
+                backupConfirm.onFalse();
+                setPendingAction(null);
+                setPendingUploadData(null);
+              }}
+            >
+              업로드
+            </Button>
+          )}
+
+          <Button
+            variant="contained"
+            color="success"
+            onClick={async () => {
+              await handleDownload();
+              if (pendingAction === 'reset') {
+                await handleReset();
+              } else if (pendingAction === 'upload' && pendingUploadData) {
+                await applyUpload(pendingUploadData);
+              }
+              backupConfirm.onFalse();
+              setPendingAction(null);
+              setPendingUploadData(null);
+            }}
+          >
+            백업
+          </Button>
+        </>
       }
     />
   );
@@ -503,7 +560,10 @@ export function FileManagerView() {
                 <Stack direction="row" spacing={1}>
                   <IconButton
                     color="error"
-                    onClick={resetDialog.onTrue}
+                    onClick={() => {
+                      setPendingAction('reset');
+                      backupConfirm.onTrue();
+                    }}
                     sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
                   >
                     <Iconify icon="solar:restart-bold" />
@@ -584,7 +644,7 @@ export function FileManagerView() {
 
       {renderUploadFilesDialog()}
       {renderConfirmDialog()}
-      {renderResetDialog()}
+      {renderBackupConfirmDialog()}
     </>
   );
 }

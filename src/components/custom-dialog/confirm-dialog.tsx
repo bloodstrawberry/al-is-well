@@ -14,8 +14,9 @@ export function ConfirmDialog({
   action,
   content,
   onClose,
+  cancelLabel = 'Cancel',
   ...other
-}: ConfirmDialogProps) {
+}: ConfirmDialogProps & { cancelLabel?: string }) {
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>
       <DialogTitle sx={{ pb: 2 }}>{title}</DialogTitle>
@@ -26,7 +27,7 @@ export function ConfirmDialog({
         {action}
 
         <Button variant="outlined" color="inherit" onClick={onClose}>
-          Cancel
+          {cancelLabel}
         </Button>
       </DialogActions>
     </Dialog>

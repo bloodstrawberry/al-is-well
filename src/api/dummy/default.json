@@ -79,6 +79,37 @@
       "id": "14",
       "label": "tsconfig.json",
       "type": "file"
+    },
+    {
+      "id": "1777443455203",
+      "label": "A. 일반 주제",
+      "type": "folder",
+      "children": [
+        {
+          "id": "1777443553869",
+          "label": "01. 가구 Furniture (공통)",
+          "type": "folder",
+          "children": [
+            {
+              "id": "1777443579253",
+              "label": "01. 집에 있는 가구 또는 가장 좋아하는 가구 묘사",
+              "type": "file"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1777443466448",
+      "label": "B. 롤플레이",
+      "type": "folder",
+      "children": []
+    },
+    {
+      "id": "1777443498415",
+      "label": "C. 14, 15",
+      "type": "folder",
+      "children": []
     }
   ],
   "scripts": {
@@ -106,6 +137,49 @@
         {
           "ko": "아마 남자라면 공감할거야. 조용한 미용실이 얼마나 편안한지를",
           "en": "It’s a guy thing, you know? The silence is so relaxing."
+        }
+      ]
+    },
+    "1777443579253": {
+      "questionEn": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
+      "questionKo": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?",
+      "audioUrl": "https://blog.kakaocdn.net/dna/C5ggF/dJMcahKE0zM/AAAAAAAAAAAAAAAAAAAAAAUKx8zSREKa5NsBI9erjT99MgZgkwjKNv347JFmzXhq/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PWScYTCoiH4XMls1Qe9mlmyDlWE%3D&attach=1&knm=tfile.mp3",
+      "lines": [
+        {
+          "ko": "내가 소개하고자 하는 가구는 바로 만화책을 모아두는 책장이야.",
+          "en": "Let's talk about my bookshelf, where I keep my entire comic book collection."
+        },
+        {
+          "ko": "내가 집에서 가장 좋아하는 가구지.",
+          "en": "It is actually my favorite piece of furniture in my home."
+        },
+        {
+          "ko": "나는 매달 월급이 나오면 만화책을 구매하고",
+          "en": "Every month when I get paid, I buy new comic books."
+        },
+        {
+          "ko": "책장에 꽂아넣는 재미로 살아",
+          "en": "I live for the moment I put new comics on the shelf in my room."
+        },
+        {
+          "ko": "이 책장은 내 키보다 10인치 정도 더 큰 하얀색 슬라이딩 책장인데,",
+          "en": "It is a white sliding shelf, and it’s actually about 10 inches taller than me!"
+        },
+        {
+          "ko": "문을 잡아서 당기면 드르륵 하고 선반이 나와",
+          "en": "When I pull the handle, the shelves slide out with a nice 'click-clack.' sound"
+        },
+        {
+          "ko": "무려 첫월급으로 1000달러나 주고 샀어!!",
+          "en": "Believe it or not, I spent 1,000 bucks from my very first paycheck on this!"
+        },
+        {
+          "ko": "나는 은퇴를 하고 나면 내가 모은 만화책을 보면서 여생을 보내는게 꿈이거든.",
+          "en": "My ultimate dream is to just read my entire collection after I retire."
+        },
+        {
+          "ko": "내 방에서 힘들 때 마다 만화책이 쌓여가는 책장을 보기만 해도 즐거워",
+          "en": "It makes me so happy just to look at my growing collection in my room."
         }
       ]
     }

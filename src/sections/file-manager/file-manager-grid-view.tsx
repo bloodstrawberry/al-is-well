@@ -251,16 +251,6 @@ export function FileManagerGridView({
               >
                 Delete
               </Button>
-
-              <Button
-                color="primary"
-                size="small"
-                variant="contained"
-                startIcon={<Iconify icon="solar:share-bold" />}
-                onClick={shareDialog.onTrue}
-              >
-                Share
-              </Button>
             </>
           }
         />

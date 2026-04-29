@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import Box from '@mui/material/Box';
@@ -16,6 +17,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { Iconify } from 'src/components/iconify';
 import { getFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
+import { getIsMobile } from 'src/utils/is-mobile';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +37,8 @@ type Props = {
 
 export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const theme = useTheme();
+
+  const isMobile = getIsMobile();
 
   const [scriptData, setScriptData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -488,9 +492,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                                 >
                                   <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
                                 </IconButton>
-
-                                <IconButton onClick={() => handleSpeak(line.en)} size="small" color="primary">
-                                  <Iconify icon="solar:volume-loud-bold" />
+                                 <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
+                                  <Iconify icon="solar:check-read-bold" />
                                 </IconButton>
                               </InputAdornment>
                             ),
@@ -568,6 +571,14 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                               sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
                             >
                               <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
+                            </IconButton>
+
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSpeak(line.en)}
+                              sx={{ ml: 0.5, p: 0.5, color: 'primary.main' }}
+                            >
+                              <Iconify icon="solar:volume-loud-bold" width={16} />
                             </IconButton>
                           </Box>
                         </Box>
