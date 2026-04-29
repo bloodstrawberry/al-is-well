@@ -15,6 +15,12 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
@@ -32,7 +38,38 @@ type ScriptData = {
   questionEn: string;
   questionKo: string;
   audioUrl: string;
+  category?: string;
+  subCategory?: string;
+  comboPositions?: number[];
   lines: Line[];
+};
+
+const CATEGORY_OPTIONS = ['자기소개', '콤보 세트', '롤플레이', '14, 15'];
+
+const SUB_CATEGORY_OPTIONS: Record<string, string[]> = {
+  '콤보 세트': [
+    '활동 묘사',
+    '사물 묘사',
+    '인물 묘사',
+    '장소 묘사',
+    '시간 순서',
+    '준비물',
+    '첫 계기',
+    '최근 경험',
+    '특별한 경험',
+    '기타',
+  ],
+  '롤플레이': [
+    '질문, 제안하기',
+    '문제 설명 및 대안 제시',
+    '에바에게 질문하기',
+    '13번 - 과거 경험',
+  ],
+  '14, 15': [
+    '과거 현재 비교',
+    '사회 이슈',
+  ],
+  '자기소개': [],
 };
 
 type Props = {
@@ -44,11 +81,14 @@ type Props = {
 
 export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Props) {
   const theme = useTheme();
-  
+
   const [scriptData, setScriptData] = useState<ScriptData>({
     questionEn: '',
     questionKo: '',
     audioUrl: '',
+    category: '',
+    subCategory: '',
+    comboPositions: [],
     lines: [{ ko: '', en: '' }],
   });
 
@@ -66,6 +106,9 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
             questionEn: data.questionEn || data.question || '',
             questionKo: data.questionKo || '',
             audioUrl: data.audioUrl || '',
+            category: data.category || '',
+            subCategory: data.subCategory || '',
+            comboPositions: data.comboPositions || [],
             lines: data.lines || [{ ko: '', en: '' }],
           });
         }
@@ -144,16 +187,16 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
   return (
     <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
       {/* Sticky Header */}
-      <Stack 
-        direction="row" 
-        alignItems="center" 
-        spacing={2} 
-        sx={{ 
-          mb: 4, 
-          position: 'sticky', 
-          top: 0, 
-          bgcolor: 'background.default', 
-          zIndex: 10, 
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        sx={{
+          mb: 4,
+          position: 'sticky',
+          top: 0,
+          bgcolor: 'background.default',
+          zIndex: 10,
           py: 1,
           borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`,
         }}
@@ -161,11 +204,11 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
-        
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            flexGrow: 1, 
+
+        <Typography
+          variant="h5"
+          sx={{
+            flexGrow: 1,
             fontWeight: 800,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -175,9 +218,9 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
           Edit: {fileName}
         </Typography>
 
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           onClick={handleSave}
           startIcon={<Iconify icon="solar:diskette-bold" />}
           sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
@@ -186,12 +229,185 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
         </Button>
       </Stack>
 
-      <Stack spacing={5}>
+      <Stack spacing={4}>
+        {/* Category Selection */}
+        <Stack 
+          direction={{ xs: 'column', md: 'row' }} 
+          spacing={2} 
+          sx={{ width: '100%', alignItems: 'center' }}
+        >
+          <FormControl sx={{ flex: 1, minWidth: { md: 200 } }}>
+            <InputLabel>문제 유형 (Category)</InputLabel>
+            <Select
+              label="문제 유형 (Category)"
+              value={scriptData.category || ''}
+              onChange={(e) => {
+                const cat = e.target.value;
+                let positions = [];
+                if (cat === '자기소개') positions = [1];
+                
+                setScriptData({
+                  ...scriptData,
+                  category: cat,
+                  subCategory: '',
+                  comboPositions: positions
+                });
+              }}
+              sx={{
+                bgcolor: 'background.paper',
+                borderRadius: 1.5,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: (theme) => alpha(theme.palette.grey[500], 0.2),
+                }
+              }}
+            >
+              <MenuItem value=""><em>미지정</em></MenuItem>
+              {CATEGORY_OPTIONS.map((option) => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {scriptData.category && scriptData.category !== '자기소개' && (
+            <FormControl sx={{ flex: 1, minWidth: { md: 200 } }}>
+              <InputLabel>세부 유형 (Sub-category)</InputLabel>
+              <Select
+                label="세부 유형 (Sub-category)"
+                value={scriptData.subCategory || ''}
+                onChange={(e) => {
+                  const subCat = e.target.value;
+                  let positions = scriptData.comboPositions || [];
+                  
+                  if (scriptData.category === '롤플레이' && subCat === '13번 - 과거 경험') {
+                    positions = [13];
+                  } else if (scriptData.category === '14, 15') {
+                    if (subCat === '과거 현재 비교') positions = [14];
+                    else if (subCat === '사회 이슈') positions = [15];
+                  }
+                  
+                  setScriptData({ 
+                    ...scriptData, 
+                    subCategory: subCat,
+                    comboPositions: positions 
+                  });
+                }}
+                sx={{ 
+                  bgcolor: 'background.paper',
+                  borderRadius: 1.5,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: (theme) => alpha(theme.palette.grey[500], 0.2),
+                  }
+                }}
+              >
+                <MenuItem value=""><em>미지정</em></MenuItem>
+                {SUB_CATEGORY_OPTIONS[scriptData.category]?.map((option) => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {(scriptData.category === '자기소개' || ((scriptData.category === '콤보 세트' || scriptData.category === '롤플레이' || scriptData.category === '14, 15') && scriptData.subCategory)) && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                px: 1.5,
+                height: 56,
+                borderRadius: 1.5,
+                position: 'relative',
+                bgcolor: 'background.paper',
+                border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+                flexShrink: 0,
+                ...((
+                  scriptData.category === '자기소개' ||
+                  (scriptData.category === '롤플레이' && scriptData.subCategory === '13번 - 과거 경험') ||
+                  (scriptData.category === '14, 15' && (scriptData.subCategory === '과거 현재 비교' || scriptData.subCategory === '사회 이슈'))
+                ) && {
+                  bgcolor: (theme) => alpha(theme.palette.action.disabledBackground, 0.12),
+                  opacity: 0.9,
+                  pointerEvents: 'none',
+                })
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  px: 0.5,
+                  top: -9,
+                  left: 10,
+                  fontWeight: 700,
+                  position: 'absolute',
+                  color: 'text.secondary',
+                  bgcolor: 'background.default',
+                }}
+              >
+                {scriptData.category === '콤보 세트' ? '콤보 위치' : '문제 위치'}
+              </Typography>
+
+              <ToggleButtonGroup
+                size="small"
+                value={scriptData.comboPositions || []}
+                disabled={
+                  scriptData.category === '자기소개' ||
+                  (scriptData.category === '롤플레이' && scriptData.subCategory === '13번 - 과거 경험') ||
+                  (scriptData.category === '14, 15' && (scriptData.subCategory === '과거 현재 비교' || scriptData.subCategory === '사회 이슈'))
+                }
+                onChange={(_, newPositions) => {
+                  setScriptData({ ...scriptData, comboPositions: newPositions });
+                }}
+                sx={{ 
+                  '& .MuiToggleButton-root': {
+                    border: 'none',
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50% !important',
+                    mx: 0.25,
+                    fontWeight: 800,
+                    fontSize: 12,
+                    '&.Mui-selected': {
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
+                      '&:hover': { bgcolor: 'primary.dark' },
+                      '&.Mui-disabled': {
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
+                        opacity: 0.8
+                      }
+                    },
+                    '&.Mui-disabled': {
+                      color: 'text.disabled'
+                    }
+                  }
+                }}
+              >
+                {(() => {
+                  if (scriptData.category === '자기소개') return [1];
+                  if (scriptData.category === '롤플레이') {
+                    if (scriptData.subCategory === '13번 - 과거 경험') return [13];
+                    return [11, 12];
+                  }
+                  if (scriptData.category === '14, 15') {
+                    if (scriptData.subCategory === '과거 현재 비교') return [14];
+                    if (scriptData.subCategory === '사회 이슈') return [15];
+                    return [14, 15];
+                  }
+                  return [1, 2, 3];
+                })().map((pos) => (
+                  <ToggleButton key={pos} value={pos}>
+                    {pos}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+          )}
+        </Stack>
+
         {/* Question Configuration */}
         <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ fontWeight: 800 }}>Configuration</Typography>
-            
+
             <Stack spacing={2}>
               <TextField
                 fullWidth
@@ -245,7 +461,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
         <Stack spacing={3}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              Script Lines 
+              Script Lines
               <Typography component="span" variant="body2" sx={{ ml: 1, color: 'text.disabled', fontWeight: 400 }}>
                 ({scriptData.lines.length} lines)
               </Typography>
@@ -263,10 +479,10 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
 
           <Stack spacing={2}>
             {scriptData.lines.map((line, index) => (
-              <Card 
-                key={index} 
-                sx={{ 
-                  p: 2.5, 
+              <Card
+                key={index}
+                sx={{
+                  p: 2.5,
                   border: (theme) => `solid 1px ${theme.vars.palette.divider}`,
                   bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.3),
                   position: 'relative',
@@ -320,14 +536,14 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
                     />
                   </Stack>
 
-                  <IconButton 
+                  <IconButton
                     className="delete-btn"
-                    color="error" 
-                    onClick={() => handleRemoveLine(index)} 
-                    disabled={scriptData.lines.length === 1} 
-                    sx={{ 
-                      mt: 1, 
-                      opacity: { xs: 1, md: 0 }, 
+                    color="error"
+                    onClick={() => handleRemoveLine(index)}
+                    disabled={scriptData.lines.length === 1}
+                    sx={{
+                      mt: 1,
+                      opacity: { xs: 1, md: 0 },
                       transition: (theme) => theme.transitions.create('opacity'),
                       bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
                       '&:hover': { bgcolor: (theme) => alpha(theme.palette.error.main, 0.16) }
@@ -346,9 +562,9 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
             variant="outlined"
             fullWidth
             size="large"
-            sx={{ 
-              py: 2, 
-              borderWidth: 2, 
+            sx={{
+              py: 2,
+              borderWidth: 2,
               borderStyle: 'dashed',
               borderRadius: 2,
               borderColor: 'divider',
@@ -362,14 +578,14 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
 
       {/* Footer Save Button for Mobile */}
       <Box sx={{ mt: 8, pb: 10, display: 'flex', justifyContent: 'center' }}>
-        <Button 
-          variant="contained" 
-          size="large" 
-          color="primary" 
-          onClick={handleSave} 
-          sx={{ 
-            px: 8, 
-            height: 56, 
+        <Button
+          variant="contained"
+          size="large"
+          color="primary"
+          onClick={handleSave}
+          sx={{
+            px: 8,
+            height: 56,
             borderRadius: 2,
             boxShadow: (theme) => theme.customShadows?.primary
           }}
@@ -391,8 +607,8 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
             placeholder={"Korean line 1\nEnglish translation 1\n\nKorean line 2\nEnglish translation 2..."}
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            sx={{ 
-              '& .MuiInputBase-root': { fontFamily: 'monospace', fontSize: 14 } 
+            sx={{
+              '& .MuiInputBase-root': { fontFamily: 'monospace', fontSize: 14 }
             }}
           />
         </DialogContent>
