@@ -14,6 +14,10 @@ const icon = (name: string) => (
   <SvgColor src={`${CONFIG.assetsDir}/assets/icons/navbar/${name}.svg`} />
 );
 
+const iconify = (name: string) => (
+  <Iconify icon={name} />
+);
+
 const ICONS = {
   job: icon('ic-job'),
   blog: icon('ic-blog'),
@@ -42,6 +46,9 @@ const ICONS = {
   pattern: icon('ic-ecommerce'),
   analytics: icon('ic-analytics'),
   dashboard: icon('ic-dashboard'),
+  speaking: iconify('solar:microphone-bold'),
+  listening: iconify('solar:headphones-round-bold'),
+  writing: iconify('solar:pen-bold'),
 };
 
 // ----------------------------------------------------------------------
@@ -73,7 +80,7 @@ export const navData: NavSectionProps['data'] = [
       {
         title: 'Speaking',
         path: paths.dashboard.opicTest.root,
-        icon: ICONS.course,
+        icon: ICONS.speaking,
         children: [
           { title: '내 모의고사', path: paths.dashboard.opicTest.myTests },
           { title: '랜덤 모의고사', path: paths.dashboard.opicTest.randomTest },
@@ -82,7 +89,7 @@ export const navData: NavSectionProps['data'] = [
       {
         title: 'Listening',
         path: paths.dashboard.listening.root,
-        icon: ICONS.course,
+        icon: ICONS.listening,
         children: [
           { title: 'Playlist', path: paths.dashboard.listening.playlist },
           { title: '랜덤 듣기', path: paths.dashboard.listening.random },
@@ -91,7 +98,7 @@ export const navData: NavSectionProps['data'] = [
       {
         title: 'Writing',
         path: paths.dashboard.writing.root,
-        icon: ICONS.course,
+        icon: ICONS.writing,
         children: [
           { title: '받아쓰기', path: paths.dashboard.writing.dictation },
           { title: '랜덤 받아쓰기', path: paths.dashboard.writing.random },
