@@ -276,18 +276,60 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
 
-        <Typography
-          variant="h5"
-          sx={{
-            flexGrow: 1,
-            fontWeight: 800,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {fileName}
-        </Typography>
+        <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {fileName}
+          </Typography>
+
+          {(scriptData?.category || scriptData?.comboPositions?.length > 0) && (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              {scriptData.category && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 0.5,
+                    bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
+                    color: 'info.main',
+                    fontWeight: 800,
+                    fontSize: 10,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {scriptData.category} {scriptData.subCategory && `• ${scriptData.subCategory}`}
+                </Typography>
+              )}
+              {scriptData.comboPositions?.map((pos: number) => (
+                <Box
+                  key={pos}
+                  sx={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    bgcolor: 'text.primary',
+                    color: 'background.paper',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 10,
+                    fontWeight: 900,
+                  }}
+                >
+                  {pos}
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </Stack>
 
         <Stack direction="row" spacing={1}>
           <Tooltip title="Test Mode">

@@ -243,7 +243,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
               value={scriptData.category || ''}
               onChange={(e) => {
                 const cat = e.target.value;
-                let positions = [];
+                let positions: number[] = [];
                 if (cat === '자기소개') positions = [1];
                 
                 setScriptData({
@@ -365,19 +365,19 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
                     mx: 0.25,
                     fontWeight: 800,
                     fontSize: 12,
-                    '&.Mui-selected': {
-                      bgcolor: 'primary.main',
-                      color: 'primary.contrastText',
-                      '&:hover': { bgcolor: 'primary.dark' },
+                      '&.Mui-selected': {
+                        bgcolor: 'text.primary',
+                        color: 'background.paper',
+                        '&:hover': { bgcolor: 'grey.800' },
+                        '&.Mui-disabled': {
+                          bgcolor: 'text.primary',
+                          color: 'background.paper',
+                          opacity: 0.9
+                        }
+                      },
                       '&.Mui-disabled': {
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        opacity: 0.8
+                        color: 'text.disabled'
                       }
-                    },
-                    '&.Mui-disabled': {
-                      color: 'text.disabled'
-                    }
                   }
                 }}
               >
