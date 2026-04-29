@@ -57,11 +57,16 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
   cursor: 'col-resize',
   position: 'absolute',
   touchAction: 'none',
-  '&:hover': {
+  '&:hover, &:active': {
     '&::after': {
       backgroundColor: theme.vars.palette.primary.main,
     },
+    '&::before': {
+      backgroundColor: theme.vars.palette.primary.main,
+      opacity: 1,
+    },
   },
+  // Vertical line
   '&::after': {
     content: '""',
     top: 0,
@@ -69,7 +74,22 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
     bottom: 0,
     width: 2,
     position: 'absolute',
+    backgroundColor: theme.vars.palette.divider,
     transition: theme.transitions.create(['background-color']),
+  },
+  // Grabbable pill handle
+  '&::before': {
+    content: '""',
+    top: '50%',
+    left: 4,
+    width: 8,
+    height: 48,
+    borderRadius: 8,
+    position: 'absolute',
+    transform: 'translateY(-50%)',
+    backgroundColor: theme.vars.palette.text.disabled,
+    opacity: 0.3,
+    transition: theme.transitions.create(['background-color', 'opacity']),
   },
 }));
 
