@@ -9,9 +9,10 @@ import { usePathname } from 'src/routes/hooks';
 import { useScrollOffsetTop } from 'minimal-shared/hooks';
 import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 
+import { styled, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { layoutClasses } from './classes';
 
@@ -48,7 +49,10 @@ export function HeaderSection({
 
   const { offsetTop: isOffset } = useScrollOffsetTop();
 
-  if (pathname !== '/') {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(layoutQuery));
+
+  if (pathname !== '/' && !isMobile) {
     return null;
   }
 
