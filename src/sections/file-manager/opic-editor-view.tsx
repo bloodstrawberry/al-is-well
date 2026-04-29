@@ -34,9 +34,13 @@ type Line = {
   en: string;
 };
 
+type Question = {
+  en: string;
+  ko: string;
+};
+
 type ScriptData = {
-  questionEn: string;
-  questionKo: string;
+  questions: Question[];
   audioUrl: string;
   category?: string;
   subCategory?: string;
@@ -85,8 +89,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
   const theme = useTheme();
 
   const [scriptData, setScriptData] = useState<ScriptData>({
-    questionEn: '',
-    questionKo: '',
+    questions: [{ en: '', ko: '' }],
     audioUrl: '',
     category: '',
     subCategory: '',
@@ -104,9 +107,19 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
       try {
         const data = await getFileScript(fileId);
         if (data) {
+          let questions = data.questions;
+          if (!questions && (data.questionEn || data.question)) {
+            questions = [{
+              en: data.questionEn || data.question || '',
+              ko: data.questionKo || ''
+            }];
+          }
+          if (!questions || questions.length === 0) {
+            questions = [{ en: '', ko: '' }];
+          }
+
           setScriptData({
-            questionEn: data.questionEn || data.question || '',
-            questionKo: data.questionKo || '',
+            questions,
             audioUrl: data.audioUrl || '',
             category: data.category || '',
             subCategory: data.subCategory || '',
@@ -411,25 +424,79 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ fontWeight: 800 }}>Configuration</Typography>
 
-            <Stack spacing={2}>
-              <TextField
+            <Stack spacing={3}>
+              {scriptData.questions.map((q, index) => (
+                <Stack key={index} spacing={3} sx={{ position: 'relative' }}>
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', mt: 1 }}>
+                      Q{index + 1}
+                    </Typography>
+                    <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                      <TextField
+                        fullWidth
+                        label="English Question"
+                        value={q.en}
+                        onChange={(e) => {
+                          const newQuestions = [...scriptData.questions];
+                          newQuestions[index] = { ...newQuestions[index], en: e.target.value };
+                          setScriptData({ ...scriptData, questions: newQuestions });
+                        }}
+                        multiline
+                        rows={2}
+                        placeholder="Type the English question here..."
+                      />
+                      <TextField
+                        fullWidth
+                        label="Korean Translation"
+                        value={q.ko}
+                        onChange={(e) => {
+                          const newQuestions = [...scriptData.questions];
+                          newQuestions[index] = { ...newQuestions[index], ko: e.target.value };
+                          setScriptData({ ...scriptData, questions: newQuestions });
+                        }}
+                        multiline
+                        rows={2}
+                        placeholder="Type the Korean translation here..."
+                      />
+                    </Stack>
+                    <IconButton
+                      color="error"
+                      disabled={scriptData.questions.length === 1}
+                      onClick={() => {
+                        const newQuestions = scriptData.questions.filter((_, i) => i !== index);
+                        setScriptData({ ...scriptData, questions: newQuestions });
+                      }}
+                      sx={{ mt: 1 }}
+                    >
+                      <Iconify icon="solar:trash-bin-trash-bold" />
+                    </IconButton>
+                  </Stack>
+                  {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
+                </Stack>
+              ))}
+
+              <Button
+                size="large"
+                variant="outlined"
                 fullWidth
-                label="English Question"
-                value={scriptData.questionEn}
-                onChange={(e) => setScriptData({ ...scriptData, questionEn: e.target.value })}
-                multiline
-                rows={2}
-                placeholder="Type the English question here..."
-              />
-              <TextField
-                fullWidth
-                label="Korean Translation"
-                value={scriptData.questionKo}
-                onChange={(e) => setScriptData({ ...scriptData, questionKo: e.target.value })}
-                multiline
-                rows={2}
-                placeholder="Type the Korean translation here..."
-              />
+                startIcon={<Iconify icon="mingcute:add-line" />}
+                onClick={() => {
+                  setScriptData({
+                    ...scriptData,
+                    questions: [...scriptData.questions, { en: '', ko: '' }]
+                  });
+                }}
+                sx={{
+                  py: 2,
+                  borderWidth: 2,
+                  borderStyle: 'dashed',
+                  borderRadius: 2,
+                  borderColor: 'divider',
+                  '&:hover': { borderColor: 'primary.main', bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04) }
+                }}
+              >
+                Add Question Set
+              </Button>
             </Stack>
 
             <Divider sx={{ borderStyle: 'dashed' }} />
@@ -474,7 +541,14 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
               variant="soft"
               color="info"
               startIcon={<Iconify icon="solar:import-bold" />}
-              onClick={bulkModal.onTrue}
+              onClick={() => {
+                const text = scriptData.lines
+                  .filter((line) => line.ko || line.en)
+                  .map((line) => `${line.ko}\n${line.en}`)
+                  .join('\n\n');
+                setBulkText(text);
+                bulkModal.onTrue();
+              }}
             >
               Bulk Import
             </Button>
@@ -597,7 +671,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
         </Button>
       </Box>
 
-      <Dialog open={bulkModal.value} onClose={bulkModal.onFalse} fullWidth maxWidth="sm">
+      <Dialog open={bulkModal.value} onClose={bulkModal.onFalse} fullWidth maxWidth="lg">
         <DialogTitle sx={{ fontWeight: 800 }}>Bulk Import Lines</DialogTitle>
         <DialogContent sx={{ pt: 1 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>

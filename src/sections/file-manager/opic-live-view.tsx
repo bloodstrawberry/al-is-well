@@ -77,6 +77,12 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       setLoading(true);
       try {
         const data = await getFileScript(fileId);
+        if (data && !data.questions && (data.questionEn || data.question)) {
+          data.questions = [{
+            en: data.questionEn || data.question || '',
+            ko: data.questionKo || ''
+          }];
+        }
         setScriptData(data);
       } catch (error) {
         console.error('Failed to load script', error);
@@ -98,10 +104,15 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     const newState = !allRevealed;
     setAllRevealed(newState);
     setShowKoQuestion(newState);
-    const newRevealed: Record<number, boolean> = {};
+    const newRevealed: Record<string, boolean> = {};
     if (scriptData?.lines) {
       scriptData.lines.forEach((_: any, index: number) => {
-        newRevealed[index] = newState;
+        newRevealed[index.toString()] = newState;
+      });
+    }
+    if (scriptData?.questions) {
+      scriptData.questions.forEach((_: any, index: number) => {
+        newRevealed[`q-${index}`] = newState;
       });
     }
     setRevealedLines(newRevealed);
@@ -381,53 +392,67 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
           <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
-          <Stack spacing={2.5}>
-            <Stack direction="row" alignItems="flex-start" spacing={2}>
-              <Typography variant="h6" sx={{ lineHeight: 1.5, fontWeight: 700, flexGrow: 1, color: 'text.primary' }}>
-                {scriptData?.questionEn || scriptData?.question || 'Untitled Question'}
-              </Typography>
-              {(scriptData?.questionEn || scriptData?.question) && (
-                <IconButton
-                  onClick={() => handleSpeak(scriptData?.questionEn || scriptData?.question)}
-                  size="medium"
-                  color="primary"
-                  sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
-                >
-                  <Iconify icon="solar:volume-loud-bold" />
-                </IconButton>
-              )}
-            </Stack>
+          <Stack spacing={3}>
+            {scriptData?.questions?.map((q: any, index: number) => (
+              <Stack key={index} spacing={2.5}>
+                <Stack direction="row" alignItems="flex-start" spacing={2}>
+                  <Box sx={{ mt: 0.5, flexShrink: 0 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', bgcolor: 'background.neutral', px: 0.5, py: 0.25, borderRadius: 0.5 }}>
+                      Q{index + 1}
+                    </Typography>
+                  </Box>
+                  <Typography variant="h6" sx={{ lineHeight: 1.5, fontWeight: 700, flexGrow: 1, color: 'text.primary' }}>
+                    {q.en || 'Untitled Question'}
+                  </Typography>
+                  {q.en && (
+                    <IconButton
+                      onClick={() => handleSpeak(q.en)}
+                      size="medium"
+                      color="primary"
+                      sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
+                    >
+                      <Iconify icon="solar:volume-loud-bold" />
+                    </IconButton>
+                  )}
+                </Stack>
 
-            {scriptData?.questionKo && (
-              <Box
-                onClick={() => setShowKoQuestion(!showKoQuestion)}
-                sx={{
-                  p: 2,
-                  cursor: 'pointer',
-                  borderRadius: 1.5,
-                  bgcolor: 'background.paper',
-                  border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
-                  transition: (theme) => theme.transitions.create(['background-color']),
-                  '&:hover': { bgcolor: 'action.hover' }
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    textAlign: 'justify',
-                    transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                    ...(!showKoQuestion && {
-                      filter: 'blur(6px)',
-                      opacity: 0.4,
-                      userSelect: 'none'
-                    })
-                  }}
-                >
-                  {scriptData.questionKo}
-                </Typography>
-              </Box>
-            )}
+                {q.ko && (
+                  <Box
+                    onClick={() => {
+                      const key = `q-${index}`;
+                      setRevealedLines(prev => ({ ...prev, [key]: !prev[key] }));
+                    }}
+                    sx={{
+                      ml: 4,
+                      p: 2,
+                      cursor: 'pointer',
+                      borderRadius: 1.5,
+                      bgcolor: 'background.paper',
+                      border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
+                      transition: (theme) => theme.transitions.create(['background-color']),
+                      '&:hover': { bgcolor: 'action.hover' }
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        textAlign: 'justify',
+                        transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                        ...( ! (revealedLines[`q-${index}`] ?? allRevealed) && {
+                          filter: 'blur(6px)',
+                          opacity: 0.4,
+                          userSelect: 'none'
+                        })
+                      }}
+                    >
+                      {q.ko}
+                    </Typography>
+                  </Box>
+                )}
+                {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
+              </Stack>
+            ))}
           </Stack>
 
           {scriptData?.audioUrl && (
