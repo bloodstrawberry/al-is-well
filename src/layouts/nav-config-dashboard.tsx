@@ -49,6 +49,7 @@ const ICONS = {
   speaking: iconify('solar:microphone-bold'),
   listening: iconify('solar:headphones-round-bold'),
   writing: iconify('solar:pen-bold'),
+  faq: iconify('solar:question-circle-bold'),
 };
 
 // ----------------------------------------------------------------------
@@ -104,6 +105,7 @@ export const navData: NavSectionProps['data'] = [
           { title: '랜덤 받아쓰기', path: paths.dashboard.writing.random },
         ],
       },
+      { title: 'FAQ', path: paths.dashboard.faq, icon: ICONS.faq },
       { title: '패턴분석', path: paths.dashboard.general.pattern, icon: ICONS.pattern },
       { title: '통계분석', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
       { title: '과거순위', path: paths.dashboard.general.history, icon: ICONS.banking },

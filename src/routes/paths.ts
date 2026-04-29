@@ -187,5 +187,6 @@ export const paths = {
       dictation: `${ROOTS.DASHBOARD}/writing/dictation`,
       random: `${ROOTS.DASHBOARD}/writing/random`,
     },
+    faq: `${ROOTS.DASHBOARD}/faq`,
   },
 };
