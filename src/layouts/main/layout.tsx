@@ -46,7 +46,7 @@ export function MainLayout({
   cssVars,
   children,
   slotProps,
-  layoutQuery = 'md',
+  layoutQuery = 'lg',
 }: MainLayoutProps) {
   const pathname = usePathname();
 

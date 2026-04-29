@@ -42,7 +42,7 @@ export function HeaderSection({
   className,
   disableOffset,
   disableElevation,
-  layoutQuery = 'md',
+  layoutQuery = 'lg',
   ...other
 }: HeaderSectionProps) {
   const pathname = usePathname();
