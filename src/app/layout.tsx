@@ -37,7 +37,10 @@ const AuthProvider =
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: primaryColor.main,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
 };
 
 export const metadata: Metadata = {
