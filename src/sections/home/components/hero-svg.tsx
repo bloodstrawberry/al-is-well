@@ -230,7 +230,7 @@ export function Texts({ sx, ...other }: BoxProps & MotionProps) {
           animate={{ x: ['0%', '-50%'] }}
           transition={{ duration: 64, ease: 'linear', repeat: Infinity }}
         >
-          {Array(2).fill(TEXT).join(' ')}
+
         </m.text>
       </Box>
     </Box>

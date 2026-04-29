@@ -7,10 +7,7 @@ import Alert from '@mui/material/Alert';
 
 import { getIsMobile } from 'src/utils/is-mobile';
 
-import { HomeLottoDisplay } from '../home-lotto-display';
-
-// ----------------------------------------------------------------------
-
+import { HomeHero } from '../home-hero';
 export function HomeView() {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
@@ -20,9 +17,7 @@ export function HomeView() {
 
   return (
     <>
-      <Stack sx={{ position: 'relative', bgcolor: 'background.default', gap: 3, alignItems: 'center', py: 5 }}>
-        <HomeLottoDisplay />
-      </Stack>
+      <HomeHero />
     </>
   );
 }
