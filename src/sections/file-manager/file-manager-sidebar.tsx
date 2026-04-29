@@ -228,8 +228,7 @@ const SidebarTreeItem = memo(
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
                 sx={{
-                  fontSize: 'inherit',
-                  fontWeight: 'inherit',
+                  typography: 'body2',
                   flexGrow: 1,
                   minWidth: 0,
                   backgroundColor: (theme) => theme.vars.palette.background.paper,
@@ -237,6 +236,10 @@ const SidebarTreeItem = memo(
                   px: 0.5,
                   '& .MuiInputBase-input': {
                     p: 0,
+                    height: '24px',
+                    lineHeight: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
                   },
                 }}
               />
