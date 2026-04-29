@@ -36,13 +36,6 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
   const detailsDrawer = useBoolean();
   const favorite = useBoolean(file.isFavorited);
 
-  const [fileName, setFileName] = useState(file.name);
-
-  const handleChangeFileName = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setFileName(event.target.value);
-  }, []);
-
-
   const renderMenuActions = () => (
     <CustomPopover
       open={menuActions.open}
@@ -82,16 +75,13 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
       open={editFileDialog.value}
       onClose={editFileDialog.onFalse}
       title="Edit File"
-      onUpdate={() => {
+      onUpdate={(newName) => {
         editFileDialog.onFalse();
-        console.info('UPDATE FILE', fileName);
+        console.info('UPDATE FILE', newName);
       }}
-      folderName={fileName}
-      onChangeFolderName={handleChangeFileName}
+      folderName={file.name}
     />
   );
-
-
 
   return (
     <>
