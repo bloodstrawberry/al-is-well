@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 
-import { isMobile } from 'react-device-detect';
+import { getIsMobile } from 'src/utils/is-mobile';
 
 import { HomeLottoDisplay } from '../home-lotto-display';
 
@@ -15,7 +15,7 @@ export function HomeView() {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
-    setIsMobileDevice(isMobile);
+    setIsMobileDevice(getIsMobile());
   }, []);
 
   return (
@@ -24,7 +24,7 @@ export function HomeView() {
         <HomeLottoDisplay />
         
         <Alert severity={isMobileDevice ? "info" : "success"} sx={{ width: 'fit-content' }}>
-          {isMobileDevice ? "You are on a Mobile Device (detected via User-Agent)" : "You are on a Desktop Device (detected via User-Agent)"}
+          {isMobileDevice ? "You are on a Mobile Device (detected via Enhanced Check)" : "You are on a Desktop Device (detected via Enhanced Check)"}
         </Alert>
 
         <div>isMobile: {String(isMobileDevice)}</div>

@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 
-import { isMobile } from 'react-device-detect';
+import { getIsMobile } from 'src/utils/is-mobile';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -57,7 +57,7 @@ export function FileManagerFileItem({
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
-    setIsMobileDevice(isMobile);
+    setIsMobileDevice(getIsMobile());
   }, []);
 
   const handleDoubleClick = useCallback(() => {
