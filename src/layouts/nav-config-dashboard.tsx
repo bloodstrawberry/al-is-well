@@ -106,45 +106,6 @@ export const navData: NavSectionProps['data'] = [
         ],
       },
       { title: 'FAQ', path: paths.dashboard.faq, icon: ICONS.faq },
-      { title: '패턴분석', path: paths.dashboard.general.pattern, icon: ICONS.pattern },
-      { title: '통계분석', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
-      { title: '과거순위', path: paths.dashboard.general.history, icon: ICONS.banking },
-      { title: '번호생성', path: paths.dashboard.general.drawing, icon: ICONS.drawing },
-      { title: '마킹패턴', path: paths.dashboard.general.marking, icon: ICONS.file },
-      { title: 'Course', path: paths.dashboard.general.course, icon: ICONS.course },
     ],
   },
-  /**
-   * Management
-   */
-  {
-    subheader: 'Management',
-    items: [
-      { title: '로또달력', path: paths.dashboard.calendar, icon: ICONS.calendar },
-      {
-        title: 'User',
-        path: paths.dashboard.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Profile', path: paths.dashboard.user.root },
-          { title: 'Cards', path: paths.dashboard.user.cards },
-          { title: 'List', path: paths.dashboard.user.list },
-          { title: 'Create', path: paths.dashboard.user.new },
-          { title: 'Edit', path: paths.dashboard.user.demo.edit },
-          { title: 'Account', path: paths.dashboard.user.account, deepMatch: true },
-        ],
-      },
-      {
-        title: 'Product',
-        path: paths.dashboard.product.root,
-        icon: ICONS.product,
-        children: [
-          { title: 'List', path: paths.dashboard.product.root },
-          { title: 'Details', path: paths.dashboard.product.demo.details },
-          { title: 'Create', path: paths.dashboard.product.new },
-          { title: 'Edit', path: paths.dashboard.product.demo.edit },
-        ],
-      },
-    ],
-  }
 ];
