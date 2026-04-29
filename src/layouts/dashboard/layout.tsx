@@ -29,7 +29,6 @@ import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
 import { AccountDrawer } from '../components/account-drawer';
 import { SettingsButton } from '../components/settings-button';
-import { ShareButton } from '../components/share-button';
 import { ContactsPopover } from '../components/contacts-popover';
 import { WorkspacesPopover } from '../components/workspaces-popover';
 import { navData as dashboardNavData } from '../nav-config-dashboard';
@@ -142,9 +141,6 @@ export function DashboardLayout({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
           {/** @slot Searchbar */}
           <Searchbar data={navData} />
-
-          {/** @slot Share button */}
-          <ShareButton />
 
           {/** @slot Notifications popover */}
           <NotificationsDrawer data={_notifications} />
