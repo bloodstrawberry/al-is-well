@@ -568,6 +568,23 @@ export function FileManagerView() {
     />
   );
 
+  const scrollbarStyles = {
+    '&::-webkit-scrollbar': {
+      width: 5,
+      height: 5,
+    },
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: (theme: any) => theme.vars.palette.divider,
+      borderRadius: 10,
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: (theme: any) => theme.vars.palette.text.disabled,
+    },
+  };
+
   const renderBreadcrumbs = () => {
     if (!currentFolderId) return null;
 
@@ -615,9 +632,13 @@ export function FileManagerView() {
           flexDirection: 'row',
           flexGrow: 1,
           minHeight: 0,
+          maxHeight: '100vh',
+          height: '100vh',
           maxWidth: 'none!important',
           m: 0,
+          p: 0,
           width: '100%',
+          overflow: 'hidden',
         }}
       >
         <FileManagerSidebar
@@ -630,7 +651,15 @@ export function FileManagerView() {
           onUpdateName={handleUpdateItemName}
         />
 
-        <Box sx={{ flexGrow: 1, minWidth: 0, height: '100%', overflowY: 'auto' }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            minWidth: 0,
+            height: '100%',
+            overflowY: 'auto',
+            ...scrollbarStyles,
+          }}
+        >
           {viewMode === 'list' ? (
             <>
               <Box

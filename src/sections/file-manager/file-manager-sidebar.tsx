@@ -158,10 +158,16 @@ const SidebarTreeItem = memo(
     const isEditing = editingId === node.id;
     const [localValue, setLocalValue] = useState(node.label);
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     // Sync local value when entering editing mode
     useEffect(() => {
       if (isEditing) {
         setLocalValue(node.label);
+        // Focus without scrolling
+        setTimeout(() => {
+          inputRef.current?.focus({ preventScroll: true });
+        }, 0);
       }
     }, [isEditing, node.label]);
 
@@ -215,7 +221,7 @@ const SidebarTreeItem = memo(
             {isEditing ? (
               <InputBase
                 fullWidth
-                autoFocus
+                inputRef={inputRef}
                 value={localValue}
                 onChange={(e) => setLocalValue(e.target.value)}
                 onBlur={handleBlur}
@@ -297,6 +303,23 @@ export function FileManagerSidebar({
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const scrollbarStyles = {
+    '&::-webkit-scrollbar': {
+      width: 5,
+      height: 5,
+    },
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: (theme: any) => theme.vars.palette.divider,
+      borderRadius: 10,
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: (theme: any) => theme.vars.palette.text.disabled,
+    },
+  };
 
   const { state: width, setState: setWidth } = useLocalStorage(
     WIDTH_KEY,
@@ -478,7 +501,7 @@ export function FileManagerSidebar({
   const displayCollapsed = isMounted ? isCollapsed : true;
 
   return (
-    <Box sx={{ position: 'relative', display: 'flex' }}>
+    <Box sx={{ position: 'relative', display: 'flex', height: '100%' }}>
       <RootStyle
         width={displayWidth}
         isCollapsed={displayCollapsed}
@@ -565,7 +588,16 @@ export function FileManagerSidebar({
             }}
           />
 
-          <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              px: 1,
+              py: 1,
+              overflowY: 'auto',
+              minHeight: 0,
+              ...scrollbarStyles,
+            }}
+          >
             <SimpleTreeView
               aria-label="file system navigator"
               expandedItems={expandedItems}
