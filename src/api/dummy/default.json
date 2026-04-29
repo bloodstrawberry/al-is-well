@@ -7,7 +7,7 @@
       "children": [
         {
           "id": "1777443553869",
-          "label": "01. 가구 Furniture (공통)",
+          "label": "공통 - 가구, Furniture",
           "type": "folder",
           "children": [
             {
@@ -40,14 +40,14 @@
             }
           ],
           "createdAt": "2026-04-29T12:53:05.952Z",
-          "modifiedAt": "2026-04-29T12:53:05.952Z"
+          "modifiedAt": "2026-04-29T15:45:43.874Z"
         },
         {
           "id": "1777469277167",
-          "label": "02. 재활용 Recycling (공통)",
+          "label": "공통 - 재활용, Recycling",
           "type": "folder",
           "createdAt": "2026-04-29T13:27:57.167Z",
-          "modifiedAt": "2026-04-29T13:27:57.167Z",
+          "modifiedAt": "2026-04-29T15:51:25.303Z",
           "children": [
             {
               "id": "1777469283917",
@@ -78,6 +78,222 @@
               "modifiedAt": "2026-04-29T13:35:05.847Z"
             }
           ]
+        },
+        {
+          "id": "1777476748642",
+          "label": "선택 - 집, Housing",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:32:28.642Z",
+          "modifiedAt": "2026-04-29T15:53:42.567Z",
+          "children": []
+        },
+        {
+          "id": "1777476759153",
+          "label": "선택 - 음악, Music",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:32:39.153Z",
+          "modifiedAt": "2026-04-29T15:53:35.671Z",
+          "children": []
+        },
+        {
+          "id": "1777476771624",
+          "label": "선택 - 영화, Movie",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:32:51.624Z",
+          "modifiedAt": "2026-04-29T15:53:28.160Z",
+          "children": []
+        },
+        {
+          "id": "1777476794585",
+          "label": "선택 - 해변, Beach",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:33:14.585Z",
+          "modifiedAt": "2026-04-29T15:43:09.432Z",
+          "children": []
+        },
+        {
+          "id": "1777476850384",
+          "label": "공통 - 음식점, Restaurant",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:34:10.384Z",
+          "modifiedAt": "2026-04-29T15:54:07.383Z",
+          "children": []
+        },
+        {
+          "id": "1777476925906",
+          "label": "선택 - 집에서 보내는 휴가, Vacation at Home",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:35:25.906Z",
+          "modifiedAt": "2026-04-29T15:42:14.338Z",
+          "children": []
+        },
+        {
+          "id": "1777476939096",
+          "label": "공통 - 식품 Food ",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:35:39.096Z",
+          "modifiedAt": "2026-04-29T15:35:39.096Z",
+          "children": []
+        },
+        {
+          "id": "1777476951808",
+          "label": "공통 - 건강, Health",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:35:51.808Z",
+          "modifiedAt": "2026-04-29T15:35:51.808Z",
+          "children": []
+        },
+        {
+          "id": "1777477019960",
+          "label": "공통 - 날씨, Weather",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:36:59.960Z",
+          "modifiedAt": "2026-04-29T15:36:59.960Z",
+          "children": []
+        },
+        {
+          "id": "1777477031440",
+          "label": "공통 - 산업, Industry",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:37:11.440Z",
+          "modifiedAt": "2026-04-29T15:37:11.440Z",
+          "children": []
+        },
+        {
+          "id": "1777477040329",
+          "label": "공통 - 기술, Technology",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:37:20.329Z",
+          "modifiedAt": "2026-04-29T15:37:20.329Z",
+          "children": []
+        },
+        {
+          "id": "1777477053368",
+          "label": "공통 - 전화기, Phone",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:37:33.368Z",
+          "modifiedAt": "2026-04-29T15:37:33.368Z",
+          "children": []
+        },
+        {
+          "id": "1777477062914",
+          "label": "공통 - 인터넷, Internet",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:37:42.914Z",
+          "modifiedAt": "2026-04-29T15:37:42.914Z",
+          "children": []
+        },
+        {
+          "id": "1777477072545",
+          "label": "공통 - 지형, Geography",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:37:52.545Z",
+          "modifiedAt": "2026-04-29T15:37:52.545Z",
+          "children": []
+        },
+        {
+          "id": "1777477171162",
+          "label": "선택 - 해외여행, Overseas Trips",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:39:31.162Z",
+          "modifiedAt": "2026-04-29T15:39:31.162Z",
+          "children": []
+        },
+        {
+          "id": "1777477184689",
+          "label": "선택 - 국내여행, Domestic Trips",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:39:44.689Z",
+          "modifiedAt": "2026-04-29T15:39:44.689Z",
+          "children": []
+        },
+        {
+          "id": "1777477199456",
+          "label": "선택 - 공원, Park",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:39:59.456Z",
+          "modifiedAt": "2026-04-29T15:39:59.456Z",
+          "children": []
+        },
+        {
+          "id": "1777477229921",
+          "label": "공통 - 미용실, Hair Salon",
+          "type": "folder",
+          "createdAt": "2026-04-29T15:40:29.921Z",
+          "modifiedAt": "2026-04-29T15:40:29.921Z",
+          "children": []
+        },
+        {
+          "id": "1777478522943",
+          "label": "공통 - 모임, Gathering",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:02.943Z",
+          "modifiedAt": "2026-04-29T16:02:02.943Z",
+          "children": []
+        },
+        {
+          "id": "1777478533175",
+          "label": "교통 - Transportation",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:13.175Z",
+          "modifiedAt": "2026-04-29T16:02:13.175Z",
+          "children": []
+        },
+        {
+          "id": "1777478543519",
+          "label": "공통 - 패션, Fashion",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:23.519Z",
+          "modifiedAt": "2026-04-29T16:02:23.519Z",
+          "children": []
+        },
+        {
+          "id": "1777478550863",
+          "label": "공통 - 은행, Bank",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:30.863Z",
+          "modifiedAt": "2026-04-29T16:02:30.863Z",
+          "children": []
+        },
+        {
+          "id": "1777478558815",
+          "label": "공통 - 호텔, Hotel",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:38.815Z",
+          "modifiedAt": "2026-04-29T16:02:38.815Z",
+          "children": []
+        },
+        {
+          "id": "1777478568727",
+          "label": "공통 - 예약, Appointment",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:48.727Z",
+          "modifiedAt": "2026-04-29T16:02:48.727Z",
+          "children": []
+        },
+        {
+          "id": "1777478579696",
+          "label": "공통 - 자유시간, Free Time",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:02:59.696Z",
+          "modifiedAt": "2026-04-29T16:02:59.696Z",
+          "children": []
+        },
+        {
+          "id": "1777478596151",
+          "label": "공통 - 휴일, Holiday",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:03:16.151Z",
+          "modifiedAt": "2026-04-29T16:03:16.151Z",
+          "children": []
+        },
+        {
+          "id": "1777478610751",
+          "label": "공통 - 가족, 친구, Family, Friends",
+          "type": "folder",
+          "createdAt": "2026-04-29T16:03:30.751Z",
+          "modifiedAt": "2026-04-29T16:03:30.751Z",
+          "children": []
         }
       ],
       "createdAt": "2026-04-29T12:53:05.952Z",
