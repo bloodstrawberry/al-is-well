@@ -1,28 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+
+import { isMobile } from 'react-device-detect';
 
 import { HomeLottoDisplay } from '../home-lotto-display';
 
 // ----------------------------------------------------------------------
 
 export function HomeView() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setIsMobileDevice(isMobile);
+  }, []);
 
   return (
     <>
       <Stack sx={{ position: 'relative', bgcolor: 'background.default', gap: 3, alignItems: 'center', py: 5 }}>
         <HomeLottoDisplay />
         
-        <Alert severity={isMobile ? "info" : "success"} sx={{ width: 'fit-content' }}>
-          {isMobile ? "You are on a Mobile Device" : "You are on a Desktop Device"}
+        <Alert severity={isMobileDevice ? "info" : "success"} sx={{ width: 'fit-content' }}>
+          {isMobileDevice ? "You are on a Mobile Device (detected via User-Agent)" : "You are on a Desktop Device (detected via User-Agent)"}
         </Alert>
 
-        <div>isMobile: {String(isMobile)}</div>
+        <div>isMobile: {String(isMobileDevice)}</div>
 
         <div>test</div>
         <div style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '10px 0' }}>

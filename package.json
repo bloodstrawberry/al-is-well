@@ -99,6 +99,7 @@
     "nprogress": "^0.2.0",
     "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.58.1",

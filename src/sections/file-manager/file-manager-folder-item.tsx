@@ -1,7 +1,7 @@
 import type { IFolderManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Button from '@mui/material/Button';
@@ -11,8 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 
 import { fData } from 'src/utils/format-number';
 
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { isMobile } from 'react-device-detect';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -55,8 +54,11 @@ export function FileManagerFolderItem({
 
   const menuActions = usePopover();
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setIsMobileDevice(isMobile);
+  }, []);
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -115,7 +117,7 @@ export function FileManagerFolderItem({
         variant="outlined"
         selected={selected}
         onDoubleClick={onNavigate}
-        onClick={isMobile ? onNavigate : undefined}
+        onClick={isMobileDevice ? onNavigate : undefined}
         sx={{ ...sx, cursor: 'pointer' }}
         {...other}
       >

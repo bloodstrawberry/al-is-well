@@ -1,7 +1,7 @@
 import type { IFileManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Button from '@mui/material/Button';
@@ -12,8 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { isMobile } from 'react-device-detect';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -55,8 +54,11 @@ export function FileManagerFileItem({
   const checkbox = useBoolean();
   const favorite = useBoolean(file.isFavorited);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setIsMobileDevice(isMobile);
+  }, []);
 
   const handleDoubleClick = useCallback(() => {
     onOpenFile?.();
@@ -129,7 +131,7 @@ export function FileManagerFileItem({
         selected={selected}
         sx={sx}
         onDoubleClick={handleDoubleClick}
-        onClick={isMobile ? handleDoubleClick : undefined}
+        onClick={isMobileDevice ? handleDoubleClick : undefined}
         {...other}
       >
 
