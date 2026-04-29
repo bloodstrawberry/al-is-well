@@ -9,6 +9,7 @@ import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Checkbox from '@mui/material/Checkbox';
+import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
@@ -131,20 +132,33 @@ export type FileItemInfoProps = BoxProps & {
 
 export function FileItemInfo({ type, title, values, sx, ...other }: FileItemInfoProps) {
   const renderTitle = () => (
-    <Typography
-      variant={['file', 'recent-file'].includes(type) ? 'subtitle2' : 'subtitle1'}
-      sx={[
-        (theme) => ({
-          wordBreak: 'break-all',
-          ...theme.mixins.maxLine({
-            line: type === 'file' ? 2 : 1,
-            persistent: type === 'file' ? theme.typography.subtitle2 : undefined,
-          }),
-        }),
-      ]}
+    <Tooltip
+      title={title}
+      placement="top-start"
+      slotProps={{
+        tooltip: {
+          sx: {
+            maxWidth: 'none',
+            whiteSpace: 'nowrap',
+          },
+        },
+      }}
     >
-      {title}
-    </Typography>
+      <Typography
+        variant={['file', 'recent-file'].includes(type) ? 'subtitle2' : 'subtitle1'}
+        sx={[
+          (theme) => ({
+            wordBreak: 'break-all',
+            ...theme.mixins.maxLine({
+              line: type === 'file' ? 2 : 1,
+              persistent: type === 'file' ? theme.typography.subtitle2 : undefined,
+            }),
+          }),
+        ]}
+      >
+        {title}
+      </Typography>
+    </Tooltip>
   );
 
   const renderDetails = () => (

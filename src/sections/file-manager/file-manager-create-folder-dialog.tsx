@@ -23,11 +23,12 @@ type Props = DialogProps & {
   title?: string;
   folderName?: string;
   onClose: () => void;
-  onCreate?: () => void;
-  onUpdate?: () => void;
+  onCreate?: (name: string) => void;
+  onUpdate?: (name: string) => void;
   hideUpload?: boolean;
   textFieldProps?: TextFieldProps;
-  onChangeFolderName?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  existingItems?: { name: string; type: string }[];
+  currentType?: string;
 };
 
 export function FileManagerCreateFolderDialog({
@@ -35,20 +36,65 @@ export function FileManagerCreateFolderDialog({
   onClose,
   onCreate,
   onUpdate,
-  folderName,
+  folderName = '',
   hideUpload,
   textFieldProps,
-  onChangeFolderName,
+  existingItems = [],
+  currentType,
   title = 'Add files',
   ...other
 }: Props) {
   const [files, setFiles] = useState<(File | string)[]>([]);
+  const [name, setName] = useState(folderName);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setName(folderName);
+      setError('');
+    } else {
       setFiles([]);
     }
-  }, [open]);
+  }, [open, folderName]);
+
+  const validate = useCallback(
+    (value: string) => {
+      const INVALID_CHARACTERS = /[<>:"/\\|?*]/;
+      if (!value) return 'Name is required';
+      if (INVALID_CHARACTERS.test(value)) return 'Invalid characters: < > : " / \\ | ? *';
+      if (
+        existingItems.some(
+          (item) => item.name.toLowerCase() === value.toLowerCase() && item.type === currentType
+        )
+      ) {
+        return `A ${currentType} with this name already exists`;
+      }
+      return '';
+    },
+    [existingItems, currentType]
+  );
+
+  const handleChangeName = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setName(value);
+      setError(validate(value));
+    },
+    [validate]
+  );
+
+  const handleSubmit = useCallback(() => {
+    const err = validate(name);
+    if (err) {
+      setError(err);
+      return;
+    }
+    if (onUpdate) {
+      onUpdate(name);
+    } else if (onCreate) {
+      onCreate(name);
+    }
+  }, [name, validate, onCreate, onUpdate]);
 
   const handleDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -80,13 +126,15 @@ export function FileManagerCreateFolderDialog({
           <TextField
             fullWidth
             autoFocus
-            value={folderName}
-            onChange={onChangeFolderName}
+            value={name}
+            onChange={handleChangeName}
             onKeyUp={(event) => {
               if (event.key === 'Enter') {
-                (onCreate || onUpdate)?.();
+                handleSubmit();
               }
             }}
+            error={!!error}
+            helperText={error}
             {...textFieldProps}
             sx={{ mt: 1 }}
           />
@@ -121,7 +169,7 @@ export function FileManagerCreateFolderDialog({
         )}
 
         {(onCreate || onUpdate) && (
-          <Button variant="contained" color="inherit" onClick={onCreate || onUpdate}>
+          <Button variant="contained" color="inherit" onClick={handleSubmit}>
             {onUpdate ? 'Save' : 'Create'}
           </Button>
         )}

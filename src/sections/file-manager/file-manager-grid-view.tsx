@@ -2,7 +2,7 @@ import type { IFile } from 'src/types/file';
 import type { UseTableReturn } from 'src/components/table';
 
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useMemo } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -64,50 +64,27 @@ export function FileManagerGridView({
 
   const menuActions = usePopover();
 
-  const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
-
-  const [renameItem, setRenameItem] = useState<IFile | null>(null);
-
-  const [itemName, setItemName] = useState('');
-
   const [inviteEmail, setInviteEmail] = useState('');
-
-  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setInviteEmail(event.target.value);
   }, []);
 
-  const handleChangeItemName = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setItemName(value);
+  const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
 
-      if (INVALID_CHARACTERS.test(value)) {
-        setErrorMessage('Invalid characters: < > : " / \\ | ? *');
-      } else if (
-        dataFiltered.some((item) => {
-          if (renameItem && item.id === renameItem.id) return false;
-          return item.name.toLowerCase() === value.toLowerCase() && item.type === (renameItem?.type || createType);
-        })
-      ) {
-        setErrorMessage(`A ${renameItem?.type || createType} with this name already exists in this folder`);
-      } else {
-        setErrorMessage('');
-      }
-    },
-    [dataFiltered, renameItem, createType]
-  );
+  const [renameItem, setRenameItem] = useState<IFile | null>(null);
 
-  const sortedData = [...dataFiltered].sort((a, b) => {
-    if (a.type === 'folder' && b.type !== 'folder') return -1;
-    if (a.type !== 'folder' && b.type === 'folder') return 1;
+  const sortedData = useMemo(() => {
+    return [...dataFiltered].sort((a, b) => {
+      if (a.type === 'folder' && b.type !== 'folder') return -1;
+      if (a.type !== 'folder' && b.type === 'folder') return 1;
 
-    if (a.isFavorited && !b.isFavorited) return -1;
-    if (!a.isFavorited && b.isFavorited) return 1;
+      if (a.isFavorited && !b.isFavorited) return -1;
+      if (!a.isFavorited && b.isFavorited) return 1;
 
-    return a.name.localeCompare(b.name);
-  });
+      return a.name.localeCompare(b.name);
+    });
+  }, [dataFiltered]);
 
   const renderShareDialog = () => (
     <FileManagerShareDialog
@@ -128,32 +105,18 @@ export function FileManagerGridView({
   const renderCreateFolderDialog = () => (
     <FileManagerCreateFolderDialog
       open={newFolderDialog.value}
-      onClose={() => {
-        newFolderDialog.onFalse();
-        setItemName('');
-        setErrorMessage('');
-      }}
+      onClose={newFolderDialog.onFalse}
       title={createType === 'folder' ? 'New folder' : 'New file'}
-      onCreate={() => {
-        if (!itemName) {
-          setErrorMessage('Name is required');
-          return;
-        }
-        if (errorMessage) return;
-
+      onCreate={(name) => {
         newFolderDialog.onFalse();
-        onCreateItem?.(itemName, createType);
-        setItemName('');
-        setErrorMessage('');
+        onCreateItem?.(name, createType);
       }}
-      folderName={itemName}
-      onChangeFolderName={handleChangeItemName}
-      hideUpload
+      existingItems={dataFiltered}
+      currentType={createType}
       textFieldProps={{
-        error: !!errorMessage,
-        helperText: errorMessage,
         label: createType === 'folder' ? 'Folder name' : 'File name',
       }}
+      hideUpload
     />
   );
 
@@ -163,31 +126,20 @@ export function FileManagerGridView({
       onClose={() => {
         renameDialog.onFalse();
         setRenameItem(null);
-        setItemName('');
-        setErrorMessage('');
       }}
       title="Rename"
-      onUpdate={() => {
-        if (!itemName) {
-          setErrorMessage('Name is required');
-          return;
-        }
-        if (errorMessage) return;
-
+      onUpdate={(name) => {
         if (renameItem) {
-          onUpdateItem(renameItem.id, itemName);
+          onUpdateItem(renameItem.id, name);
         }
         renameDialog.onFalse();
         setRenameItem(null);
-        setItemName('');
-        setErrorMessage('');
       }}
-      folderName={itemName}
-      onChangeFolderName={handleChangeItemName}
+      folderName={renameItem?.name || ''}
+      existingItems={dataFiltered.filter((item) => item.id !== renameItem?.id)}
+      currentType={renameItem?.type}
       hideUpload
       textFieldProps={{
-        error: !!errorMessage,
-        helperText: errorMessage,
         label: renameItem?.type === 'folder' ? 'Folder name' : 'File name',
       }}
     />
@@ -297,7 +249,6 @@ export function FileManagerGridView({
                 onDelete={() => onDeleteItem(item.id)}
                 onEdit={() => {
                   setRenameItem(item);
-                  setItemName(item.name);
                   renameDialog.onTrue();
                 }}
                 onNavigate={() => onNavigate(item.id)}
@@ -314,7 +265,6 @@ export function FileManagerGridView({
                 onFavorite={() => onFavoriteItem?.(item.id)}
                 onEdit={() => {
                   setRenameItem(item);
-                  setItemName(item.name);
                   renameDialog.onTrue();
                 }}
               />

@@ -1,7 +1,7 @@
 import type { IFileManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
-import { useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Button from '@mui/material/Button';
@@ -39,7 +39,7 @@ type Props = FileItemProps & {
   onFavorite?: (id: string) => void;
 };
 
-export function FileManagerFileItem({
+export const FileManagerFileItem = memo(({
   file,
   selected,
   onSelect,
@@ -49,7 +49,7 @@ export function FileManagerFileItem({
   onFavorite,
   sx,
   ...other
-}: Props) {
+}: Props) => {
   const confirmDialog = useBoolean();
   const menuActions = usePopover();
 
@@ -180,4 +180,4 @@ export function FileManagerFileItem({
 
     </>
   );
-}
+});

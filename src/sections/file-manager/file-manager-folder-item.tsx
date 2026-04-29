@@ -1,7 +1,7 @@
 import type { IFolderManager } from 'src/types/file';
 import type { FileItemProps } from './file-manager-file-item-slots';
 
-import { useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
 import Button from '@mui/material/Button';
@@ -38,7 +38,7 @@ type Props = FileItemProps & {
   folder: IFolderManager;
 };
 
-export function FileManagerFolderItem({
+export const FileManagerFolderItem = memo(({
   sx,
   folder,
   selected,
@@ -48,7 +48,7 @@ export function FileManagerFolderItem({
   onNavigate,
   onFavorite,
   ...other
- }: Props) {
+ }: Props) => {
   const confirmDialog = useBoolean();
 
   const checkbox = useBoolean();
@@ -166,4 +166,4 @@ export function FileManagerFolderItem({
 
     </>
   );
-}
+});

@@ -1,5 +1,6 @@
 import type { BoxProps } from '@mui/material/Box';
 
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Portal from '@mui/material/Portal';
 import Checkbox from '@mui/material/Checkbox';
@@ -16,7 +17,7 @@ type Props = BoxProps & {
   onSelectAllItems: (checked: boolean) => void;
 };
 
-export function FileManagerActionSelected({
+export const FileManagerActionSelected = memo(({
   sx,
   action,
   selected,
@@ -24,7 +25,7 @@ export function FileManagerActionSelected({
   numSelected,
   onSelectAllItems,
   ...other
-}: Props) {
+}: Props) => {
   return (
     <Portal>
       <Box
@@ -83,4 +84,4 @@ export function FileManagerActionSelected({
       </Box>
     </Portal>
   );
-}
+});
