@@ -148,7 +148,7 @@ export function FileManagerFileItem({
         <FileItemInfo
           type="file"
           title={file.name}
-          values={[fData(file.size), fDateTime(file.modifiedAt)]}
+          values={[fDateTime(file.modifiedAt)]}
         />
 
 

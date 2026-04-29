@@ -134,7 +134,7 @@ export function FileManagerFolderItem({
         <FileItemInfo
           type="folder"
           title={folder.name}
-          values={[fData(folder.size), `${folder.totalFiles} files`]}
+          values={[`${folder.totalFiles} files`]}
         />
 
 

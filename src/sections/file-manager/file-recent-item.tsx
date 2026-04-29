@@ -112,7 +112,7 @@ export function FileRecentItem({ file, onDelete, sx, ...other }: Props) {
         <FileItemInfo
           type="recent-file"
           title={file.name}
-          values={[fData(file.size), fDateTime(file.modifiedAt)]}
+          values={[fDateTime(file.modifiedAt)]}
         />
 
 
