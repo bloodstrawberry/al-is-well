@@ -571,7 +571,7 @@ export function FileManagerView() {
                 }}
               >
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 1 }}>File manager</Typography>
+                  <Typography variant="h4" sx={{ mb: 1 }}>OPIC Drive</Typography>
                   {renderBreadcrumbs()}
                 </Box>
                 <Stack direction="row" spacing={1}>
