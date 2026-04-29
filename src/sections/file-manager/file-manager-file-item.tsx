@@ -12,6 +12,9 @@ import MenuItem from '@mui/material/MenuItem';
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -51,6 +54,9 @@ export function FileManagerFileItem({
 
   const checkbox = useBoolean();
   const favorite = useBoolean(file.isFavorited);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleDoubleClick = useCallback(() => {
     onOpenFile?.();
@@ -123,6 +129,7 @@ export function FileManagerFileItem({
         selected={selected}
         sx={sx}
         onDoubleClick={handleDoubleClick}
+        onClick={isMobile ? handleDoubleClick : undefined}
         {...other}
       >
 

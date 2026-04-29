@@ -113,6 +113,7 @@ export function FileItemIcon({
             },
           }}
           sx={{ p: 0, width: 1, height: 1 }}
+          onClick={(event) => event.stopPropagation()}
         />
       ) : (
         renderIcon()
@@ -224,6 +225,7 @@ export function FileItemActions({
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
+      onClick={(event) => event.stopPropagation()}
       {...other}
     >
       <Checkbox
