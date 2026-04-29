@@ -79,6 +79,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
     paddingTop: 0,
     paddingBottom: 0,
     minHeight: 20,
+    minWidth: 0,
     fontWeight: theme.typography.fontWeightMedium,
     [`& .${treeItemClasses.iconContainer}`]: {
       marginRight: 0,
@@ -355,8 +356,13 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
             renderOption={(props, option) => {
               const { key, ...optionProps } = props as any;
               return (
-                <li key={key} {...optionProps}>
-                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: 1 }}>
+                <li key={key} {...optionProps} style={{ ...optionProps.style, overflow: 'hidden' }}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                    sx={{ width: 1, minWidth: 0, overflow: 'hidden' }}
+                  >
                     <Iconify
                       icon={
                         option.type === 'folder'
@@ -365,15 +371,22 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
                       }
                       width={18}
                       sx={{
+                        flexShrink: 0,
                         color: option.type === 'folder' ? 'warning.main' : 'text.disabled',
                       }}
                     />
-                    <ListItemText
-                      primary={option.label}
-                      secondary={option.path}
-                      primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                      secondaryTypographyProps={{ variant: 'caption', noWrap: true, sx: { opacity: 0.6 } }}
-                    />
+                    <Box sx={{ minWidth: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body2" noWrap sx={{ display: 'block', width: 1 }}>
+                        {option.label}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        noWrap
+                        sx={{ display: 'block', width: 1, opacity: 0.6 }}
+                      >
+                        {option.path}
+                      </Typography>
+                    </Box>
                   </Stack>
                 </li>
               );
