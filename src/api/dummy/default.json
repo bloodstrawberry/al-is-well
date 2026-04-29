@@ -4,16 +4,22 @@
       "id": "1777443455203",
       "label": "A. 일반 주제",
       "type": "folder",
+      "createdAt": "2024-04-20T10:00:00Z",
+      "modifiedAt": "2024-04-20T10:00:00Z",
       "children": [
         {
           "id": "1777443553869",
           "label": "01. 가구 Furniture (공통)",
           "type": "folder",
+          "createdAt": "2024-04-20T10:30:00Z",
+          "modifiedAt": "2024-04-20T10:30:00Z",
           "children": [
             {
               "id": "1777443579253",
               "label": "01. 집에 있는 가구 또는 가장 좋아하는 가구 묘사",
-              "type": "file"
+              "type": "file",
+              "createdAt": "2024-04-20T11:00:00Z",
+              "modifiedAt": "2024-04-20T11:00:00Z"
             }
           ]
         }
@@ -23,6 +29,8 @@
       "id": "1777443466448",
       "label": "B. 롤플레이",
       "type": "folder",
+      "createdAt": "2024-04-21T12:00:00Z",
+      "modifiedAt": "2024-04-21T12:00:00Z",
       "children": [],
       "isFavorited": false
     },
@@ -30,6 +38,8 @@
       "id": "1777443498415",
       "label": "C. 14, 15",
       "type": "folder",
+      "createdAt": "2024-04-22T14:00:00Z",
+      "modifiedAt": "2024-04-22T14:00:00Z",
       "children": []
     }
   ],

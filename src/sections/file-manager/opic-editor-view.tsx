@@ -77,9 +77,10 @@ type Props = {
   fileName: string;
   onBack: () => void;
   onSaveSuccess: () => void;
+  onSave?: (fileId: string) => void;
 };
 
-export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Props) {
+export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave }: Props) {
   const theme = useTheme();
 
   const [scriptData, setScriptData] = useState<ScriptData>({
@@ -124,6 +125,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess }: Prop
   const handleSave = async () => {
     try {
       await saveFileScript(fileId, scriptData);
+      onSave?.(fileId);
       toast.success('Script saved successfully!');
       onSaveSuccess();
     } catch (error) {

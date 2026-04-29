@@ -82,6 +82,11 @@ export function FileManagerCreateFolderDialog({
             autoFocus
             value={folderName}
             onChange={onChangeFolderName}
+            onKeyUp={(event) => {
+              if (event.key === 'Enter') {
+                (onCreate || onUpdate)?.();
+              }
+            }}
             {...textFieldProps}
             sx={{ mt: 1 }}
           />

@@ -117,7 +117,8 @@ export function FileManagerView() {
     const loadData = async () => {
       try {
         const data = await getTreeData();
-        setTreeData(data);
+        const sanitizedData = sanitizeTreeData(data);
+        setTreeData(sanitizedData);
         setIsLoaded(true);
       } catch (error) {
         console.error('Failed to load tree data from IndexedDB', error);
@@ -178,12 +179,12 @@ export function FileManagerView() {
       size: 0,
       tags: [],
       isFavorited: !!node.isFavorited,
-      createdAt: new Date().toISOString(),
-      modifiedAt: new Date().toISOString(),
+      createdAt: node.createdAt,
+      modifiedAt: node.modifiedAt,
       shared: null,
       totalFiles: node.children?.length || 0,
     })) as IFile[];
-  }, [currentFolderId, flattenedTree]);
+  }, [currentFolderId, flattenedTree, treeData]);
 
   const dataFiltered = applyFilter({
     inputData: dataForGrid,
@@ -220,10 +221,13 @@ export function FileManagerView() {
 
   const handleCreateItem = useCallback(
     (name: string, type: 'folder' | 'file') => {
+      const now = new Date().toISOString();
       const newItem = {
         id: Date.now().toString(),
         label: name,
         type,
+        createdAt: now,
+        modifiedAt: now,
         ...(type === 'folder' && { children: [] }),
       };
 
@@ -368,7 +372,7 @@ export function FileManagerView() {
       const updateFavoriteInTree = (nodes: any[]): any[] =>
         nodes.map((node) => {
           if (node.id === id) {
-            return { ...node, isFavorited: !node.isFavorited };
+            return { ...node, isFavorited: !node.isFavorited, modifiedAt: new Date().toISOString() };
           }
           if (node.children) {
             return { ...node, children: updateFavoriteInTree(node.children) };
@@ -623,7 +627,7 @@ export function FileManagerView() {
                     const updateNameInTree = (nodes: any[]): any[] =>
                       nodes.map((node) => {
                         if (node.id === id) {
-                          return { ...node, label: name };
+                          return { ...node, label: name, modifiedAt: new Date().toISOString() };
                         }
                         if (node.children) {
                           return { ...node, children: updateNameInTree(node.children) };
@@ -648,6 +652,19 @@ export function FileManagerView() {
               fileName={selectedFile.name}
               onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
               onSaveSuccess={() => updateURL({ view: 'live' })}
+              onSave={(id) => {
+                const updateModifiedAt = (nodes: any[]): any[] =>
+                  nodes.map((node) => {
+                    if (node.id === id) {
+                      return { ...node, modifiedAt: new Date().toISOString() };
+                    }
+                    if (node.children) {
+                      return { ...node, children: updateModifiedAt(node.children) };
+                    }
+                    return node;
+                  });
+                setTreeData((prev) => updateModifiedAt(prev));
+              }}
             />
           ) : viewMode === 'live' && selectedFile ? (
             <OpicLiveView
@@ -701,4 +718,21 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   }
 
   return inputData;
+}
+
+// ----------------------------------------------------------------------
+
+function sanitizeTreeData(nodes: any[]): any[] {
+  const now = new Date().toISOString();
+  return nodes.map((node) => {
+    const updatedNode = {
+      ...node,
+      createdAt: node.createdAt || now,
+      modifiedAt: node.modifiedAt || now,
+    };
+    if (node.children) {
+      updatedNode.children = sanitizeTreeData(node.children);
+    }
+    return updatedNode;
+  });
 }
