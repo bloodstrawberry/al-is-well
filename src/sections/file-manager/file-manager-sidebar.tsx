@@ -50,12 +50,13 @@ const RootStyle = styled(Box, {
 
 const ResizeHandle = styled(Box)(({ theme }) => ({
   top: 0,
-  right: -4,
+  right: -8,
   bottom: 0,
-  width: 8,
+  width: 16,
   zIndex: 10,
   cursor: 'col-resize',
   position: 'absolute',
+  touchAction: 'none',
   '&:hover': {
     '&::after': {
       backgroundColor: theme.vars.palette.primary.main,
@@ -64,7 +65,7 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
   '&::after': {
     content: '""',
     top: 0,
-    left: 3,
+    left: 7,
     bottom: 0,
     width: 2,
     position: 'absolute',
@@ -163,6 +164,15 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
     [width]
   );
 
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      setIsResizing(true);
+      startXRef.current = e.touches[0].clientX;
+      startWidthRef.current = width;
+    },
+    [width]
+  );
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isResizing) return;
@@ -176,7 +186,24 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
     [isResizing, setWidth]
   );
 
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!isResizing) return;
+
+      window.requestAnimationFrame(() => {
+        const deltaX = e.touches[0].clientX - startXRef.current;
+        const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidthRef.current + deltaX));
+        setWidth(newWidth);
+      });
+    },
+    [isResizing, setWidth]
+  );
+
   const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
     setIsResizing(false);
   }, []);
 
@@ -186,19 +213,25 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
       document.body.style.cursor = 'col-resize';
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
     } else {
       document.body.style.userSelect = 'auto';
       document.body.style.cursor = 'auto';
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     }
     return () => {
       document.body.style.userSelect = 'auto';
       document.body.style.cursor = 'auto';
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isResizing, handleMouseMove, handleMouseUp]);
+  }, [isResizing, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   const sortedData = useMemo(() => {
     const sortNodes = (nodes: any[]): any[] => {
@@ -410,7 +443,9 @@ export function FileManagerSidebar({ data, isCollapsed, onToggle, selectedId, on
           </Box>
         </Stack>
 
-        {!displayCollapsed && <ResizeHandle onMouseDown={handleMouseDown} />}
+        {!displayCollapsed && (
+          <ResizeHandle onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} />
+        )}
       </RootStyle>
 
       <IconButton
