@@ -1,16 +1,29 @@
 'use client';
 
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { HomeLottoDisplay } from '../home-lotto-display';
 
 // ----------------------------------------------------------------------
 
 export function HomeView() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <>
       <Stack sx={{ position: 'relative', bgcolor: 'background.default', gap: 3, alignItems: 'center', py: 5 }}>
         <HomeLottoDisplay />
+        
+        <Alert severity={isMobile ? "info" : "success"} sx={{ width: 'fit-content' }}>
+          {isMobile ? "You are on a Mobile Device" : "You are on a Desktop Device"}
+        </Alert>
+
+        <div>isMobile: {String(isMobile)}</div>
+
         <div>test</div>
         <div style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '10px 0' }}>
           <audio controls>
