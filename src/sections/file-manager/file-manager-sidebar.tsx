@@ -97,18 +97,26 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   color: theme.vars.palette.text.secondary,
   [`& .${treeItemClasses.content}`]: {
-    paddingRight: theme.spacing(0.5),
-    paddingTop: 0,
-    paddingBottom: 0,
-    minHeight: 20,
+    paddingRight: theme.spacing(1),
+    paddingTop: theme.spacing(0.2),
+    paddingBottom: theme.spacing(0.2),
+    margin: theme.spacing(0.2, 0),
+    minHeight: 28,
     minWidth: 0,
+    borderRadius: '6px',
     fontWeight: theme.typography.fontWeightMedium,
+    transition: theme.transitions.create(['background-color', 'color'], {
+      duration: theme.transitions.duration.shorter,
+    }),
     [`& .${treeItemClasses.iconContainer}`]: {
       marginRight: 0,
-      width: 10,
+      width: 14,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       '& svg': {
-        width: 12,
-        height: 12,
+        width: 14,
+        height: 14,
       },
     },
     '&.Mui-expanded': {
@@ -197,7 +205,7 @@ const SidebarTreeItem = memo(
             direction="row"
             alignItems="center"
             spacing={0.3}
-            sx={{ py: 0.5, minWidth: 0 }}
+            sx={{ py: 0.2, minWidth: 0 }}
             onClick={(event) => {
               event.stopPropagation();
               onSelect(node.id);
