@@ -274,12 +274,19 @@ export function useOpicSpeech() {
       return {};
     });
     setIsListening(null);
+    setPlayingIndex(null);
+    setSpeakingIndex(null);
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
   }, []);
 
   return {
     userAnswers,
     setUserAnswers,
     recordedAudios,
+    setRecordedAudios,
     isListening,
     isPreparing,
     playingIndex,
