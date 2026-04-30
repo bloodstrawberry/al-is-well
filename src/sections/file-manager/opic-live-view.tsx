@@ -220,10 +220,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       window.speechSynthesis.cancel();
     }
 
-    // Blur any focused input to prevent keyboard on mobile
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
@@ -249,14 +246,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       }
 
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
-      
-      // Direct DOM update for better mobile compatibility
-      if (inputRefs.current[index]) {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-          window.HTMLInputElement.prototype, 'value'
-        )?.set;
-        nativeInputValueSetter?.call(inputRefs.current[index], transcript);
-      }
     };
 
     recognition.onerror = (event: any) => {
@@ -679,7 +668,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                               handleCheckAnswer(index);
                             }
                           }}
-                          onFocus={(e) => { if (isListening !== null) e.target.blur(); }}
+
                           autoComplete="off"
                           slotProps={{
                             input: {

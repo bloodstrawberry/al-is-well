@@ -278,10 +278,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
 
-    // Blur any focused input to prevent keyboard on mobile
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
@@ -307,14 +304,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
       
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
-      
-      // Direct DOM update for better mobile compatibility
-      if (inputRefs.current[index]) {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-          window.HTMLInputElement.prototype, 'value'
-        )?.set;
-        nativeInputValueSetter?.call(inputRefs.current[index], transcript);
-      }
     };
 
     recognition.onerror = (event: any) => {
@@ -621,7 +610,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           placeholder="Listen and type English..." value={userAnswers[index] || ''}
                           onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
                           onKeyDown={(e) => { if (e.key === 'Enter') handleCheckAnswer(index); }}
-                          onFocus={(e) => { if (isListening !== null) e.target.blur(); }}
+
                           autoComplete="off"
                           slotProps={{
                             input: {
