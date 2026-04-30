@@ -357,28 +357,45 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
       {/* Header */}
       <Stack
-        direction="row"
-        alignItems="center"
-        spacing={2}
-        sx={{ mb: 4, position: 'sticky', top: 0, bgcolor: 'background.default', zIndex: 10, py: 1 }}
+        spacing={{ xs: 1, md: 0 }}
+        direction={{ xs: 'column', md: 'row' }}
+        alignItems={{ xs: 'stretch', md: 'center' }}
+        sx={{ 
+          mb: 4, 
+          position: 'sticky', 
+          top: 0, 
+          bgcolor: 'background.default', 
+          zIndex: 10, 
+          py: 1.5,
+          borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`
+        }}
       >
-        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
-          <Iconify icon="eva:arrow-ios-back-fill" />
-        </IconButton>
+        <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, minWidth: 0 }}>
+          <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', flexShrink: 0 }}>
+            <Iconify icon="eva:arrow-ios-back-fill" />
+          </IconButton>
 
-        <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {fileName}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700 }}>
-            Script {currentIndex + 1} of {playlist?.fileIds.length || 0}: {currentFileName}
-          </Typography>
+          <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+              {fileName}
+            </Typography>
+            <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
+              {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
+            </Typography>
+          </Stack>
         </Stack>
 
-        <Stack direction="row" spacing={1}>
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          justifyContent={{ xs: 'center', md: 'flex-end' }} 
+          spacing={1} 
+          sx={{ flexShrink: 0 }}
+        >
           <Tooltip title="Previous Script">
             <span>
               <IconButton 
+                size="small"
                 disabled={currentIndex === 0} 
                 onClick={handlePrev}
                 sx={{ bgcolor: 'background.neutral' }}
@@ -391,6 +408,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           <Tooltip title="Next Script">
             <span>
               <IconButton 
+                size="small"
                 disabled={!playlist || currentIndex === playlist.fileIds.length - 1} 
                 onClick={handleNext}
                 sx={{ bgcolor: 'background.neutral' }}
@@ -400,10 +418,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
             </span>
           </Tooltip>
 
-          <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+          <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.5, md: 1 }, height: 24, alignSelf: 'center' }} />
 
           <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
             <IconButton
+              size="small"
               color={autoPlay ? 'primary' : 'default'}
               onClick={() => setAutoPlay(!autoPlay)}
               sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
@@ -414,6 +433,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
           <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
             <IconButton
+              size="small"
               color={allRevealed ? 'warning' : 'success'}
               onClick={toggleAll}
               sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
@@ -423,7 +443,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           </Tooltip>
 
           <Tooltip title="Edit Playlist">
-            <IconButton color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
+            <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
           </Tooltip>
