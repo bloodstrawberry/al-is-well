@@ -289,9 +289,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
-      // Start MediaRecorder with a small delay on mobile to avoid mic conflict
+      // Start MediaRecorder with a delay on mobile to avoid mic conflict
       if (isMobile) {
-        setTimeout(() => startMediaRecorder(index), 500);
+        setTimeout(() => startMediaRecorder(index), 1000);
       } else {
         startMediaRecorder(index);
       }
@@ -306,6 +306,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
       
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+      
+      // Direct DOM update for better mobile compatibility
+      if (inputRefs.current[index]) {
+        inputRefs.current[index].value = transcript;
+      }
 
       // Auto-scroll logic
       const input = inputRefs.current[index];
@@ -616,7 +621,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           autoComplete="off"
                           slotProps={{
                             input: {
-                              readOnly: isListening === index,
                               inputMode: isListening === index ? 'none' : 'text',
                               endAdornment: (
                                 <InputAdornment position="end" sx={{ gap: 0.5 }}>

@@ -235,9 +235,9 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
-      // Start MediaRecorder with a small delay on mobile to avoid mic conflict
+      // Start MediaRecorder with a delay on mobile to avoid mic conflict
       if (isMobile) {
-        setTimeout(() => startMediaRecorder(index), 500);
+        setTimeout(() => startMediaRecorder(index), 1000);
       } else {
         startMediaRecorder(index);
       }
@@ -252,6 +252,11 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       }
 
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+      
+      // Direct DOM update for better mobile compatibility
+      if (inputRefs.current[index]) {
+        inputRefs.current[index].value = transcript;
+      }
 
       // Auto-scroll logic
       const input = inputRefs.current[index];
@@ -670,36 +675,35 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           inputRef={(el) => (inputRefs.current[index] = el)}
                           placeholder="Listen and type English..."
                           value={userAnswers[index] || ''}
-                        onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleCheckAnswer(index);
-                          }
-                        }}
-                        autoComplete="off"
-                        slotProps={{
-                          input: {
-                            readOnly: isListening === index,
-                            inputMode: isListening === index ? 'none' : 'text',
-                            endAdornment: (
-                              <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                                <IconButton
-                                  size="small"
-                                  color={isListening === index ? 'error' : 'default'}
-                                  onClick={() => (isListening === index ? stopListening() : startListening(index))}
-                                  sx={{
-                                    ...(isListening === index && {
-                                      animation: 'pulse 1.5s infinite',
-                                      '@keyframes pulse': {
-                                        '0%': { transform: 'scale(1)', opacity: 1 },
-                                        '50%': { transform: 'scale(1.2)', opacity: 0.7 },
-                                        '100%': { transform: 'scale(1)', opacity: 1 },
-                                      },
-                                    }),
-                                  }}
-                                >
-                                  <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
-                                </IconButton>
+                          onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleCheckAnswer(index);
+                            }
+                          }}
+                          autoComplete="off"
+                          slotProps={{
+                            input: {
+                              inputMode: isListening === index ? 'none' : 'text',
+                              endAdornment: (
+                                <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    color={isListening === index ? 'error' : 'default'}
+                                    onClick={() => (isListening === index ? stopListening() : startListening(index))}
+                                    sx={{
+                                      ...(isListening === index && {
+                                        animation: 'pulse 1.5s infinite',
+                                        '@keyframes pulse': {
+                                          '0%': { transform: 'scale(1)', opacity: 1 },
+                                          '50%': { transform: 'scale(1.2)', opacity: 0.7 },
+                                          '100%': { transform: 'scale(1)', opacity: 1 },
+                                        },
+                                      }),
+                                    }}
+                                  >
+                                    <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                                  </IconButton>
                                   <IconButton
                                     size="small"
                                     disabled={!recordedAudios[index]}
@@ -714,14 +718,14 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                                   >
                                     <Iconify icon="solar:play-bold" />
                                   </IconButton>
-                                   <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
+                                  <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
                                     <Iconify icon="solar:check-read-bold" />
                                   </IconButton>
-                              </InputAdornment>
-                            ),
-                          },
-                        }}
-                      />
+                                </InputAdornment>
+                              ),
+                            },
+                          }}
+                        />
 
                       {(result || allRevealed) && (
                         <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
