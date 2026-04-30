@@ -257,8 +257,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     silenceTimerRef.current = setTimeout(() => {
       stopListening();
-      toast.info('3초간 입력이 없어 녹음을 종료합니다.');
-    }, 3000);
+      toast.info('5초간 입력이 없어 녹음을 종료합니다.');
+    }, 5000);
   }, [stopListening]);
 
   const startListening = (index: number) => {
@@ -289,12 +289,22 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
-      startMediaRecorder(index);
+      // Start MediaRecorder with a small delay on mobile to avoid mic conflict
+      if (isMobile) {
+        setTimeout(() => startMediaRecorder(index), 500);
+      } else {
+        startMediaRecorder(index);
+      }
     };
 
     recognition.onresult = (event: any) => {
       resetSilenceTimer(index);
-      const transcript = Array.from(event.results).map((result: any) => result[0].transcript).join('');
+      
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
 
       // Auto-scroll logic
