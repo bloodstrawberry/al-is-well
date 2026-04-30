@@ -98,6 +98,7 @@ const ResizeHandle = styled(Box)(({ theme }) => ({
 const StyledTreeItem = styled(TreeItem)(({ theme }) => ({
   color: theme.vars.palette.text.secondary,
   [`& .${treeItemClasses.content}`]: {
+    userSelect: 'none',
     paddingRight: theme.spacing(1),
     paddingTop: theme.spacing(0.2),
     paddingBottom: theme.spacing(0.2),
@@ -249,6 +250,7 @@ const SidebarTreeItem = memo(
                   backgroundColor: (theme) => theme.vars.palette.background.paper,
                   borderRadius: 0.5,
                   px: 0.5,
+                  userSelect: 'text',
                   '& .MuiInputBase-input': {
                     p: 0,
                     height: '24px',
@@ -549,6 +551,7 @@ export function FileManagerSidebar({
             alignItems="center"
             justifyContent="space-between"
             sx={{
+              userSelect: 'none',
               borderRadius: 0.5,
               p: 0.5,
             }}

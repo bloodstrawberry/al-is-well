@@ -250,7 +250,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           </Typography>
 
           {selectedFiles.length > 0 ? (
-            <Stack spacing={1.5}>
+            <Stack spacing={1.5} sx={{ userSelect: { xs: 'none', md: 'auto' } }}>
               {selectedFiles.map((file, index) => (
                 <Card
                   key={file.id}
