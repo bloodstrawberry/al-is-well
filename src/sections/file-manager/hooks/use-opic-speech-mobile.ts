@@ -9,6 +9,7 @@ declare global {
   interface Window {
     webkitSpeechRecognition: any;
     SpeechRecognition: any;
+    webkitAudioContext: any;
   }
 }
 
@@ -27,6 +28,7 @@ export function useOpicSpeech() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isManualStopRef = useRef(false);
@@ -65,6 +67,11 @@ export function useOpicSpeech() {
       mediaStreamRef.current = null;
     }
 
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
     setIsListening(null);
     setIsPreparing(false);
   }, []);
@@ -74,7 +81,6 @@ export function useOpicSpeech() {
       clearTimeout(silenceTimerRef.current);
     }
     
-    // Mobile version: fixed 5 seconds
     const timeoutDuration = 5000;
     const timeoutMessage = '5초간 입력이 없어 녹음을 종료합니다.';
 
@@ -90,7 +96,6 @@ export function useOpicSpeech() {
     recognitionRef.current = recognition;
 
     recognition.lang = 'en-US';
-    // Mobile: continuous=false to prevent hangs
     recognition.continuous = false;
     recognition.interimResults = true;
 
@@ -164,8 +169,14 @@ export function useOpicSpeech() {
 
     const initializeMobile = async () => {
       try {
-        // 1. MediaStream 먼저 확보 (iOS Safari 등 대응)
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // 1. 마이크 스트림 확보 (PWA 최적화 설정)
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { 
+            echoCancellation: true, 
+            noiseSuppression: true, 
+            autoGainControl: true 
+          } 
+        });
         mediaStreamRef.current = stream;
 
         if (isManualStopRef.current) {
@@ -173,7 +184,36 @@ export function useOpicSpeech() {
           return;
         }
 
-        // 2. MediaRecorder 즉시 시작 (인식보다 녹음이 더 안정적임)
+        // 2. Web Audio API를 통한 강제 침묵 방지 (VAD - Voice Activity Detection)
+        const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContextCtor();
+        audioContextRef.current = audioContext;
+        
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        const checkVolume = () => {
+          if (isManualStopRef.current || !isListeningRef.current) return;
+          
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const average = sum / dataArray.length;
+          
+          // 평균 볼륨이 임계값(약간의 소음 포함) 이상이면 타이머 리셋
+          if (average > 12) { 
+            resetSilenceTimer(); 
+          }
+          requestAnimationFrame(checkVolume);
+        };
+        checkVolume();
+
+        // 3. MediaRecorder 준비 (첫 음성 인식 결과가 나올 때 시작하도록 지연)
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
         audioChunksRef.current = [];
@@ -193,20 +233,21 @@ export function useOpicSpeech() {
           }
         };
 
-        mediaRecorder.start();
-
-        // 3. 하드웨어가 안정될 때까지 약간 대기 후 음성 인식 시작
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (isManualStopRef.current) return;
-
         // 4. SpeechRecognition 설정 및 시작
         const recognition = setupRecognition(index);
         
-        // onstart를 확장하여 준비 상태 해제
-        const originalOnStart = recognition.onstart;
+        // 중요: 음성 인식이 먼저 마이크를 확실히 잡도록 onstart 이후에 녹음 고려
+        // 또는 첫 결과(onresult)가 나올 때 녹음 시작
+        const originalOnResult = recognition.onresult;
+        recognition.onresult = (event: any) => {
+          if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive' && !isManualStopRef.current) {
+            mediaRecorderRef.current.start();
+            console.log('Mobile MediaRecorder started on first speech result');
+          }
+          originalOnResult(event);
+        };
+
         recognition.onstart = () => {
-          if (originalOnStart) originalOnStart();
           setIsPreparing(false);
           toast.info('준비되었습니다. 말씀해 주세요!');
         };
@@ -228,7 +269,7 @@ export function useOpicSpeech() {
 
     initializeMobile();
 
-  }, [setupRecognition, stopListening]);
+  }, [setupRecognition, resetSilenceTimer, stopListening]);
 
   const recordedAudiosRef = useRef<Record<number, string>>({});
   useEffect(() => {
@@ -241,6 +282,9 @@ export function useOpicSpeech() {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(t => t.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
       }
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
