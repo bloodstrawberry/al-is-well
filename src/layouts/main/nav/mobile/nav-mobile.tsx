@@ -84,28 +84,7 @@ export function NavMobile({ data, open, onClose, slots, sx }: NavMobileProps) {
         </Nav>
       </Scrollbar>
 
-      {slots?.bottomArea ?? (
-        <Box
-          sx={{
-            py: 3,
-            px: 2.5,
-            gap: 1.5,
-            display: 'flex',
-          }}
-        >
-          <SignInButton fullWidth />
-
-          <Button
-            fullWidth
-            variant="contained"
-            rel="noopener noreferrer"
-            target="_blank"
-            href={paths.minimalStore}
-          >
-            Purchase
-          </Button>
-        </Box>
-      )}
+      {slots?.bottomArea}
     </Drawer>
   );
 }

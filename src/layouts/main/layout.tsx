@@ -20,7 +20,7 @@ import { NavMobile } from './nav/mobile';
 import { NavDesktop } from './nav/desktop';
 import { Footer, HomeFooter } from './footer';
 import { MenuButton } from '../components/menu-button';
-import { navData as mainNavData } from '../nav-config-main';
+import { mainNavData } from '../nav-config-dashboard';
 import { SettingsButton } from '../components/settings-button';
 import { MainSection, LayoutSection, HeaderSection } from '../core';
 
