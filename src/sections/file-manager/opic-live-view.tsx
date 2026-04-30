@@ -249,6 +249,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         .join('');
 
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+
+      // Auto-scroll logic
+      const input = inputRefs.current[index];
+      if (input) {
+        input.focus();
+        setTimeout(() => {
+          input.selectionStart = input.selectionEnd = input.value.length;
+          input.scrollLeft = input.scrollWidth;
+        }, 0);
+      }
     };
 
     recognition.onerror = (event: any) => {

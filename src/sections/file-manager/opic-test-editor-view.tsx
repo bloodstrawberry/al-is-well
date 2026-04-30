@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -41,6 +41,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
   const [playlist, setPlaylist] = useState<PlaylistData>({ fileIds: [] });
   const [driveFiles, setDriveFiles] = useState<{ id: string; label: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const initialPlaylistRef = useRef<any>(null);
 
   // Load drive files for autocomplete
   useEffect(() => {
@@ -73,6 +74,9 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         const data = await getFileScript(fileId, storageKey);
         if (data && data.fileIds) {
           setPlaylist(data);
+          initialPlaylistRef.current = JSON.stringify(data);
+        } else {
+          initialPlaylistRef.current = JSON.stringify({ fileIds: [] });
         }
       } catch (error) {
         console.error('Failed to load playlist', error);
@@ -83,11 +87,19 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
     loadPlaylist();
   }, [fileId, storageKey]);
 
-  const handleSave = async () => {
+  const handleSave = async (silent = false) => {
     try {
+      const currentDataStr = JSON.stringify(playlist);
+      const hasChanged = currentDataStr !== initialPlaylistRef.current;
+
       await saveFileScript(fileId, playlist, storageKey);
       onSave?.(fileId);
-      toast.success('Playlist saved successfully!');
+      
+      if (!silent || hasChanged) {
+        toast.success('Playlist saved successfully!');
+      }
+
+      initialPlaylistRef.current = currentDataStr;
       onSaveSuccess();
     } catch (error) {
       console.error('Failed to save playlist', error);
@@ -180,7 +192,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
               <IconButton
                 color="info"
                 onClick={async () => {
-                  await handleSave();
+                  await handleSave(true);
                   onStartTest();
                 }}
                 sx={{

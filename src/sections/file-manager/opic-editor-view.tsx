@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
+import { getIsMobile } from 'src/utils/is-mobile';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -101,6 +102,16 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
   const [bulkText, setBulkText] = useState('');
   const bulkModal = useBoolean();
 
+  const isMobile = getIsMobile();
+
+  const [isListening, setIsListening] = useState<number | null>(null);
+  const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
+
+  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
   useEffect(() => {
     const loadScript = async () => {
       setLoading(true);
@@ -189,6 +200,104 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
       toast.success(`${newLines.length} lines applied!`);
     } else {
       toast.error('Invalid format. Please provide Korean and English pairs.');
+    }
+  };
+
+  const startListening = (index: number) => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다.');
+      return;
+    }
+
+    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) {} }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsListening(index);
+      toast.info('인식을 시작합니다.');
+      startMediaRecorder(index);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0].transcript)
+        .join('');
+      
+      handleChangeLine(index, 'en', transcript);
+
+      // Auto-scroll logic: move cursor to end and scroll
+      const input = inputRefs.current[index];
+      if (input) {
+        input.focus();
+        setTimeout(() => {
+          input.selectionStart = input.selectionEnd = input.value.length;
+          input.scrollLeft = input.scrollWidth;
+          input.scrollTop = input.scrollHeight;
+        }, 0);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.warn('Recognition error', event.error);
+      stopListening();
+    };
+
+    recognition.onend = () => {
+      stopListening();
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+      setIsListening(null);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsListening(null);
+  };
+
+  const startMediaRecorder = async (index: number) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setRecordedAudios((prev) => {
+            if (prev[index]) URL.revokeObjectURL(prev[index]);
+            return { ...prev, [index]: audioUrl };
+          });
+        }
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+    } catch (err) {
+      console.error('Failed to start recording', err);
     }
   };
 
@@ -605,10 +714,48 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                       value={line.en}
                       onChange={(e) => handleChangeLine(index, 'en', e.target.value)}
                       multiline
+                      inputRef={(el) => (inputRefs.current[index] = el)}
                       variant="standard"
                       placeholder="English translation..."
                       slotProps={{
-                        input: { sx: { color: 'primary.main', fontWeight: 500 } }
+                        input: { 
+                          sx: { color: 'primary.main', fontWeight: 500 },
+                          endAdornment: (
+                            <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                              <IconButton
+                                size="small"
+                                color={isListening === index ? 'error' : 'default'}
+                                onClick={() => (isListening === index ? stopListening() : startListening(index))}
+                                sx={{
+                                  ...(isListening === index && {
+                                    animation: 'pulse 1.5s infinite',
+                                    '@keyframes pulse': {
+                                      '0%': { transform: 'scale(1)', opacity: 1 },
+                                      '50%': { transform: 'scale(1.2)', opacity: 0.7 },
+                                      '100%': { transform: 'scale(1)', opacity: 1 },
+                                    },
+                                  }),
+                                }}
+                              >
+                                <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                disabled={!recordedAudios[index]}
+                                onClick={() => {
+                                  const audio = new Audio(recordedAudios[index]);
+                                  audio.play();
+                                }}
+                                sx={{
+                                  color: recordedAudios[index] ? 'info.main' : 'text.disabled',
+                                  bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                                }}
+                              >
+                                <Iconify icon="solar:play-bold" />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }
                       }}
                     />
                   </Stack>

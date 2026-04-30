@@ -248,12 +248,22 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
-      if (!isMobile) startMediaRecorder(index);
+      startMediaRecorder(index);
     };
 
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results).map((result: any) => result[0].transcript).join('');
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+
+      // Auto-scroll logic
+      const input = inputRefs.current[index];
+      if (input) {
+        input.focus();
+        setTimeout(() => {
+          input.selectionStart = input.selectionEnd = input.value.length;
+          input.scrollLeft = input.scrollWidth;
+        }, 0);
+      }
     };
 
     recognition.onerror = (event: any) => {
