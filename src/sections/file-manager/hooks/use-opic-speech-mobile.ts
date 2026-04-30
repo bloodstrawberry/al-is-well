@@ -112,7 +112,7 @@ export function useOpicSpeech() {
       setIsPreparing(false);
       resetSilenceTimer();
       if (isFirstStartRef.current) {
-        toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
+        // toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
         isFirstStartRef.current = false;
       }
     };
