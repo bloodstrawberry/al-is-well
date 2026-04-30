@@ -205,65 +205,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }, 5000);
   }, [stopListening]);
 
-  const launchRecognitionSession = useCallback((index: number) => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition || isManualStopRef.current) return;
-
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-
-    recognition.lang = 'en-US';
-    recognition.continuous = false;  // CRITICAL: mobile PWA only supports false
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      resetSilenceTimer();
-    };
-
-    recognition.onresult = (event: any) => {
-      resetSilenceTimer();
-
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        sessionTranscript += event.results[i][0].transcript;
-      }
-
-      const fullTranscript = accumulatedTranscriptRef.current + sessionTranscript;
-      currentFullTranscriptRef.current = fullTranscript;
-      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('Speech recognition error', event.error);
-      if (event.error === 'not-allowed') {
-        toast.warning('마이크 권한이 거부되었습니다.');
-        stopListening();
-      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        toast.warning(`인식 오류: ${event.error}`);
-        stopListening();
-      }
-      // 'no-speech' and 'aborted' → will be handled by onend
-    };
-
-    recognition.onend = () => {
-      if (!isManualStopRef.current) {
-        // Save accumulated transcript before creating new session
-        accumulatedTranscriptRef.current = currentFullTranscriptRef.current;
-        // Create a brand new recognition instance for next session
-        launchRecognitionSession(index);
-        return;
-      }
-      stopListening();
-    };
-
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error('Recognition start failed', e);
-    }
-  }, [resetSilenceTimer, stopListening]);
-
-  const startListening = async (index: number) => {
+  const startListening = (index: number) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
@@ -272,9 +214,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
 
     isManualStopRef.current = false;
-    isFirstStartRef.current = true;
-    accumulatedTranscriptRef.current = '';
-    currentFullTranscriptRef.current = '';
 
     // Cleanup previous
     if (recognitionRef.current) {
@@ -283,51 +222,95 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       try { mediaRecorderRef.current.stop(); } catch (e) {}
     }
-    if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach((t) => t.stop()); }
+    if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach((t) => t.stop()); mediaStreamRef.current = null;}
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
 
-    // Step 1: Pre-acquire mic stream (resolves permission before recognition starts)
-    let stream: MediaStream;
+    // 1. Initialize SpeechRecognition
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    
+    recognition.lang = 'en-US';
+    recognition.continuous = true; // Use continuous to avoid needing auto-restarts
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsListening(index);
+      toast.info('인식을 시작합니다. 말씀해 주세요.');
+      resetSilenceTimer();
+    };
+
+    recognition.onresult = (event: any) => {
+      resetSilenceTimer();
+
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+
+      setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+      
+      // Fallback direct DOM update just in case React state lags on mobile PWA
+      if (inputRefs.current[index]) {
+        inputRefs.current[index].value = transcript;
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.warn('Speech recognition error', event.error);
+      if (event.error === 'not-allowed') {
+        toast.warning('마이크 권한이 거부되었습니다.');
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast.warning(`인식 오류: ${event.error}`);
+      }
+      stopListening();
+    };
+
+    recognition.onend = () => {
+      // Let it naturally stop. Auto-restarting on mobile often fails due to user-gesture requirements.
+      stopListening();
+    };
+
+    // 2. Start SpeechRecognition SYNCHRONOUSLY to satisfy mobile PWA user-gesture rules
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = stream;
-    } catch (err) {
-      toast.warning('마이크 권한을 허용해주세요.');
-      return;
+      recognition.start();
+    } catch (e) {
+      console.error('Recognition start failed', e);
+      setIsListening(null);
     }
 
-    // Step 2: Setup MediaRecorder with pre-acquired stream
-    try {
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+    // 3. Start MediaRecorder ASYNCHRONOUSLY after a delay to prevent mic lock conflict
+    setTimeout(async () => {
+      if (isManualStopRef.current) return; // if user stopped very quickly
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
+        
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data);
-      };
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) audioChunksRef.current.push(event.data);
+        };
 
-      mediaRecorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setRecordedAudios((prev) => {
-            if (prev[index]) URL.revokeObjectURL(prev[index]);
-            return { ...prev, [index]: audioUrl };
-          });
-        }
-      };
+        mediaRecorder.onstop = () => {
+          if (audioChunksRef.current.length > 0) {
+            const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setRecordedAudios((prev) => {
+              if (prev[index]) URL.revokeObjectURL(prev[index]);
+              return { ...prev, [index]: audioUrl };
+            });
+          }
+        };
 
-      mediaRecorder.start();
-    } catch (err) {
-      console.warn('MediaRecorder setup failed', err);
-    }
-
-    // Step 3: Start SpeechRecognition (mic permission already granted)
-    setIsListening(index);
-    toast.info('인식을 시작합니다. 말씀해 주세요.');
-    launchRecognitionSession(index);
+        mediaRecorder.start();
+      } catch (err) {
+        console.warn('MediaRecorder setup failed', err);
+      }
+    }, 800); // 800ms delay ensures SpeechRecognition grabs the mic first
   };
 
   const handleCheckAnswer = (index: number) => {
