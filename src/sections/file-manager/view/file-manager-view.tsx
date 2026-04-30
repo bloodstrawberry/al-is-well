@@ -17,7 +17,7 @@ import Link from '@mui/material/Link';
 import { fIsBetween } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _allFiles, FILE_TYPE_OPTIONS } from 'src/_mock';
+
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';

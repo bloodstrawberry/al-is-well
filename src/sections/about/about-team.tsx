@@ -9,7 +9,8 @@ import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
-import { _socials, _carouselsMembers } from 'src/_mock';
+const _socials: any[] = [];
+const _carouselsMembers: any[] = [];
 
 import { Image } from 'src/components/image';
 import { Iconify } from 'src/components/iconify';

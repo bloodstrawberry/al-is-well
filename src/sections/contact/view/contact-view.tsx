@@ -3,7 +3,7 @@
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 
-import { _mapContact } from 'src/_mock';
+const _mapContact: any[] = [];
 
 import { ContactMap } from '../contact-map';
 import { ContactHero } from '../contact-hero';

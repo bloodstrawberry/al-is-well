@@ -16,7 +16,7 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { fDate } from 'src/utils/format-time';
 
-import { _testimonials } from 'src/_mock';
+const _testimonials: any[] = [];
 import { CONFIG } from 'src/global-config';
 
 import { Iconify } from 'src/components/iconify';

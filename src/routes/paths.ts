@@ -1,11 +1,6 @@
 import { kebabCase } from 'es-toolkit';
 
-import { _id, _postTitles } from 'src/_mock/assets';
-
 // ----------------------------------------------------------------------
-
-const MOCK_ID = _id[1];
-const MOCK_TITLE = _postTitles[2];
 
 const ROOTS = {
   DASHBOARD: '/dashboard',
@@ -35,12 +30,10 @@ export const paths = {
     root: `/product`,
     checkout: `/product/checkout`,
     details: (id: string) => `/product/${id}`,
-    demo: { details: `/product/${MOCK_ID}` },
   },
   post: {
     root: `/post`,
     details: (title: string) => `/post/${kebabCase(title)}`,
-    demo: { details: `/post/${kebabCase(MOCK_TITLE)}` },
   },
   // DASHBOARD
   dashboard: {
@@ -56,45 +49,28 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/invoice/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/invoice/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`,
-      },
     },
     post: {
       root: `${ROOTS.DASHBOARD}/post`,
       new: `${ROOTS.DASHBOARD}/post/new`,
       details: (title: string) => `${ROOTS.DASHBOARD}/post/${kebabCase(title)}`,
       edit: (title: string) => `${ROOTS.DASHBOARD}/post/${kebabCase(title)}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/post/${kebabCase(MOCK_TITLE)}`,
-        edit: `${ROOTS.DASHBOARD}/post/${kebabCase(MOCK_TITLE)}/edit`,
-      },
     },
     order: {
       root: `${ROOTS.DASHBOARD}/order`,
       details: (id: string) => `${ROOTS.DASHBOARD}/order/${id}`,
-      demo: { details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}` },
     },
     job: {
       root: `${ROOTS.DASHBOARD}/job`,
       new: `${ROOTS.DASHBOARD}/job/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/job/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/job/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/job/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/job/${MOCK_ID}/edit`,
-      },
     },
     tour: {
       root: `${ROOTS.DASHBOARD}/tour`,
       new: `${ROOTS.DASHBOARD}/tour/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/tour/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/tour/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
-      },
     },
     opicTest: {
       root: `${ROOTS.DASHBOARD}/opic-test`,

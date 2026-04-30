@@ -7,7 +7,11 @@ import { useTheme } from '@mui/material/styles';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { SeoIllustration } from 'src/assets/illustrations';
-import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } from 'src/_mock';
+const _appFeatured: any[] = [];
+const _appInvoices: any[] = [];
+const _appRelated: any[] = [];
+const _appInstalled: any[] = [];
+const _appAuthors: any[] = [];
 
 import { svgColorClasses } from 'src/components/svg-color';
 
