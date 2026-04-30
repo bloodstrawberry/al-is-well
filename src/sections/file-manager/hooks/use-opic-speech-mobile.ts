@@ -34,6 +34,7 @@ export function useOpicSpeech() {
   const isManualStopRef = useRef(false);
   const accumulatedTranscriptRef = useRef('');
   const isListeningRef = useRef<number | null>(null);
+  const isFirstStartRef = useRef(true);
 
   const userAnswersRef = useRef<Record<number, string>>({});
   useEffect(() => {
@@ -99,6 +100,7 @@ export function useOpicSpeech() {
     // 초기화
     isManualStopRef.current = false;
     accumulatedTranscriptRef.current = '';
+    isFirstStartRef.current = true;
     
     if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
@@ -113,7 +115,10 @@ export function useOpicSpeech() {
       setIsListening(index);
       setIsPreparing(false);
       resetSilenceTimer();
-      toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
+      if (isFirstStartRef.current) {
+        toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
+        isFirstStartRef.current = false;
+      }
     };
 
     recognition.onresult = (event: any) => {
@@ -124,9 +129,16 @@ export function useOpicSpeech() {
         sessionTranscript += event.results[i][0].transcript;
       }
 
-      // 이전 세션 결과와 현재 세션 결과를 합침
-      const fullTranscript = (accumulatedTranscriptRef.current + ' ' + sessionTranscript).trim();
-      
+      // 모바일 브라우저 버그 방어: 재시작 시 브라우저가 이전 컨텍스트를 기억하여 누적된 문장을 다시 보내는 경우 중복을 방지합니다.
+      const acc = accumulatedTranscriptRef.current.trim();
+      const cur = sessionTranscript.trim();
+      let fullTranscript = '';
+
+      if (acc && cur.toLowerCase().startsWith(acc.toLowerCase())) {
+        fullTranscript = cur; // 이미 누적된 내용이 포함되어 들어온 경우
+      } else {
+        fullTranscript = (acc + ' ' + cur).trim(); // 정상적인 경우 이어붙임
+      }
       setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
       
       if (inputRefs.current[index]) {
