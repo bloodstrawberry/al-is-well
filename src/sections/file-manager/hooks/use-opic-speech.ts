@@ -31,6 +31,12 @@ export function useOpicSpeech() {
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isManualStopRef = useRef(false);
   const accumulatedTranscriptRef = useRef('');
+  const currentSessionTranscriptRef = useRef('');
+  const isListeningRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
 
   const stopListening = useCallback(() => {
     isManualStopRef.current = true;
@@ -67,10 +73,15 @@ export function useOpicSpeech() {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
     }
+    
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const timeoutDuration = isMobile ? 5000 : 3000;
+    const timeoutMessage = isMobile ? '5초간 입력이 없어 녹음을 종료합니다.' : '3초간 입력이 없어 녹음을 종료합니다.';
+
     silenceTimerRef.current = setTimeout(() => {
       stopListening();
-      toast.info('3초간 입력이 없어 녹음을 종료합니다.');
-    }, 3000);
+      toast.info(timeoutMessage);
+    }, timeoutDuration);
   }, [stopListening]);
 
   const startListening = useCallback((index: number) => {
@@ -83,6 +94,7 @@ export function useOpicSpeech() {
 
     isManualStopRef.current = false;
     accumulatedTranscriptRef.current = '';
+    currentSessionTranscriptRef.current = '';
 
     // Cleanup previous
     if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
@@ -90,85 +102,28 @@ export function useOpicSpeech() {
     if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach((t) => t.stop()); mediaStreamRef.current = null; }
     if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
-    // 1. Initialize SpeechRecognition
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
+    setIsPreparing(true);
 
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      setIsListening(index);
-      setIsPreparing(true);
-      resetSilenceTimer();
-    };
-
-    recognition.onresult = (event: any) => {
-      resetSilenceTimer();
-
-      let interimTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          accumulatedTranscriptRef.current += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-
-      const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
-      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
-      
-      if (inputRefs.current[index]) {
-        inputRefs.current[index].value = fullTranscript;
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('Speech recognition error', event.error);
-      if (event.error === 'not-allowed') {
-        toast.warning('마이크 권한이 거부되었습니다.');
-      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        toast.warning(`인식 오류: ${event.error}`);
-      }
-      stopListening();
-    };
-
-    recognition.onend = () => {
-      if (!isManualStopRef.current && isListening === index) {
-        try {
-          recognition.start();
-        } catch (e) {
-          stopListening();
-        }
-      } else {
-        stopListening();
-      }
-    };
-
-    // 2. Start SpeechRecognition
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error('Recognition start failed', e);
-      setIsListening(null);
-    }
-
-    // 3. Start MediaRecorder
-    setTimeout(async () => {
-      if (isManualStopRef.current) return;
+    const initializeRecording = async () => {
       try {
+        // 1. 모바일 환경의 마이크 권한 충돌을 방지하기 위해 MediaStream을 먼저 확보합니다.
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaStreamRef.current = stream;
-        
+
+        if (isManualStopRef.current) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+
+        // 2. MediaRecorder 준비
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
         audioChunksRef.current = [];
-        
+
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) audioChunksRef.current.push(event.data);
         };
-        
+
         mediaRecorder.onstop = () => {
           if (audioChunksRef.current.length > 0) {
             const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
@@ -179,16 +134,93 @@ export function useOpicSpeech() {
             });
           }
         };
-        
-        mediaRecorder.start();
-        setIsPreparing(false);
-        toast.info('준비되었습니다. 말씀해 주세요!');
+
+        // 3. SpeechRecognition 설정 및 시작
+        const recognition = new SpeechRecognition();
+        recognitionRef.current = recognition;
+
+        recognition.lang = 'en-US';
+        // 모바일에서는 continuous 모드가 종종 마이크를 점유한 채로 멈추는 버그가 있으므로
+        // false로 설정하여 문장이 끝날 때마다 onend에서 재시작되도록 유도합니다.
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        recognition.continuous = !isMobile;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+          setIsListening(index);
+          resetSilenceTimer();
+        };
+
+        recognition.onresult = (event: any) => {
+          resetSilenceTimer();
+
+          // 모바일 중복 입력 방지: 매번 세션의 전체 텍스트를 재구성하여 사용
+          let currentSessionTranscript = '';
+          for (let i = 0; i < event.results.length; ++i) {
+            currentSessionTranscript += event.results[i][0].transcript;
+          }
+
+          currentSessionTranscriptRef.current = currentSessionTranscript;
+          const fullTranscript = (accumulatedTranscriptRef.current + ' ' + currentSessionTranscript).trim();
+          
+          setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
+          
+          if (inputRefs.current[index]) {
+            inputRefs.current[index].value = fullTranscript;
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn('Speech recognition error', event.error);
+          if (event.error === 'not-allowed') {
+            toast.warning('마이크 권한이 거부되었습니다.');
+            stopListening();
+          }
+          // 모바일 환경 강건성을 위해 'no-speech'나 기타 일시적 오류 발생 시 즉각 중단하지 않고 onend의 재시작 로직에 맡김.
+        };
+
+        recognition.onend = () => {
+          // 세션 종료 시 지금까지의 텍스트 누적
+          if (currentSessionTranscriptRef.current) {
+            accumulatedTranscriptRef.current = (accumulatedTranscriptRef.current + ' ' + currentSessionTranscriptRef.current).trim();
+            currentSessionTranscriptRef.current = '';
+          }
+
+          if (!isManualStopRef.current && isListeningRef.current === index) {
+            try {
+              recognition.start();
+            } catch (e) {
+              // 이미 시작된 상태 등의 오류 발생 시 조용히 넘어감
+              console.warn('Speech recognition restart failed', e);
+            }
+          }
+        };
+
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error('Recognition start failed', e);
+        }
+
+        // MediaRecorder 시작 (SpeechRecognition 초기화 시간 고려하여 약간의 딜레이)
+        setTimeout(() => {
+          if (isManualStopRef.current || mediaRecorder.state !== 'inactive') return;
+          mediaRecorder.start();
+          setIsPreparing(false);
+          toast.info('준비되었습니다. 말씀해 주세요!');
+        }, 500);
+
       } catch (err) {
-        console.warn('MediaRecorder setup failed', err);
+        console.warn('Media setup failed', err);
         setIsPreparing(false);
+        setIsListening(null);
+        toast.warning('마이크 접근 권한을 허용해 주세요.');
       }
-    }, 500);
-  }, [isListening, resetSilenceTimer, stopListening]);
+    };
+
+    initializeRecording();
+
+  }, [resetSilenceTimer, stopListening]);
 
   const recordedAudiosRef = useRef<Record<number, string>>({});
   useEffect(() => {
