@@ -544,6 +544,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           autoComplete="off"
                           slotProps={{
                             input: {
+                              inputMode: isListening === index ? 'none' : 'text',
                               endAdornment: (
                                 <InputAdornment position="end" sx={{ gap: 0.5 }}>
                                   <IconButton size="small" color={isListening === index ? 'error' : 'default'} onClick={() => (isListening === index ? stopListening() : startListening(index))} sx={{ ...(isListening === index && { animation: 'pulse 1.5s infinite', '@keyframes pulse': { '0%': { transform: 'scale(1)', opacity: 1 }, '50%': { transform: 'scale(1.2)', opacity: 0.7 }, '100%': { transform: 'scale(1)', opacity: 1 } } }) }}>
