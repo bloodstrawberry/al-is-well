@@ -200,59 +200,54 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
       if (!SpeechRecognition) {
-        toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다.');
+        toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
         return;
       }
 
       // Cleanup existing instances
       stopListening();
 
-      // Initialize MediaRecorder for voice playback
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      } catch (err: any) {
-        console.warn('Microphone access issues', err);
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          toast.warning('마이크 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해 주세요.');
-        } else {
-          toast.warning('마이크를 시작할 수 없습니다. 연결 상태를 확인해주세요.');
-        }
-        return;
-      }
-
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setRecordedAudios((prev) => {
-            if (prev[index]) URL.revokeObjectURL(prev[index]);
-            return { ...prev, [index]: audioUrl };
-          });
-        }
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorder.start();
-
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-US';
       recognition.continuous = true;
       recognition.interimResults = true;
 
+      // Initialize MediaRecorder for voice playback
+      // Note: On some mobile browsers, starting this AFTER recognition.start() might work better
+      const startMediaRecorder = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = mediaRecorder;
+          audioChunksRef.current = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) audioChunksRef.current.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            if (audioChunksRef.current.length > 0) {
+              const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              setRecordedAudios((prev) => {
+                if (prev[index]) URL.revokeObjectURL(prev[index]);
+                return { ...prev, [index]: audioUrl };
+              });
+            }
+            stream.getTracks().forEach((track) => track.stop());
+          };
+
+          mediaRecorder.start();
+        } catch (err) {
+          console.warn('MediaRecorder failed to start', err);
+        }
+      };
+
       recognition.onstart = () => {
         setIsListening(index);
         resetSilenceTimer(index);
+        // Start recording audio once recognition has successfully started
+        startMediaRecorder();
       };
 
       recognition.onresult = (event: any) => {
@@ -271,8 +266,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
       recognition.onerror = (event: any) => {
         console.warn('Speech recognition error', event.error);
-        if (event.error !== 'no-speech' && event.error !== 'aborted') {
-          toast.warning(`음성 인식 오류: ${event.error}`);
+        if (event.error === 'not-allowed') {
+          toast.warning('마이크 권한이 거부되었습니다. 설정에서 권한을 허용해 주세요.');
+        } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          toast.warning(`인식 오류: ${event.error}`);
         }
         stopListening();
       };
@@ -282,7 +279,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       };
 
       recognitionRef.current = recognition;
+      
+      // Crucial: Start recognition directly to preserve user gesture context
       recognition.start();
+
     } catch (error) {
       console.warn('Failed to start listening', error);
       toast.warning('음성 인식을 시작하는 중 오류가 발생했습니다.');

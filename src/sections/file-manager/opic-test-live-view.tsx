@@ -200,41 +200,72 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const startListening = async (index: number) => {
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
-      if (recognitionRef.current) recognitionRef.current.stop();
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setRecordedAudios((prev) => {
-          if (prev[index]) URL.revokeObjectURL(prev[index]);
-          return { ...prev, [index]: audioUrl };
-        });
-        stream.getTracks().forEach((track) => track.stop());
-      };
-      mediaRecorder.start();
+      if (!SpeechRecognition) {
+        toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
+        return;
+      }
+      
+      stopListening();
 
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-US';
-      recognition.onstart = () => setIsListening(index);
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      const startMediaRecorder = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = mediaRecorder;
+          audioChunksRef.current = [];
+          mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
+          mediaRecorder.onstop = () => {
+            if (audioChunksRef.current.length > 0) {
+              const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              setRecordedAudios((prev) => {
+                if (prev[index]) URL.revokeObjectURL(prev[index]);
+                return { ...prev, [index]: audioUrl };
+              });
+            }
+            stream.getTracks().forEach((track) => track.stop());
+          };
+          mediaRecorder.start();
+        } catch (err) {
+          console.warn('MediaRecorder start failed', err);
+        }
+      };
+
+      recognition.onstart = () => {
+        setIsListening(index);
+        startMediaRecorder();
+      };
+      
       recognition.onresult = (event: any) => {
         const transcript = Array.from(event.results).map((result: any) => result[0].transcript).join('');
         setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
       };
-      recognition.onerror = () => setIsListening(null);
-      recognition.onend = () => {
-        setIsListening(null);
-        if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
+      
+      recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error', event.error);
+        if (event.error === 'not-allowed') {
+          toast.warning('마이크 권한이 거부되었습니다.');
+        } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          toast.warning(`인식 오류: ${event.error}`);
+        }
+        stopListening();
       };
+      
+      recognition.onend = () => {
+        stopListening();
+      };
+
       recognitionRef.current = recognition;
       recognition.start();
-    } catch (error) { setIsListening(null); }
+    } catch (error) { 
+      console.error(error);
+      setIsListening(null); 
+    }
   };
 
   const stopListening = () => {
