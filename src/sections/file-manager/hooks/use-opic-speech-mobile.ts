@@ -35,6 +35,11 @@ export function useOpicSpeech() {
   const accumulatedTranscriptRef = useRef('');
   const isListeningRef = useRef<number | null>(null);
 
+  const userAnswersRef = useRef<Record<number, string>>({});
+  useEffect(() => {
+    userAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
   useEffect(() => {
     isListeningRef.current = isListening;
   }, [isListening]);
@@ -51,6 +56,7 @@ export function useOpicSpeech() {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.onend = null;
+        recognitionRef.current.onresult = null; // 결과 전송 차단
         recognitionRef.current.stop();
       } catch (e) { /* 이미 중지됨 */ }
       recognitionRef.current = null;
@@ -173,22 +179,17 @@ export function useOpicSpeech() {
       recognition.onresult = (event: any) => {
         resetSilenceTimer(); // 단어 하나라도 인식되면 타이머 리셋
         
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            accumulatedTranscriptRef.current += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
-          }
+        let sessionTranscript = '';
+        for (let i = 0; i < event.results.length; ++i) {
+          sessionTranscript += event.results[i][0].transcript;
         }
 
-        const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
-        
-        // State 업데이트
+        const fullTranscript = (accumulatedTranscriptRef.current + ' ' + sessionTranscript).trim();
+
+        // 1. 상태 업데이트 (UI 갱신용)
         setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
         
-        // Input에 즉시 반영 (Ref 사용 시)
+        // 2. Ref 직접 업데이트 (입력 지연 방지용)
         if (inputRefs.current[index]) {
           inputRefs.current[index].value = fullTranscript;
         }
@@ -200,6 +201,10 @@ export function useOpicSpeech() {
       };
 
       recognition.onend = () => {
+        // 현재까지의 텍스트를 누적
+        const currentText = (userAnswersRef.current[index] || '');
+        accumulatedTranscriptRef.current = currentText;
+
         // 비정상적 종료 시 재시작 (모바일 대응)
         if (!isManualStopRef.current && isListeningRef.current === index) {
           try { recognition.start(); } catch (e) {}
