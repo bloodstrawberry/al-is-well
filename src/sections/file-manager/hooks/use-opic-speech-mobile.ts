@@ -45,7 +45,6 @@ export function useOpicSpeech() {
     isListeningRef.current = isListening;
   }, [isListening]);
 
-  // 1. 중지 함수
   const stopListening = useCallback(() => {
     isManualStopRef.current = true;
 
@@ -72,23 +71,21 @@ export function useOpicSpeech() {
     setIsPreparing(false);
   }, []);
 
-  // 2. 10초 침묵 타이머 (테스트를 위해 10초로 연장)
   const resetSilenceTimer = useCallback(() => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
     }
     
-    const timeoutDuration = 10000; // 10초
+    const timeoutDuration = 5000; // 5초
 
     silenceTimerRef.current = setTimeout(() => {
       if (isListeningRef.current !== null) {
         stopListening();
-        toast.info('10초간 입력이 없어 종료합니다.');
+        toast.info('5초간 입력이 없어 종료합니다.');
       }
     }, timeoutDuration);
   }, [stopListening]);
 
-  // 3. 리스닝 시작 (가장 단순한 구조로 변경)
   const startListening = useCallback((index: number) => {
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -97,18 +94,17 @@ export function useOpicSpeech() {
       return;
     }
 
-    // 초기화
     isManualStopRef.current = false;
     accumulatedTranscriptRef.current = '';
     isFirstStartRef.current = true;
     
     if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
-    // 🌟 핵심: User Gesture 유지를 위해 setTimeout이나 await 없이 즉시 실행
     const recognition = new SpeechRecognitionCtor();
     recognitionRef.current = recognition;
     recognition.lang = 'en-US';
-    recognition.continuous = true;
+    // 🌟 핵심: continuous = false → 한 발화씩 깔끔하게 캡처 (중복 방지)
+    recognition.continuous = false;
     recognition.interimResults = true;
 
     recognition.onstart = () => {
@@ -124,41 +120,48 @@ export function useOpicSpeech() {
     recognition.onresult = (event: any) => {
       resetSilenceTimer(); 
       
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; ++i) {
-        sessionTranscript += event.results[i][0].transcript;
-      }
+      // continuous=false이므로 보통 result는 하나입니다.
+      const result = event.results[event.results.length - 1];
+      const transcript = result[0].transcript;
+      const trimmedTranscript = transcript.trim();
 
-      // 모바일 브라우저 버그 방어: 재시작 시 브라우저가 이전 컨텍스트를 기억하여 누적된 문장을 다시 보내는 경우 중복을 방지합니다.
-      const acc = accumulatedTranscriptRef.current.trim();
-      const cur = sessionTranscript.trim();
-      let fullTranscript = '';
-
-      if (acc && cur.toLowerCase().startsWith(acc.toLowerCase())) {
-        fullTranscript = cur; // 이미 누적된 내용이 포함되어 들어온 경우
+      if (result.isFinal) {
+        // 최종 결과: 중복 방지를 위해 기존 누적 텍스트와 비교 후 저장
+        const currentAcc = accumulatedTranscriptRef.current.trim();
+        if (trimmedTranscript && !currentAcc.toLowerCase().endsWith(trimmedTranscript.toLowerCase())) {
+          accumulatedTranscriptRef.current = (accumulatedTranscriptRef.current + ' ' + transcript).trim();
+        }
+        
+        const fullText = accumulatedTranscriptRef.current;
+        setUserAnswers((prev) => ({ ...prev, [index]: fullText }));
+        if (inputRefs.current[index]) {
+          inputRefs.current[index].value = fullText;
+        }
       } else {
-        fullTranscript = (acc + ' ' + cur).trim(); // 정상적인 경우 이어붙임
-      }
-      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
-      
-      if (inputRefs.current[index]) {
-        inputRefs.current[index].value = fullTranscript;
+        // 중간 결과: 현재까지의 확정본 + 현재 분석 중인 단어
+        const fullText = (accumulatedTranscriptRef.current + ' ' + transcript).trim();
+        setUserAnswers((prev) => ({ ...prev, [index]: fullText }));
+        if (inputRefs.current[index]) {
+          inputRefs.current[index].value = fullText;
+        }
       }
     };
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
+      if (event.error === 'no-speech') {
+        // no-speech는 재시작 시도 (자동 종료 방지)
+        return;
+      }
       if (event.error === 'not-allowed') {
         toast.error('마이크 권한이 거부되었습니다.');
+        stopListening();
       }
-      stopListening();
     };
 
     recognition.onend = () => {
-      // 🌟 세션이 종료될 때 현재까지의 전체 텍스트를 누적 버퍼에 저장
-      const currentText = (userAnswersRef.current[index] || '');
-      accumulatedTranscriptRef.current = currentText;
-
+      // continuous=false → 발화 하나 끝나면 자동으로 onend 호출
+      // 수동 종료가 아니면 다음 발화를 위해 재시작
       if (!isManualStopRef.current && isListeningRef.current === index) {
         try { recognition.start(); } catch (e) {}
       }

@@ -478,7 +478,9 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         <TextField
                           fullWidth
                           inputRef={(el) => (inputRefs.current[index] = el)}
-                          placeholder="Listen and type English..."
+                                                     placeholder="Listen and type English..."
+                           multiline={isMobile}
+                           minRows={isMobile ? 3 : 1}
                           value={userAnswers[index] || ''}
                                                      onChange={(e) => {
                              const { value } = e.target;
