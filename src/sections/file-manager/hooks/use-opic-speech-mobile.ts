@@ -162,65 +162,73 @@ export function useOpicSpeech() {
 
     setIsPreparing(true);
 
-    // =========================================================
-    // 모바일 전용 경로: SpeechRecognition 우선, MediaRecorder 후순위
-    // =========================================================
-    const recognition = setupRecognition(index);
+    const initializeMobile = async () => {
+      try {
+        // 1. MediaStream 먼저 확보 (iOS Safari 등 대응)
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
 
-    recognition.onstart = () => {
-      setIsListening(index);
-      resetSilenceTimer();
-
-      // Attempt MediaRecorder after recognition starts
-      setTimeout(async () => {
-        if (isManualStopRef.current) return;
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaStreamRef.current = stream;
-
-          if (isManualStopRef.current) {
-            stream.getTracks().forEach(t => t.stop());
-            return;
-          }
-
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          audioChunksRef.current = [];
-
-          mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) audioChunksRef.current.push(event.data);
-          };
-
-          mediaRecorder.onstop = () => {
-            if (audioChunksRef.current.length > 0) {
-              const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-              const audioUrl = URL.createObjectURL(audioBlob);
-              setRecordedAudios((prev) => {
-                if (prev[index]) URL.revokeObjectURL(prev[index]);
-                return { ...prev, [index]: audioUrl };
-              });
-            }
-          };
-
-          mediaRecorder.start();
-          console.log('Mobile MediaRecorder started successfully');
-        } catch (err) {
-          console.warn('Mobile MediaRecorder failed (expected on some devices):', err);
+        if (isManualStopRef.current) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
         }
-      }, 300);
+
+        // 2. MediaRecorder 즉시 시작 (인식보다 녹음이 더 안정적임)
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) audioChunksRef.current.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunksRef.current.length > 0) {
+            const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setRecordedAudios((prev) => {
+              if (prev[index]) URL.revokeObjectURL(prev[index]);
+              return { ...prev, [index]: audioUrl };
+            });
+          }
+        };
+
+        mediaRecorder.start();
+
+        // 3. 하드웨어가 안정될 때까지 약간 대기 후 음성 인식 시작
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (isManualStopRef.current) return;
+
+        // 4. SpeechRecognition 설정 및 시작
+        const recognition = setupRecognition(index);
+        
+        // onstart를 확장하여 준비 상태 해제
+        const originalOnStart = recognition.onstart;
+        recognition.onstart = () => {
+          if (originalOnStart) originalOnStart();
+          setIsPreparing(false);
+          toast.info('준비되었습니다. 말씀해 주세요!');
+        };
+
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error('Mobile Recognition start failed', e);
+          setIsPreparing(false);
+        }
+
+      } catch (err) {
+        console.warn('Mobile Media setup failed', err);
+        setIsPreparing(false);
+        setIsListening(null);
+        toast.warning('마이크 접근 권한을 허용해 주세요.');
+      }
     };
 
-    try {
-      recognition.start();
-      setIsPreparing(false);
-      toast.info('준비되었습니다. 말씀해 주세요!');
-    } catch (e) {
-      console.error('Recognition start failed', e);
-      setIsPreparing(false);
-      setIsListening(null);
-    }
+    initializeMobile();
 
-  }, [setupRecognition, resetSilenceTimer, stopListening]);
+  }, [setupRecognition, stopListening]);
 
   const recordedAudiosRef = useRef<Record<number, string>>({});
   useEffect(() => {
