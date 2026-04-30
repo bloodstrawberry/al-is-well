@@ -51,7 +51,7 @@ export const navData: NavMainProps['data'] = [
       {
         subheader: 'Writing',
         items: [
-          { title: '받아쓰기', path: paths.dashboard.writing.dictation },
+          { title: '내 받아쓰기', path: paths.dashboard.writing.dictation },
           { title: '랜덤 받아쓰기', path: paths.dashboard.writing.random },
         ],
       },

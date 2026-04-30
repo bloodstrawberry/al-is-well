@@ -11,7 +11,7 @@ export function WritingDictationView() {
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        받아쓰기
+        내 받아쓰기
       </Typography>
 
       <Box
