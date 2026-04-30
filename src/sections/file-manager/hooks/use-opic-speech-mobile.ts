@@ -248,6 +248,8 @@ export function useOpicSpeech() {
         };
 
         recognition.onstart = () => {
+          setIsListening(index);
+          resetSilenceTimer();
           setIsPreparing(false);
           toast.info('준비되었습니다. 말씀해 주세요!');
         };
