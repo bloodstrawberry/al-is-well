@@ -53,11 +53,6 @@ export function useOpicSpeech() {
       silenceTimerRef.current = null;
     }
 
-    // MediaRecorder 중지
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-
     if (recognitionRef.current) {
       try {
         recognitionRef.current.onend = null;
@@ -91,44 +86,20 @@ export function useOpicSpeech() {
     }, timeoutDuration);
   }, [stopListening]);
 
+  const startListening = useCallback((index: number) => {
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-      mediaStreamRef.current = stream;
-      
-      const recorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setRecordedAudios((prev) => {
-            if (prev[index]) {
-              try { URL.revokeObjectURL(prev[index]); } catch (e) {}
-            }
-            return { ...prev, [index]: audioUrl };
-          });
-        }
-      };
-
-      recorder.start();
-    } catch (err) {
-      console.error('Failed to start recording:', err);
-      // 권한 거부 등의 경우 처리
-      if (err instanceof Error) {
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          toast.error('마이크 권한이 필요합니다.');
-          setIsPreparing(false);
-          return;
-        }
-      }
+    if (!SpeechRecognitionCtor) {
+      toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다.');
+      return;
     }
 
-    // 2. 음성 인식 설정
+    isManualStopRef.current = false;
+    accumulatedTranscriptRef.current = '';
+    isFirstStartRef.current = true;
+    
+    if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
+
     const recognition = new SpeechRecognitionCtor();
     recognitionRef.current = recognition;
     recognition.lang = 'en-US';
@@ -201,15 +172,13 @@ export function useOpicSpeech() {
 
     try {
       recognition.start();
+      setIsPreparing(true);
       if (inputRefs.current[index]) {
         inputRefs.current[index].focus();
       }
     } catch (err) {
       console.error('Recognition start failed:', err);
       toast.error('음성 인식 시작에 실패했습니다.');
-      setIsPreparing(false);
-      setIsListening(null);
-      stopListening();
     }
   }, [resetSilenceTimer, stopListening]);
 
