@@ -69,6 +69,7 @@ const contentStyles = (theme: Theme): CSSObject => ({
     lineHeight: 20 / 13,
     fontSize: theme.typography.pxToRem(13),
     fontWeight: theme.typography.fontWeightMedium,
+    whiteSpace: 'nowrap',
   },
   [`& .${snackbarClasses.description}`]: {
     opacity: 0.64,
@@ -152,7 +153,7 @@ export const SnackbarRoot = styled(Toaster)(({ theme }) => ({
   '@keyframes rotate': {
     to: { transform: 'rotate(1turn)' },
   },
-  width: 300,
+  width: 420,
   ...toastStyles(theme),
   ...iconStyles(theme),
   ...contentStyles(theme),
