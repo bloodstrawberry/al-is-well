@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'src/components/snackbar';
 
+// ----------------------------------------------------------------------
+
 declare global {
   interface Window {
     webkitSpeechRecognition: any;
@@ -31,14 +33,13 @@ export function useOpicSpeech() {
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isManualStopRef = useRef(false);
   const accumulatedTranscriptRef = useRef('');
-  const currentSessionTranscriptRef = useRef('');
   const isListeningRef = useRef<number | null>(null);
 
-  // 현재 청취 중인 인덱스 동기화
   useEffect(() => {
     isListeningRef.current = isListening;
   }, [isListening]);
 
+  // 1. 중지 함수
   const stopListening = useCallback(() => {
     isManualStopRef.current = true;
 
@@ -49,16 +50,16 @@ export function useOpicSpeech() {
 
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onend = null;
         recognitionRef.current.stop();
-        recognitionRef.current.onend = null; // 재시작 방지
-      } catch (e) { /* ignore */ }
+      } catch (e) { /* 이미 중지됨 */ }
       recognitionRef.current = null;
     }
 
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       try {
         mediaRecorderRef.current.stop();
-      } catch (e) { /* ignore */ }
+      } catch (e) { /* 이미 중지됨 */ }
     }
 
     if (mediaStreamRef.current) {
@@ -75,22 +76,23 @@ export function useOpicSpeech() {
     setIsPreparing(false);
   }, []);
 
+  // 2. 5초 침묵 타이머 (핵심 수정 사항)
   const resetSilenceTimer = useCallback(() => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
     }
     
-    // 모바일은 네트워크 지연 등을 고려해 7초 정도로 약간 늘리는 것을 권장합니다.
-    const timeoutDuration = 7000; 
+    const timeoutDuration = 5000; // 5초
 
     silenceTimerRef.current = setTimeout(() => {
       if (isListeningRef.current !== null) {
         stopListening();
-        toast.info('7초간 입력이 없어 녹음을 종료합니다.');
+        toast.info('5초간 입력이 없어 녹음을 종료합니다.');
       }
     }, timeoutDuration);
   }, [stopListening]);
 
+  // 3. 리스닝 시작
   const startListening = useCallback(async (index: number) => {
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -102,35 +104,24 @@ export function useOpicSpeech() {
     // 초기화
     isManualStopRef.current = false;
     accumulatedTranscriptRef.current = '';
-    currentSessionTranscriptRef.current = '';
     audioChunksRef.current = [];
 
-    // 기존 작업 정리
-    if (recognitionRef.current) try { recognitionRef.current.abort(); } catch (e) {}
     if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
     setIsPreparing(true);
 
     try {
-      // 1. 마이크 권한 요청
+      // 마이크 권한 및 스트림
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { 
-          echoCancellation: true, 
-          noiseSuppression: true, 
-          autoGainControl: true 
-        } 
+        audio: { echoCancellation: true, noiseSuppression: true } 
       });
       mediaStreamRef.current = stream;
 
-      // 2. AudioContext 설정 (VAD)
+      // AudioContext (VAD 용) - 모바일은 resume 필수
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
       const audioContext = new AudioContextCtor();
       audioContextRef.current = audioContext;
-      
-      // iOS 대응: 사용자 제스처 후 resume 필수
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
+      if (audioContext.state === 'suspended') await audioContext.resume();
 
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
@@ -142,16 +133,13 @@ export function useOpicSpeech() {
         if (isManualStopRef.current || isListeningRef.current === null) return;
         analyser.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        if (average > 10) resetSilenceTimer(); // 문턱값 조정
+        if (average > 12) resetSilenceTimer(); // 일정 데시벨 이상의 소리가 나면 타이머 리셋
         requestAnimationFrame(checkVolume);
       };
       checkVolume();
 
-      // 3. MediaRecorder 설정 (MIME Type 체크)
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm') 
-        ? 'audio/webm' 
-        : 'audio/mp4'; // iOS/Safari 대응
-      
+      // MediaRecorder 설정
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
 
@@ -168,45 +156,51 @@ export function useOpicSpeech() {
         });
       };
 
-      // 4. SpeechRecognition 설정
+      // Speech Recognition 설정 (텍스트 입력 핵심)
       const recognition = new SpeechRecognitionCtor();
       recognitionRef.current = recognition;
       recognition.lang = 'en-US';
-      recognition.continuous = true; // 모바일 끊김 방지를 위해 true 권장
+      recognition.continuous = true; // 모바일 끊김 방지
       recognition.interimResults = true;
 
       recognition.onstart = () => {
         setIsListening(index);
         setIsPreparing(false);
         resetSilenceTimer();
-        // 인식이 시작되면 녹음도 시작
         if (mediaRecorder.state === 'inactive') mediaRecorder.start();
       };
 
       recognition.onresult = (event: any) => {
-        resetSilenceTimer();
+        resetSilenceTimer(); // 단어 하나라도 인식되면 타이머 리셋
+        
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            accumulatedTranscriptRef.current += event.results[i][0].transcript + ' ';
+            accumulatedTranscriptRef.current += transcript + ' ';
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interimTranscript += transcript;
           }
         }
 
         const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
+        
+        // State 업데이트
         setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
-        if (inputRefs.current[index]) inputRefs.current[index].value = fullTranscript;
+        
+        // Input에 즉시 반영 (Ref 사용 시)
+        if (inputRefs.current[index]) {
+          inputRefs.current[index].value = fullTranscript;
+        }
       };
 
       recognition.onerror = (event: any) => {
-        console.error('Recognition Error:', event.error);
-        if (event.error === 'no-speech') return; // 무시 후 계속 진행
+        if (event.error === 'no-speech') return;
         stopListening();
       };
 
       recognition.onend = () => {
-        // 수동 종료가 아니고 여전히 이 인덱스라면 재시작 시도 (모바일 연결 끊김 대비)
+        // 비정상적 종료 시 재시작 (모바일 대응)
         if (!isManualStopRef.current && isListeningRef.current === index) {
           try { recognition.start(); } catch (e) {}
         }
@@ -215,43 +209,32 @@ export function useOpicSpeech() {
       recognition.start();
 
     } catch (err) {
-      console.error('Setup failed:', err);
+      console.error(err);
       setIsPreparing(false);
       toast.warning('마이크 권한을 허용해 주세요.');
     }
   }, [resetSilenceTimer, stopListening]);
 
-  // 재생 로직 개선 (Audio 객체 재사용 방지 및 메모리 해제)
+  // ... 나머지 playRecordedAudio, toggleSpeak, resetStates 로직은 이전과 동일
+
   const playRecordedAudio = useCallback((index: number) => {
     if (playingIndex === index && currentAudioRef.current) {
       currentAudioRef.current.pause();
       setPlayingIndex(null);
       return;
     }
-
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-    }
+    if (currentAudioRef.current) currentAudioRef.current.pause();
 
     const url = recordedAudios[index];
     if (url) {
       const audio = new Audio(url);
       currentAudioRef.current = audio;
       setPlayingIndex(index);
-      
-      audio.onended = () => {
-        setPlayingIndex(null);
-      };
-      
-      // 모바일에서 play()는 Promise를 반환하므로 catch 처리 필수
-      audio.play().catch(e => {
-        console.error("Playback failed", e);
-        setPlayingIndex(null);
-      });
+      audio.onended = () => setPlayingIndex(null);
+      audio.play().catch(() => setPlayingIndex(null));
     }
   }, [recordedAudios, playingIndex]);
 
-  // TTS 및 기타 함수 유지...
   const toggleSpeak = useCallback((text: string, index: number | string) => {
     if (speakingIndex === index && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
