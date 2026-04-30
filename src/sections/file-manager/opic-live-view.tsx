@@ -54,6 +54,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [isListening, setIsListening] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<any>(null);
+  const inputRefs = useRef<Record<number, any>>({});
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -243,11 +244,26 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         }
       };
 
+      const startTimeout = setTimeout(() => {
+        if (!recognitionRef.current || isListening === null) {
+          console.warn('Speech recognition failed to start within timeout');
+          // Don't toast here as it might be a false positive if onstart fires just after
+        }
+      }, 3000);
+
       recognition.onstart = () => {
+        clearTimeout(startTimeout);
         setIsListening(index);
         resetSilenceTimer(index);
-        // Start recording audio once recognition has successfully started
         startMediaRecorder();
+        toast.info('음성 인식을 시작합니다. 말씀해 주세요.');
+        
+        // Auto-focus the input to ensure cursor is active
+        setTimeout(() => {
+          if (inputRefs.current[index]) {
+            inputRefs.current[index].focus();
+          }
+        }, 100);
       };
 
       recognition.onresult = (event: any) => {
@@ -623,10 +639,11 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   {/* English Text / Input */}
                   {testMode ? (
                     <Stack spacing={2}>
-                      <TextField
-                        fullWidth
-                        placeholder="Listen and type English..."
-                        value={userAnswers[index] || ''}
+                        <TextField
+                          fullWidth
+                          inputRef={(el) => (inputRefs.current[index] = el)}
+                          placeholder="Listen and type English..."
+                          value={userAnswers[index] || ''}
                         onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
