@@ -643,6 +643,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                       value={line.en}
                       onChange={(e) => handleChangeLine(index, 'en', e.target.value)}
                       multiline
+                      minRows={isMobile ? 3 : 1}
                       inputRef={(el) => (inputRefs.current[index] = el)}
                       variant="standard"
                       placeholder="English translation..."
