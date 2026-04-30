@@ -266,8 +266,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     silenceTimerRef.current = setTimeout(() => {
       stopListening();
-      toast.info('5초간 입력이 없어 녹음을 종료합니다.');
-    }, 5000);
+      toast.info('10초간 입력이 없어 녹음을 종료합니다.');
+    }, 10000);
   }, [stopListening]);
 
   const startListening = (index: number) => {
@@ -302,16 +302,21 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     recognition.onresult = (event: any) => {
       resetSilenceTimer();
 
-      let transcript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+      let interimTranscript = '';
+      // Only process from resultIndex to get the latest changes/additions
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
       }
 
-      setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+      const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
+      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
       
-      // Fallback direct DOM update just in case React state lags on mobile PWA
       if (inputRefs.current[index]) {
-        inputRefs.current[index].value = transcript;
+        inputRefs.current[index].value = fullTranscript;
       }
     };
 
@@ -326,8 +331,15 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     };
 
     recognition.onend = () => {
-      // Let it naturally stop. Auto-restarting on mobile often fails due to user-gesture requirements.
-      stopListening();
+      if (!isManualStopRef.current && isListening === index) {
+        try {
+          recognition.start();
+        } catch (e) {
+          stopListening();
+        }
+      } else {
+        stopListening();
+      }
     };
 
     // 2. Start SpeechRecognition SYNCHRONOUSLY to satisfy mobile PWA user-gesture rules
