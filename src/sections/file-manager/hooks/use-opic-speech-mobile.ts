@@ -119,12 +119,17 @@ export function useOpicSpeech() {
     recognition.onresult = (event: any) => {
       resetSilenceTimer(); 
       
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; ++i) {
-        sessionTranscript += event.results[i][0].transcript;
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          accumulatedTranscriptRef.current += transcript + ' ';
+        } else {
+          interimTranscript += transcript;
+        }
       }
 
-      const fullTranscript = (accumulatedTranscriptRef.current + ' ' + sessionTranscript).trim();
+      const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
       setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
       
       if (inputRefs.current[index]) {
@@ -141,9 +146,7 @@ export function useOpicSpeech() {
     };
 
     recognition.onend = () => {
-      const currentText = (userAnswersRef.current[index] || '');
-      accumulatedTranscriptRef.current = currentText;
-
+      // 🌟 수정: onresult에서 이미 accumulatedTranscriptRef를 업데이트하므로 여기서 추가 누적 안 함
       if (!isManualStopRef.current && isListeningRef.current === index) {
         try { recognition.start(); } catch (e) {}
       }
