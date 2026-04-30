@@ -4,6 +4,7 @@ import type { IFile, IFileFilters } from 'src/types/file';
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useBoolean, useSetState, useLocalStorage } from 'minimal-shared/hooks';
+import { DndContext, PointerSensor, useSensor, useSensors, useDroppable, DragEndEvent, pointerWithin } from '@dnd-kit/core';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -39,6 +40,55 @@ import { OpicLiveView } from '../opic-live-view';
 
 // ----------------------------------------------------------------------
 
+function DroppableBreadcrumbItem({
+  id,
+  label,
+  onClick,
+  isLast,
+}: {
+  id: string | null;
+  label: string;
+  onClick?: () => void;
+  isLast?: boolean;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: id === null ? 'root' : id,
+  });
+
+  const styles = {
+    px: 0.5,
+    borderRadius: 0.5,
+    transition: (theme: any) => theme.transitions.create(['background-color']),
+    ...(isOver && {
+      bgcolor: 'action.hover',
+      color: 'primary.main',
+      fontWeight: 'bold',
+    }),
+  };
+
+  if (isLast) {
+    return (
+      <Typography ref={setNodeRef} variant="body2" color="text.primary" sx={styles}>
+        {label}
+      </Typography>
+    );
+  }
+
+  return (
+    <Link
+      ref={setNodeRef}
+      component="span"
+      color="inherit"
+      sx={{ cursor: 'pointer', typography: 'body2', ...styles }}
+      onClick={onClick}
+    >
+      {label}
+    </Link>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 export function FileManagerView() {
   const router = useRouter();
   const pathname = usePathname();
@@ -63,6 +113,14 @@ export function FileManagerView() {
   const { state: isCollapsed, setState: setIsCollapsed } = useLocalStorage(
     'file-manager-sidebar-collapsed',
     false
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
   );
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -114,6 +172,97 @@ export function FileManagerView() {
       router.push(url);
     },
     [pathname, router, searchParams]
+  );
+
+  const handleMoveItem = useCallback((sourceId: string, targetFolderId: string | null) => {
+    if (sourceId === targetFolderId) return;
+
+    // Recursive function to move item
+    const moveInTree = (nodes: any[]): { newNodes: any[]; movedItem: any | null } => {
+      let movedItem: any = null;
+
+      // 1. Find and remove the item
+      const removeNode = (list: any[]): any[] => {
+        return list.filter((node) => {
+          if (node.id === sourceId) {
+            movedItem = node;
+            return false;
+          }
+          if (node.children) {
+            const childrenResult = removeNode(node.children);
+            node.children = childrenResult;
+          }
+          return true;
+        });
+      };
+
+      const filteredTree = removeNode(JSON.parse(JSON.stringify(nodes)));
+
+      if (!movedItem) return { newNodes: nodes, movedItem: null };
+
+      // Check if target is a descendant of source
+      const isDescendant = (parent: any, targetId: string): boolean => {
+        if (parent.id === targetId) return true;
+        if (parent.children) {
+          return parent.children.some((child: any) => isDescendant(child, targetId));
+        }
+        return false;
+      };
+
+      if (movedItem.type === 'folder' && targetFolderId && isDescendant(movedItem, targetFolderId)) {
+        toast.error('Cannot move a folder into its own descendant!');
+        return { newNodes: nodes, movedItem: null };
+      }
+
+      // 2. Insert into target folder
+      const insertNode = (list: any[]): any[] => {
+        if (targetFolderId === null) {
+          return [...list, movedItem];
+        }
+        return list.map((node) => {
+          if (node.id === targetFolderId) {
+            return {
+              ...node,
+              children: [...(node.children || []), movedItem],
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: insertNode(node.children),
+            };
+          }
+          return node;
+        });
+      };
+
+      return { newNodes: insertNode(filteredTree), movedItem };
+    };
+
+    setTreeData((prev) => {
+      const { newNodes, movedItem } = moveInTree(prev);
+      if (movedItem) {
+        toast.success(`Moved ${movedItem.label} successfully!`);
+      }
+      return newNodes;
+    });
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (over && active.id !== over.id) {
+        const sourceId = active.id as string;
+        const targetId = over.id as string;
+
+        // 'root' is our special ID for the root folder in breadcrumbs
+        const targetFolderId = targetId === 'root' ? null : targetId;
+
+        handleMoveItem(sourceId, targetFolderId);
+      }
+    },
+    [handleMoveItem]
   );
 
   useEffect(() => {
@@ -586,34 +735,29 @@ export function FileManagerView() {
   };
 
   const renderBreadcrumbs = () => {
-    if (!currentFolderId) return null;
-
     const pathNodes = currentFolder?.parentIds.map((pid: string) => flattenedTree.find((f) => f.id === pid)) || [];
 
     return (
       <Breadcrumbs separator={<Iconify icon="eva:chevron-right-fill" width={16} />} sx={{ mb: 2 }}>
-        <Link
-          component="span"
-          color="inherit"
-          sx={{ cursor: 'pointer', typography: 'body2' }}
-          onClick={() => handleNavigate(null)}
-        >
-          Root
-        </Link>
+        <DroppableBreadcrumbItem
+          id={null}
+          label="Root"
+          onClick={currentFolderId ? () => handleNavigate(null) : undefined}
+          isLast={!currentFolderId}
+        />
+
         {pathNodes.map((node: any) => (
-          <Link
+          <DroppableBreadcrumbItem
             key={node.id}
-            component="span"
-            color="inherit"
-            sx={{ cursor: 'pointer', typography: 'body2' }}
+            id={node.id}
+            label={node.label}
             onClick={() => handleNavigate(node.id)}
-          >
-            {node.label}
-          </Link>
+          />
         ))}
-        <Typography variant="body2" color="text.primary">
-          {currentFolder?.label}
-        </Typography>
+
+        {currentFolderId && (
+          <DroppableBreadcrumbItem id={currentFolderId} label={currentFolder?.label} isLast />
+        )}
       </Breadcrumbs>
     );
   };
@@ -641,126 +785,139 @@ export function FileManagerView() {
           overflow: 'hidden',
         }}
       >
-        <FileManagerSidebar
-          data={treeData}
-          isCollapsed={isCollapsed}
-          onToggle={() => setIsCollapsed(!isCollapsed)}
-          selectedId={currentFolderId}
-          onSelectId={handleNavigate}
-          onOpenFile={handleOpenFile}
-          onUpdateName={handleUpdateItemName}
-        />
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={pointerWithin}>
+          <FileManagerSidebar
+            data={treeData}
+            isCollapsed={isCollapsed}
+            onToggle={() => setIsCollapsed(!isCollapsed)}
+            selectedId={currentFolderId}
+            onSelectId={handleNavigate}
+            onOpenFile={handleOpenFile}
+            onUpdateName={handleUpdateItemName}
+          />
 
-        <Box
-          sx={{
-            flexGrow: 1,
-            minWidth: 0,
-            height: '100%',
-            overflowY: 'auto',
-            ...scrollbarStyles,
-          }}
-        >
-          {viewMode === 'list' ? (
-            <>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  p: 3,
-                  pb: 0,
-                  pl: isCollapsed ? 6 : 3,
-                  transition: (theme) => theme.transitions.create(['padding-left']),
-                }}
-              >
-                <Box>
-                  <Typography variant="h4" sx={{ mb: 1 }}>OPIC Drive</Typography>
-                  {renderBreadcrumbs()}
+          <Box
+            sx={{
+              flexGrow: 1,
+              minWidth: 0,
+              height: '100%',
+              overflowY: 'auto',
+              ...scrollbarStyles,
+            }}
+          >
+            {viewMode === 'list' ? (
+              <>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 3,
+                    pb: 0,
+                    pl: isCollapsed ? 6 : 3,
+                    transition: (theme) => theme.transitions.create(['padding-left']),
+                  }}
+                >
+                  <Box>
+                    <Typography variant="h4" sx={{ mb: 1 }}>
+                      OPIC Drive
+                    </Typography>
+                    {renderBreadcrumbs()}
+                  </Box>
+                  <Stack direction="row" spacing={1}>
+                    <IconButton
+                      color="error"
+                      onClick={() => {
+                        setPendingAction('reset');
+                        backupConfirm.onTrue();
+                      }}
+                      sx={{
+                        bgcolor: 'error.main',
+                        color: 'error.contrastText',
+                        '&:hover': { bgcolor: 'error.dark' },
+                      }}
+                    >
+                      <Iconify icon="solar:restart-bold" />
+                    </IconButton>
+
+                    <IconButton
+                      color="info"
+                      onClick={() => fileInputRef.current?.click()}
+                      sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
+                    >
+                      <Iconify icon="eva:cloud-upload-fill" />
+                    </IconButton>
+
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleUpload}
+                      accept=".json"
+                      style={{ display: 'none' }}
+                    />
+
+                    <IconButton
+                      color="success"
+                      onClick={handleDownload}
+                      sx={{
+                        bgcolor: 'success.main',
+                        color: 'success.contrastText',
+                        '&:hover': { bgcolor: 'success.dark' },
+                      }}
+                    >
+                      <Iconify icon="eva:download-fill" />
+                    </IconButton>
+                  </Stack>
                 </Box>
-                <Stack direction="row" spacing={1}>
-                  <IconButton
-                    color="error"
-                    onClick={() => {
-                      setPendingAction('reset');
-                      backupConfirm.onTrue();
-                    }}
-                    sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
-                  >
-                    <Iconify icon="solar:restart-bold" />
-                  </IconButton>
 
-                  <IconButton
-                    color="info"
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
-                  >
-                    <Iconify icon="eva:cloud-upload-fill" />
-                  </IconButton>
-
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleUpload}
-                    accept=".json"
-                    style={{ display: 'none' }}
+                <Stack spacing={2.5} sx={{ p: 3 }}>
+                  {renderFilters()}
+                  {canReset && renderResults()}
+                  <FileManagerGridView
+                    table={table}
+                    dataFiltered={dataFiltered}
+                    onDeleteItem={handleDeleteItem}
+                    onFavoriteItem={handleFavoriteItem}
+                    onOpenRename={handleOpenRename}
+                    onCreateItem={handleCreateItem}
+                    onOpenConfirm={confirmDialog.onTrue}
+                    onNavigate={handleNavigate}
+                    onOpenFile={handleOpenFile}
+                    onMoveItem={handleMoveItem}
+                    notFound={notFound}
                   />
-
-                  <IconButton
-                    color="success"
-                    onClick={handleDownload}
-                    sx={{ bgcolor: 'success.main', color: 'success.contrastText', '&:hover': { bgcolor: 'success.dark' } }}
-                  >
-                    <Iconify icon="eva:download-fill" />
-                  </IconButton>
                 </Stack>
-              </Box>
-
-              <Stack spacing={2.5} sx={{ p: 3 }}>
-                {renderFilters()}
-                {canReset && renderResults()}
-                <FileManagerGridView
-                  table={table}
-                  dataFiltered={dataFiltered}
-                  onDeleteItem={handleDeleteItem}
-                  onFavoriteItem={handleFavoriteItem}
-                  onOpenRename={handleOpenRename}
-                  onCreateItem={handleCreateItem}
-                  onOpenConfirm={confirmDialog.onTrue}
-                  onNavigate={handleNavigate}
-                  onOpenFile={handleOpenFile}
-                  notFound={notFound}
-                />
-              </Stack>
-            </>
-          ) : viewMode === 'editor' && selectedFile ? (
-            <OpicEditorView
-              fileId={selectedFile.id}
-              fileName={selectedFile.name}
-              onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
-              onSaveSuccess={() => updateURL({ view: 'live' })}
-              onSave={(id) => {
-                const updateModifiedAt = (nodes: any[]): any[] =>
-                  nodes.map((node) => {
-                    if (node.id === id) {
-                      return { ...node, modifiedAt: new Date().toISOString() };
-                    }
-                    if (node.children) {
-                      return { ...node, children: updateModifiedAt(node.children) };
-                    }
-                    return node;
-                  });
-                setTreeData((prev) => updateModifiedAt(prev));
-              }}
-            />
-          ) : viewMode === 'live' && selectedFile ? (
-            <OpicLiveView
-              fileId={selectedFile.id}
-              fileName={selectedFile.name}
-              onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
-              onEdit={() => updateURL({ view: 'editor' })}
-            />
-          ) : null}
-        </Box>
+              </>
+            ) : viewMode === 'editor' && selectedFile ? (
+              <OpicEditorView
+                fileId={selectedFile.id}
+                fileName={selectedFile.name}
+                onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
+                onSaveSuccess={() => updateURL({ view: 'live' })}
+                onSave={(id) => {
+                  const updateModifiedAt = (nodes: any[]): any[] =>
+                    nodes.map((node) => {
+                      if (node.id === id) {
+                        return { ...node, modifiedAt: new Date().toISOString() };
+                      }
+                      if (node.children) {
+                        return { ...node, children: updateModifiedAt(node.children) };
+                      }
+                      return node;
+                    });
+                  setTreeData((prev) => updateModifiedAt(prev));
+                }}
+              />
+            ) : viewMode === 'live' && selectedFile ? (
+              <OpicLiveView
+                fileId={selectedFile.id}
+                fileName={selectedFile.name}
+                onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
+                onEdit={() => updateURL({ view: 'editor' })}
+              />
+            ) : null}
+          </Box>
+        </DndContext>
       </DashboardContent>
 
       {renderUploadFilesDialog()}

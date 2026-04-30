@@ -37,6 +37,7 @@ type Props = {
   onFavoriteItem?: (id: string) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   onOpenRename?: (id: string) => void;
+  onMoveItem?: (sourceId: string, targetFolderId: string | null) => void;
   notFound?: boolean;
   hideFolder?: boolean;
 };
@@ -51,6 +52,7 @@ export function FileManagerGridView({
   onFavoriteItem,
   onCreateItem,
   onOpenRename,
+  onMoveItem,
   notFound,
   hideFolder,
 }: Props) {
@@ -119,8 +121,6 @@ export function FileManagerGridView({
       hideUpload
     />
   );
-
-
 
   const renderMenuActions = () => (
     <CustomPopover

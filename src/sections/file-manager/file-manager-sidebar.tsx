@@ -1,5 +1,6 @@
 import { memo, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useLocalStorage } from 'minimal-shared/hooks';
+import { useDroppable } from '@dnd-kit/core';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -168,6 +169,11 @@ const SidebarTreeItem = memo(
 
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const { setNodeRef, isOver } = useDroppable({
+      id: node.id,
+      disabled: node.type !== 'folder',
+    });
+
     // Sync local value when entering editing mode
     useEffect(() => {
       if (isEditing) {
@@ -202,6 +208,7 @@ const SidebarTreeItem = memo(
         itemId={node.id}
         label={
           <Stack
+            ref={setNodeRef}
             direction="row"
             alignItems="center"
             spacing={0.3}
@@ -270,16 +277,16 @@ const SidebarTreeItem = memo(
       >
         {Array.isArray(node.children)
           ? node.children.map((child: any) => (
-              <SidebarTreeItem
-                key={child.id}
-                node={child}
-                editingId={editingId}
-                onSelect={onSelect}
-                onOpenFile={onOpenFile}
-                onSave={onSave}
-                onCancel={onCancel}
-              />
-            ))
+            <SidebarTreeItem
+              key={child.id}
+              node={child}
+              editingId={editingId}
+              onSelect={onSelect}
+              onOpenFile={onOpenFile}
+              onSave={onSave}
+              onCancel={onCancel}
+            />
+          ))
           : null}
       </StyledTreeItem>
     );
@@ -511,6 +518,11 @@ export function FileManagerSidebar({
   const displayWidth = isMounted ? width : 280;
   const displayCollapsed = isMounted ? isCollapsed : true;
 
+  // Add droppable for root at sidebar level
+  const { setNodeRef: setRootDropRef, isOver: isRootOver } = useDroppable({
+    id: 'root',
+  });
+
   return (
     <Box sx={{ position: 'relative', display: 'flex', height: '100%' }}>
       <RootStyle
@@ -531,7 +543,16 @@ export function FileManagerSidebar({
             transition: (theme) => theme.transitions.create(['opacity']),
           }}
         >
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack
+            ref={setRootDropRef}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{
+              borderRadius: 0.5,
+              p: 0.5,
+            }}
+          >
             <Typography variant="overline" sx={{ color: 'text.secondary', textTransform: 'none' }}>
               Explorer
             </Typography>

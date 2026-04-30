@@ -3,6 +3,7 @@ import type { FileItemProps } from './file-manager-file-item-slots';
 
 import { memo, useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
+import { useDraggable } from '@dnd-kit/core';
 
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -57,6 +58,18 @@ export const FileManagerFileItem = memo(({
   const favorite = useBoolean(file.isFavorited);
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: file.id,
+  });
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 9999,
+        opacity: 0.8,
+      }
+    : undefined;
 
   useEffect(() => {
     setIsMobileDevice(getIsMobile());
@@ -140,11 +153,14 @@ export const FileManagerFileItem = memo(({
   return (
     <>
       <FileItem
+        ref={setNodeRef}
         variant="outlined"
         selected={selected}
-        sx={sx}
+        sx={{ ...sx, ...style }}
         onDoubleClick={handleDoubleClick}
         onClick={isMobileDevice ? handleDoubleClick : undefined}
+        {...attributes}
+        {...listeners}
         {...other}
       >
 

@@ -3,6 +3,7 @@ import type { FileItemProps } from './file-manager-file-item-slots';
 
 import { memo, useState, useCallback, useEffect } from 'react';
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -57,6 +58,28 @@ export const FileManagerFolderItem = memo(({
   const menuActions = usePopover();
 
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: folder.id,
+  });
+
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: folder.id,
+  });
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 9999,
+        opacity: 0.8,
+      }
+    : undefined;
+
+  // Combine refs
+  const setRefs = (node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    setDropRef(node);
+  };
 
   useEffect(() => {
     setIsMobileDevice(getIsMobile());
@@ -127,11 +150,23 @@ export const FileManagerFolderItem = memo(({
   return (
     <>
       <FileItem
+        ref={setRefs}
         variant="outlined"
         selected={selected}
         onDoubleClick={onNavigate}
         onClick={isMobileDevice ? onNavigate : undefined}
-        sx={{ ...sx, cursor: 'pointer' }}
+        sx={{
+          ...sx,
+          ...style,
+          cursor: 'pointer',
+          ...(isOver && {
+            bgcolor: 'action.hover',
+            borderStyle: 'dashed',
+            borderColor: 'primary.main',
+          }),
+        }}
+        {...attributes}
+        {...listeners}
         {...other}
       >
 
