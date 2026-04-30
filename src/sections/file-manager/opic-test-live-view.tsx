@@ -45,10 +45,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scriptData, setScriptData] = useState<any>(null);
   const [currentFileName, setCurrentFileName] = useState('');
-  
+
   const [loading, setLoading] = useState(true);
   const [loadingScript, setLoadingScript] = useState(false);
-  
+
   const [revealedLines, setRevealedLines] = useState<Record<string, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
   const [showKoQuestion, setShowKoQuestion] = useState(false);
@@ -116,10 +116,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   useEffect(() => {
     const loadCurrentScript = async () => {
       if (!playlist || playlist.fileIds.length === 0) return;
-      
+
       const currentId = playlist.fileIds[currentIndex];
       setLoadingScript(true);
-      
+
       // Reset current state
       setRevealedLines({});
       setAllRevealed(false);
@@ -131,7 +131,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       try {
         // Referenced scripts are ALWAYS from main DRIVE
         const data = await getFileScript(currentId);
-        
+
         // Try to get the file name from DRIVE tree
         const tree = await getTreeData();
         const findName = (nodes: any[]): string => {
@@ -227,15 +227,15 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
       return;
     }
-    
+
     // Cleanup
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) {} }
+    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
-    
+
     recognition.lang = 'en-US';
     recognition.continuous = !isMobile;
     recognition.interimResults = true;
@@ -243,19 +243,19 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     recognition.onstart = () => {
       setIsListening(index);
       toast.info('인식을 시작합니다. 말씀해 주세요.');
-      
+
       setTimeout(() => {
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
       if (!isMobile) startMediaRecorder(index);
     };
-    
+
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results).map((result: any) => result[0].transcript).join('');
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
     };
-    
+
     recognition.onerror = (event: any) => {
       console.warn('Speech recognition error', event.error);
       if (event.error === 'not-allowed') {
@@ -265,7 +265,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
       stopListening();
     };
-    
+
     recognition.onend = () => {
       stopListening();
     };
@@ -354,18 +354,14 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
+    <Box sx={{ py: { xs: 2, md: 5 }, px: { xs: 0, md: 3 }, width: 1 }}>
       {/* Header */}
       <Stack
         spacing={{ xs: 1, md: 0 }}
         direction={{ xs: 'column', md: 'row' }}
         alignItems={{ xs: 'stretch', md: 'center' }}
-        sx={{ 
-          mb: 4, 
-          position: 'sticky', 
-          top: 0, 
-          bgcolor: 'background.default', 
-          zIndex: 10, 
+        sx={{
+          mb: 4,
           py: 1.5,
           borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`
         }}
@@ -385,18 +381,18 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           </Stack>
         </Stack>
 
-        <Stack 
-          direction="row" 
-          alignItems="center" 
-          justifyContent={{ xs: 'center', md: 'flex-end' }} 
-          spacing={1} 
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent={{ xs: 'center', md: 'flex-end' }}
+          spacing={1}
           sx={{ flexShrink: 0 }}
         >
           <Tooltip title="Previous Script">
             <span>
-              <IconButton 
+              <IconButton
                 size="small"
-                disabled={currentIndex === 0} 
+                disabled={currentIndex === 0}
                 onClick={handlePrev}
                 sx={{ bgcolor: 'background.neutral' }}
               >
@@ -407,9 +403,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
           <Tooltip title="Next Script">
             <span>
-              <IconButton 
+              <IconButton
                 size="small"
-                disabled={!playlist || currentIndex === playlist.fileIds.length - 1} 
+                disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
                 onClick={handleNext}
                 sx={{ bgcolor: 'background.neutral' }}
               >
@@ -457,7 +453,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       ) : scriptData ? (
         <Stack spacing={4}>
           {/* Question Section */}
-          <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+          <Card sx={{ p: { xs: 1, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
             <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
             <Stack spacing={3}>
@@ -469,20 +465,20 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                         Q{index + 1}
                       </Typography>
                     </Box>
-                    <Typography 
-                      variant="h6" 
+                    <Typography
+                      variant="h6"
                       onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
-                      sx={{ 
-                        lineHeight: 1.5, 
-                        fontWeight: 700, 
-                        flexGrow: 1, 
+                      sx={{
+                        lineHeight: 1.5,
+                        fontWeight: 700,
+                        flexGrow: 1,
                         color: 'text.primary',
                         cursor: testMode ? 'pointer' : 'default',
                         transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                        ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && { 
-                          filter: 'blur(8px)', 
-                          opacity: 0.3, 
-                          userSelect: 'none' 
+                        ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
+                          filter: 'blur(8px)',
+                          opacity: 0.3,
+                          userSelect: 'none'
                         })
                       }}
                     >
@@ -500,7 +496,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                       onClick={() => { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); }}
                       sx={{ ml: 4, p: 2, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'background.paper', border: (theme) => `dashed 1px ${theme.vars.palette.divider}`, transition: (theme) => theme.transitions.create(['background-color']), '&:hover': { bgcolor: 'action.hover' } }}
                     >
-                      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'justify', transition: (theme) => theme.transitions.create(['filter', 'opacity']), ...(! (revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }) }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'justify', transition: (theme) => theme.transitions.create(['filter', 'opacity']), ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }) }}>
                         {q.ko}
                       </Typography>
                     </Box>
@@ -536,7 +532,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                 <Card
                   key={index}
                   sx={{
-                    p: { xs: 2, md: 2.5 },
+                    p: { xs: 1, md: 2.5 },
                     border: (theme) => `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`,
                     bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
                     boxShadow: (theme) => theme.customShadows?.z1,
@@ -635,7 +631,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           <Typography variant="body1" sx={{ color: 'text.disabled' }}>스크립트 정보가 없습니다.</Typography>
         </Box>
       )}
-    </Container>
+    </Box>
   );
 }
 
