@@ -175,7 +175,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           <Tooltip title="저장">
             <IconButton
               color="primary"
-              onClick={handleSave}
+              onClick={() => handleSave(false)}
               sx={{
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText',
