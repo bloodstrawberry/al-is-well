@@ -196,113 +196,110 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }, 3000);
   }, [stopListening]);
 
-  const startListening = async (index: number) => {
-    try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const startListening = (index: number) => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-      if (!SpeechRecognition) {
-        toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
-        return;
-      }
+    if (!SpeechRecognition) {
+      toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
+      return;
+    }
 
-      // Cleanup existing instances
-      stopListening();
+    // 1. Immediate Cleanup
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch (e) {}
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop(); } catch (e) {}
+    }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
 
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.continuous = true;
-      recognition.interimResults = true;
+    // 2. Initialize Recognition (Directly in user gesture)
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    
+    recognition.lang = 'en-US';
+    // Mobile Compatibility: Many mobile browsers struggle with continuous: true
+    recognition.continuous = !isMobile;
+    recognition.interimResults = true;
 
-      // Initialize MediaRecorder for voice playback
-      // Note: On some mobile browsers, starting this AFTER recognition.start() might work better
-      const startMediaRecorder = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          audioChunksRef.current = [];
-
-          mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) audioChunksRef.current.push(event.data);
-          };
-
-          mediaRecorder.onstop = () => {
-            if (audioChunksRef.current.length > 0) {
-              const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-              const audioUrl = URL.createObjectURL(audioBlob);
-              setRecordedAudios((prev) => {
-                if (prev[index]) URL.revokeObjectURL(prev[index]);
-                return { ...prev, [index]: audioUrl };
-              });
-            }
-            stream.getTracks().forEach((track) => track.stop());
-          };
-
-          mediaRecorder.start();
-        } catch (err) {
-          console.warn('MediaRecorder failed to start', err);
-        }
-      };
-
-      const startTimeout = setTimeout(() => {
-        if (!recognitionRef.current || isListening === null) {
-          console.warn('Speech recognition failed to start within timeout');
-          // Don't toast here as it might be a false positive if onstart fires just after
-        }
-      }, 3000);
-
-      recognition.onstart = () => {
-        clearTimeout(startTimeout);
-        setIsListening(index);
-        resetSilenceTimer(index);
-        startMediaRecorder();
-        toast.info('음성 인식을 시작합니다. 말씀해 주세요.');
-        
-        // Auto-focus the input to ensure cursor is active
-        setTimeout(() => {
-          if (inputRefs.current[index]) {
-            inputRefs.current[index].focus();
-          }
-        }, 100);
-      };
-
-      recognition.onresult = (event: any) => {
-        resetSilenceTimer(index);
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result: any) => result.transcript)
-          .join('');
-
-        setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
-      };
-
-      recognition.onspeechstart = () => {
-        resetSilenceTimer(index);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.warn('Speech recognition error', event.error);
-        if (event.error === 'not-allowed') {
-          toast.warning('마이크 권한이 거부되었습니다. 설정에서 권한을 허용해 주세요.');
-        } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-          toast.warning(`인식 오류: ${event.error}`);
-        }
-        stopListening();
-      };
-
-      recognition.onend = () => {
-        stopListening();
-      };
-
-      recognitionRef.current = recognition;
+    // 3. Setup Callbacks
+    recognition.onstart = () => {
+      setIsListening(index);
+      resetSilenceTimer(index);
+      toast.info('인식을 시작합니다. 말씀해 주세요.');
       
-      // Crucial: Start recognition directly to preserve user gesture context
-      recognition.start();
+      // Focus input
+      setTimeout(() => {
+        if (inputRefs.current[index]) inputRefs.current[index].focus();
+      }, 100);
 
-    } catch (error) {
-      console.warn('Failed to start listening', error);
-      toast.warning('음성 인식을 시작하는 중 오류가 발생했습니다.');
+      // 4. Start MediaRecorder only on Desktop or if not mobile to avoid mic conflict
+      if (!isMobile) {
+        startMediaRecorder(index);
+      }
+    };
+
+    recognition.onresult = (event: any) => {
+      resetSilenceTimer(index);
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+
+      setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+    };
+
+    recognition.onerror = (event: any) => {
+      console.warn('Speech recognition error', event.error);
+      if (event.error === 'not-allowed') {
+        toast.warning('마이크 권한이 거부되었습니다.');
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast.warning(`인식 오류: ${event.error}`);
+      }
+      stopListening();
+    };
+
+    recognition.onend = () => {
+      stopListening();
+    };
+
+    // 5. Start immediately
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('Recognition start failed', e);
       setIsListening(null);
+    }
+  };
+
+  const startMediaRecorder = async (index: number) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setRecordedAudios((prev) => {
+            if (prev[index]) URL.revokeObjectURL(prev[index]);
+            return { ...prev, [index]: audioUrl };
+          });
+        }
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+    } catch (err) {
+      console.warn('MediaRecorder failed', err);
     }
   };
 
