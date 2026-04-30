@@ -18,6 +18,7 @@ import { Iconify } from 'src/components/iconify';
 import { getFileScript, getTreeData } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
+import { useOpicSpeech } from './hooks/use-opic-speech';
 
 // ----------------------------------------------------------------------
 
@@ -61,18 +62,20 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     return true;
   });
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+
+  const {
+    userAnswers,
+    setUserAnswers,
+    recordedAudios,
+    isListening,
+    inputRefs,
+    startListening,
+    stopListening,
+    playRecordedAudio,
+  } = useOpicSpeech();
+
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
-
-  const [isListening, setIsListening] = useState<number | null>(null);
-  const recognitionRef = useRef<any>(null);
-  const silenceTimerRef = useRef<any>(null);
-  const inputRefs = useRef<Record<number, any>>({});
-
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
 
   // Pre-load voices
   useEffect(() => {
@@ -83,14 +86,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   }, []);
 
-  const recordedAudiosRef = useRef<Record<number, string>>({});
-  useEffect(() => { recordedAudiosRef.current = recordedAudios; }, [recordedAudios]);
 
-  useEffect(() => () => {
-    if (recognitionRef.current) recognitionRef.current.stop();
-    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-    Object.values(recordedAudiosRef.current).forEach((url) => URL.revokeObjectURL(url));
-  }, []);
 
   // 1. Load Playlist
   useEffect(() => {
@@ -221,166 +217,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       if (enVoice) utterance.voice = enVoice;
       setTimeout(() => { window.speechSynthesis.speak(utterance); }, 50);
     }
-  };
-
-  const isManualStopRef = useRef(false);
-  const isFirstStartRef = useRef(true);
-  const accumulatedTranscriptRef = useRef('');
-  const currentFullTranscriptRef = useRef('');
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-
-  const stopListening = useCallback(() => {
-    isManualStopRef.current = true;
-
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) { /* already stopped */ }
-      recognitionRef.current = null;
-    }
-
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch (e) { /* already stopped */ }
-      mediaRecorderRef.current = null;
-    }
-
-    // Release mic stream
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-
-    setIsListening(null);
-  }, []);
-
-  const resetSilenceTimer = useCallback(() => {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-    }
-    silenceTimerRef.current = setTimeout(() => {
-      stopListening();
-      toast.info('10초간 입력이 없어 녹음을 종료합니다.');
-    }, 10000);
-  }, [stopListening]);
-
-  const startListening = (index: number) => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 혹은 Safari 최신 버전을 사용해주세요.');
-      return;
-    }
-
-    isManualStopRef.current = false;
-
-    // Cleanup previous
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
-    if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach((t) => t.stop()); mediaStreamRef.current = null; }
-    if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-
-    // 1. Initialize SpeechRecognition
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-
-    recognition.lang = 'en-US';
-    recognition.continuous = true; // Use continuous to avoid needing auto-restarts
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      setIsListening(index);
-      toast.info('인식을 시작합니다. 말씀해 주세요.');
-      resetSilenceTimer();
-    };
-
-    recognition.onresult = (event: any) => {
-      resetSilenceTimer();
-
-      let interimTranscript = '';
-      // Only process from resultIndex to get the latest changes/additions
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          accumulatedTranscriptRef.current += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-
-      const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
-      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
-      
-      if (inputRefs.current[index]) {
-        inputRefs.current[index].value = fullTranscript;
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('Speech recognition error', event.error);
-      if (event.error === 'not-allowed') {
-        toast.warning('마이크 권한이 거부되었습니다.');
-      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        toast.warning(`인식 오류: ${event.error}`);
-      }
-      stopListening();
-    };
-
-    recognition.onend = () => {
-      if (!isManualStopRef.current && isListening === index) {
-        try {
-          recognition.start();
-        } catch (e) {
-          stopListening();
-        }
-      } else {
-        stopListening();
-      }
-    };
-
-    // 2. Start SpeechRecognition SYNCHRONOUSLY to satisfy mobile PWA user-gesture rules
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error('Recognition start failed', e);
-      setIsListening(null);
-    }
-
-    // 3. Start MediaRecorder ASYNCHRONOUSLY after a delay to prevent mic lock conflict
-    setTimeout(async () => {
-      if (isManualStopRef.current) return; // if user stopped very quickly
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaStreamRef.current = stream;
-        
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
-        
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) audioChunksRef.current.push(event.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          if (audioChunksRef.current.length > 0) {
-            const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            setRecordedAudios((prev) => {
-              if (prev[index]) URL.revokeObjectURL(prev[index]);
-              return { ...prev, [index]: audioUrl };
-            });
-          }
-        };
-        
-        mediaRecorder.start();
-      } catch (err) {
-        console.warn('MediaRecorder setup failed', err);
-      }
-    }, 800); // 800ms delay ensures SpeechRecognition grabs the mic first
   };
 
   const handleCheckAnswer = (index: number) => {
@@ -642,7 +478,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                                   <IconButton size="small" color={isListening === index ? 'error' : 'default'} onClick={() => (isListening === index ? stopListening() : startListening(index))} sx={{ ...(isListening === index && { animation: 'pulse 1.5s infinite', '@keyframes pulse': { '0%': { transform: 'scale(1)', opacity: 1 }, '50%': { transform: 'scale(1.2)', opacity: 0.7 }, '100%': { transform: 'scale(1)', opacity: 1 } } }) }}>
                                     <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
                                   </IconButton>
-                                  <IconButton size="small" disabled={!recordedAudios[index]} onClick={() => { const audio = new Audio(recordedAudios[index]); audio.play(); }} sx={{ color: recordedAudios[index] ? 'info.main' : 'text.disabled', bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent' }}>
+                                  <IconButton 
+                                    size="small" 
+                                    disabled={!recordedAudios[index]} 
+                                    onClick={() => playRecordedAudio(index)} 
+                                    sx={{ color: recordedAudios[index] ? 'info.main' : 'text.disabled', bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent' }}>
                                     <Iconify icon="solar:play-bold" />
                                   </IconButton>
                                   <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
