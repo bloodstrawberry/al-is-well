@@ -207,7 +207,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     
     // Cleanup
     if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} }
-    if (mediaRecorderRef.current?.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) {} }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) {} }
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
 
     const recognition = new SpeechRecognition();
