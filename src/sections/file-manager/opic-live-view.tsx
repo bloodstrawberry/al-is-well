@@ -158,7 +158,11 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
   };
 
+  const isManualStopRef = useRef(false);
+
   const stopListening = useCallback(() => {
+    isManualStopRef.current = true;
+
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
@@ -166,7 +170,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.onend = null;
         recognitionRef.current.stop();
       } catch (e) {
         // already stopped
@@ -186,7 +189,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     setIsListening(null);
   }, []);
 
-  const resetSilenceTimer = useCallback((index: number) => {
+  const resetSilenceTimer = useCallback(() => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
     }
@@ -204,7 +207,9 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       return;
     }
 
-    // 1. Immediate Cleanup
+    isManualStopRef.current = false;
+
+    // Cleanup previous
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch (e) {}
     }
@@ -215,36 +220,28 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       window.speechSynthesis.cancel();
     }
 
-    // 2. Initialize Recognition (Directly in user gesture)
+    // Blur any focused input to prevent keyboard on mobile
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
     
     recognition.lang = 'en-US';
-    // Mobile Compatibility: Many mobile browsers struggle with continuous: true
-    recognition.continuous = !isMobile;
+    recognition.continuous = true;
     recognition.interimResults = true;
 
-    // 3. Setup Callbacks
     recognition.onstart = () => {
       setIsListening(index);
-      resetSilenceTimer(index);
+      resetSilenceTimer();
       toast.info('인식을 시작합니다. 말씀해 주세요.');
-      
-      // Focus input
-      setTimeout(() => {
-        if (inputRefs.current[index]) inputRefs.current[index].focus();
-      }, 100);
 
-      // Start MediaRecorder with a delay on mobile to avoid mic conflict
-      if (isMobile) {
-        setTimeout(() => startMediaRecorder(index), 1000);
-      } else {
-        startMediaRecorder(index);
-      }
+      startMediaRecorder(index);
     };
 
     recognition.onresult = (event: any) => {
-      resetSilenceTimer(index);
+      resetSilenceTimer();
       
       let transcript = '';
       for (let i = 0; i < event.results.length; i++) {
@@ -255,17 +252,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       
       // Direct DOM update for better mobile compatibility
       if (inputRefs.current[index]) {
-        inputRefs.current[index].value = transcript;
-      }
-
-      // Auto-scroll logic
-      const input = inputRefs.current[index];
-      if (input) {
-        input.focus();
-        setTimeout(() => {
-          input.selectionStart = input.selectionEnd = input.value.length;
-          input.scrollLeft = input.scrollWidth;
-        }, 0);
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype, 'value'
+        )?.set;
+        nativeInputValueSetter?.call(inputRefs.current[index], transcript);
       }
     };
 
@@ -280,10 +270,18 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     };
 
     recognition.onend = () => {
+      // On mobile, continuous mode may not work. Auto-restart if not manually stopped.
+      if (!isManualStopRef.current && recognitionRef.current) {
+        try {
+          recognition.start();
+          return;
+        } catch (e) {
+          // Failed to restart, fall through to stop
+        }
+      }
       stopListening();
     };
 
-    // 5. Start immediately
     try {
       recognition.start();
     } catch (e) {
@@ -681,10 +679,11 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                               handleCheckAnswer(index);
                             }
                           }}
+                          onFocus={(e) => { if (isListening !== null) e.target.blur(); }}
                           autoComplete="off"
                           slotProps={{
                             input: {
-                              inputMode: isListening === index ? 'none' : 'text',
+                              readOnly: isListening === index,
                               endAdornment: (
                                 <InputAdornment position="end" sx={{ gap: 0.5 }}>
                                   <IconButton

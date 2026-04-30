@@ -223,7 +223,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   };
 
+  const isManualStopRef = useRef(false);
+
   const stopListening = useCallback(() => {
+    isManualStopRef.current = true;
+
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
@@ -231,7 +235,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.onend = null;
         recognitionRef.current.stop();
       } catch (e) {
         // already stopped
@@ -251,7 +254,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     setIsListening(null);
   }, []);
 
-  const resetSilenceTimer = useCallback((index: number) => {
+  const resetSilenceTimer = useCallback(() => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
     }
@@ -268,37 +271,35 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       return;
     }
 
-    // Cleanup
+    isManualStopRef.current = false;
+
+    // Cleanup previous
     if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+
+    // Blur any focused input to prevent keyboard on mobile
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
 
     recognition.lang = 'en-US';
-    recognition.continuous = !isMobile;
+    recognition.continuous = true;
     recognition.interimResults = true;
 
     recognition.onstart = () => {
       setIsListening(index);
-      resetSilenceTimer(index);
+      resetSilenceTimer();
       toast.info('인식을 시작합니다. 말씀해 주세요.');
 
-      setTimeout(() => {
-        if (inputRefs.current[index]) inputRefs.current[index].focus();
-      }, 100);
-
-      // Start MediaRecorder with a delay on mobile to avoid mic conflict
-      if (isMobile) {
-        setTimeout(() => startMediaRecorder(index), 1000);
-      } else {
-        startMediaRecorder(index);
-      }
+      startMediaRecorder(index);
     };
 
     recognition.onresult = (event: any) => {
-      resetSilenceTimer(index);
+      resetSilenceTimer();
       
       let transcript = '';
       for (let i = 0; i < event.results.length; i++) {
@@ -309,17 +310,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       
       // Direct DOM update for better mobile compatibility
       if (inputRefs.current[index]) {
-        inputRefs.current[index].value = transcript;
-      }
-
-      // Auto-scroll logic
-      const input = inputRefs.current[index];
-      if (input) {
-        input.focus();
-        setTimeout(() => {
-          input.selectionStart = input.selectionEnd = input.value.length;
-          input.scrollLeft = input.scrollWidth;
-        }, 0);
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype, 'value'
+        )?.set;
+        nativeInputValueSetter?.call(inputRefs.current[index], transcript);
       }
     };
 
@@ -334,6 +328,15 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     };
 
     recognition.onend = () => {
+      // On mobile, continuous mode may not work. Auto-restart if not manually stopped.
+      if (!isManualStopRef.current && recognitionRef.current) {
+        try {
+          recognition.start();
+          return;
+        } catch (e) {
+          // Failed to restart, fall through to stop
+        }
+      }
       stopListening();
     };
 
@@ -618,10 +621,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           placeholder="Listen and type English..." value={userAnswers[index] || ''}
                           onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
                           onKeyDown={(e) => { if (e.key === 'Enter') handleCheckAnswer(index); }}
+                          onFocus={(e) => { if (isListening !== null) e.target.blur(); }}
                           autoComplete="off"
                           slotProps={{
                             input: {
-                              inputMode: isListening === index ? 'none' : 'text',
+                              readOnly: isListening === index,
                               endAdornment: (
                                 <InputAdornment position="end" sx={{ gap: 0.5 }}>
                                   <IconButton size="small" color={isListening === index ? 'error' : 'default'} onClick={() => (isListening === index ? stopListening() : startListening(index))} sx={{ ...(isListening === index && { animation: 'pulse 1.5s infinite', '@keyframes pulse': { '0%': { transform: 'scale(1)', opacity: 1 }, '50%': { transform: 'scale(1.2)', opacity: 0.7 }, '100%': { transform: 'scale(1)', opacity: 1 } } }) }}>
