@@ -14,7 +14,7 @@ import { CONFIG } from 'src/global-config';
 
 import { Label } from 'src/components/label';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 // ----------------------------------------------------------------------
 

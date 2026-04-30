@@ -17,7 +17,7 @@ import { _contacts } from 'src/_mock';
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
 
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
