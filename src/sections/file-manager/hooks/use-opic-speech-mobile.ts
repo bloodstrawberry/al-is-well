@@ -110,9 +110,8 @@ export function useOpicSpeech() {
     recognition.onstart = () => {
       setIsListening(index);
       setIsPreparing(false);
-      resetSilenceTimer();
       if (isFirstStartRef.current) {
-        toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
+        resetSilenceTimer();
         isFirstStartRef.current = false;
       }
     };
@@ -120,30 +119,37 @@ export function useOpicSpeech() {
     recognition.onresult = (event: any) => {
       resetSilenceTimer(); 
       
-      // continuous=false이므로 보통 result는 하나입니다.
-      const result = event.results[event.results.length - 1];
-      const transcript = result[0].transcript;
-      const trimmedTranscript = transcript.trim();
+      let currentSessionFinal = '';
+      let currentSessionInterim = '';
 
-      if (result.isFinal) {
-        // 최종 결과: 중복 방지를 위해 기존 누적 텍스트와 비교 후 저장
-        const currentAcc = accumulatedTranscriptRef.current.trim();
-        if (trimmedTranscript && !currentAcc.toLowerCase().endsWith(trimmedTranscript.toLowerCase())) {
-          accumulatedTranscriptRef.current = (accumulatedTranscriptRef.current + ' ' + transcript).trim();
+      // 현재 세션의 모든 결과를 다시 계산 (Buggy한 브라우저 대응)
+      for (let i = 0; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          currentSessionFinal += transcript;
+        } else {
+          currentSessionInterim += transcript;
         }
-        
-        const fullText = accumulatedTranscriptRef.current;
-        setUserAnswers((prev) => ({ ...prev, [index]: fullText }));
-        if (inputRefs.current[index]) {
-          inputRefs.current[index].value = fullText;
-        }
+      }
+
+      // 최종 합산 문장 생성
+      const acc = accumulatedTranscriptRef.current.trim();
+      const final = currentSessionFinal.trim();
+      const interim = currentSessionInterim.trim();
+
+      let fullTranscript = '';
+      
+      // 스마트 병합: 만약 현재 세션의 확정본이 이미 이전 누적본에 포함되어 있다면 합치지 않음
+      if (acc && final && acc.toLowerCase().includes(final.toLowerCase())) {
+        fullTranscript = (acc + ' ' + interim).trim();
       } else {
-        // 중간 결과: 현재까지의 확정본 + 현재 분석 중인 단어
-        const fullText = (accumulatedTranscriptRef.current + ' ' + transcript).trim();
-        setUserAnswers((prev) => ({ ...prev, [index]: fullText }));
-        if (inputRefs.current[index]) {
-          inputRefs.current[index].value = fullText;
-        }
+        fullTranscript = (acc + ' ' + final + ' ' + interim).trim();
+      }
+
+      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
+      
+      if (inputRefs.current[index]) {
+        inputRefs.current[index].value = fullTranscript;
       }
     };
 
