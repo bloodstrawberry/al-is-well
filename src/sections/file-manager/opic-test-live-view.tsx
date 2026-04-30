@@ -67,6 +67,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const [isListening, setIsListening] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
+  const silenceTimerRef = useRef<any>(null);
   const inputRefs = useRef<Record<number, any>>({});
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -87,6 +88,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   useEffect(() => () => {
     if (recognitionRef.current) recognitionRef.current.stop();
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     Object.values(recordedAudiosRef.current).forEach((url) => URL.revokeObjectURL(url));
   }, []);
 
@@ -221,6 +223,44 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   };
 
+  const stopListening = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      } catch (e) {
+        // already stopped
+      }
+      recognitionRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        // already stopped
+      }
+      mediaRecorderRef.current = null;
+    }
+
+    setIsListening(null);
+  }, []);
+
+  const resetSilenceTimer = useCallback((index: number) => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+    }
+    silenceTimerRef.current = setTimeout(() => {
+      stopListening();
+      toast.info('3초간 입력이 없어 녹음을 종료합니다.');
+    }, 3000);
+  }, [stopListening]);
+
   const startListening = (index: number) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -242,6 +282,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
     recognition.onstart = () => {
       setIsListening(index);
+      resetSilenceTimer(index);
       toast.info('인식을 시작합니다. 말씀해 주세요.');
 
       setTimeout(() => {
@@ -252,6 +293,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     };
 
     recognition.onresult = (event: any) => {
+      resetSilenceTimer(index);
       const transcript = Array.from(event.results).map((result: any) => result[0].transcript).join('');
       setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
 
@@ -310,12 +352,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     } catch (err) {
       console.warn('MediaRecorder start failed', err);
     }
-  };
-
-  const stopListening = () => {
-    recognitionRef.current?.stop();
-    if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
-    setIsListening(null);
   };
 
   const handleCheckAnswer = (index: number) => {

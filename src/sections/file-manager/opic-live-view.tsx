@@ -235,10 +235,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         if (inputRefs.current[index]) inputRefs.current[index].focus();
       }, 100);
 
-      // 4. Start MediaRecorder only on Desktop or if not mobile to avoid mic conflict
-      if (!isMobile) {
-        startMediaRecorder(index);
-      }
+      // 4. Start MediaRecorder
+      startMediaRecorder(index);
     };
 
     recognition.onresult = (event: any) => {
