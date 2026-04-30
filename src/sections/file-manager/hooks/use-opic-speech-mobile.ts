@@ -110,9 +110,12 @@ export function useOpicSpeech() {
     recognition.onstart = () => {
       setIsListening(index);
       setIsPreparing(false);
-      resetSilenceTimer();
+      
+      // 🌟 핵심: 처음 시작할 때만 타이머 시작. 
+      // 이후에는 onresult(발화 감지) 시에만 타이머가 갱신됩니다.
+      // 이렇게 해야 브라우저의 자동 재시작이 타이머를 무한 연장하는 것을 방지합니다.
       if (isFirstStartRef.current) {
-        // toast.success('음성 인식이 시작되었습니다. 말씀해 주세요.');
+        resetSilenceTimer();
         isFirstStartRef.current = false;
       }
     };
