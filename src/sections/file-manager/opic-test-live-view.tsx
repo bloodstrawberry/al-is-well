@@ -479,7 +479,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
             {scriptData?.lines?.map((line: any, index: number) => {
               const isRevealed = revealedLines[index] ?? allRevealed;
               const result = testResults[index];
-              const isAnswerRevealed = revealedAnswers[index];
+              const isAnswerRevealed = revealedAnswers[index] || allRevealed;
 
               return (
                 <Card
@@ -529,19 +529,27 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                             }
                           }}
                         />
-                        {result && (
+                        {(result || allRevealed) && (
                           <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
-                            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
-                              <Box sx={{ px: 0.75, py: 0.25, borderRadius: 0.5, bgcolor: (theme) => alpha(theme.palette.info.main, 0.1), color: 'info.main', fontSize: 10, fontWeight: 900, mr: 0.5, flexShrink: 0 }}>답변</Box>
-                              {result.map((word: any, wIndex: number) => word.uWord && (
-                                <Typography key={wIndex} variant="body1" sx={{ color: word.isCorrect ? 'info.main' : 'error.main', fontWeight: 700, textDecoration: word.isCorrect ? 'none' : 'line-through' }}>{word.uWord}</Typography>
-                              ))}
-                            </Box>
+                            {result && (
+                              <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
+                                <Box sx={{ px: 0.75, py: 0.25, borderRadius: 0.5, bgcolor: (theme) => alpha(theme.palette.info.main, 0.1), color: 'info.main', fontSize: 10, fontWeight: 900, mr: 0.5, flexShrink: 0 }}>답변</Box>
+                                {result.map((word: any, wIndex: number) => word.uWord && (
+                                  <Typography key={wIndex} variant="body1" sx={{ color: word.isCorrect ? 'info.main' : 'error.main', fontWeight: 700, textDecoration: word.isCorrect ? 'none' : 'line-through' }}>{word.uWord}</Typography>
+                                ))}
+                              </Box>
+                            )}
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
                               <Box sx={{ px: 0.75, py: 0.25, borderRadius: 0.5, bgcolor: (theme) => alpha(theme.palette.success.main, 0.1), color: 'success.main', fontSize: 10, fontWeight: 900, mr: 0.5, flexShrink: 0 }}>정답</Box>
-                              {result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
-                                <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled', letterSpacing: isAnswerRevealed ? 0 : 1 }}>{isAnswerRevealed ? word.cWord : word.masked}</Typography>
-                              ))}
+                              {result ? (
+                                result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
+                                  <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled', letterSpacing: isAnswerRevealed ? 0 : 1 }}>{isAnswerRevealed ? word.cWord : word.masked}</Typography>
+                                ))
+                              ) : (
+                                <Typography variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled' }}>
+                                  {isAnswerRevealed ? line.en : line.en.replace(/[a-zA-Z0-9]/g, '*')}
+                                </Typography>
+                              )}
                               <IconButton size="small" onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))} sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}>
                                 <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
                               </IconButton>
