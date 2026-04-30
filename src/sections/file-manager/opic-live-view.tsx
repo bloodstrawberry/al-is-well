@@ -510,7 +510,23 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                       Q{index + 1}
                     </Typography>
                   </Box>
-                  <Typography variant="h6" sx={{ lineHeight: 1.5, fontWeight: 700, flexGrow: 1, color: 'text.primary' }}>
+                  <Typography 
+                    variant="h6" 
+                    onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
+                    sx={{ 
+                      lineHeight: 1.5, 
+                      fontWeight: 700, 
+                      flexGrow: 1, 
+                      color: 'text.primary',
+                      cursor: testMode ? 'pointer' : 'default',
+                      transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                      ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && { 
+                        filter: 'blur(8px)', 
+                        opacity: 0.3, 
+                        userSelect: 'none' 
+                      })
+                    }}
+                  >
                     {q.en || 'Untitled Question'}
                   </Typography>
                   {q.en && (

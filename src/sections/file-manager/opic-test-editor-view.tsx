@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Autocomplete from '@mui/material/Autocomplete';
+import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -155,33 +156,43 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
             whiteSpace: 'nowrap',
           }}
         >
-          {fileName} 구성
+          {fileName}
         </Typography>
 
         <Stack direction="row" spacing={1}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-            startIcon={<Iconify icon="solar:diskette-bold" />}
-            sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
-          >
-            저장
-          </Button>
+          <Tooltip title="저장">
+            <IconButton
+              color="primary"
+              onClick={handleSave}
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                boxShadow: (theme) => theme.customShadows?.primary,
+                '&:hover': { bgcolor: 'primary.dark' }
+              }}
+            >
+              <Iconify icon="solar:diskette-bold" />
+            </IconButton>
+          </Tooltip>
 
           {onStartTest && (
-            <Button
-              variant="contained"
-              color="info"
-              onClick={async () => {
-                await handleSave();
-                onStartTest();
-              }}
-              startIcon={<Iconify icon="solar:play-bold" />}
-              sx={{ boxShadow: (theme) => theme.customShadows?.info }}
-            >
-              Test 시작
-            </Button>
+            <Tooltip title="Test 시작">
+              <IconButton
+                color="info"
+                onClick={async () => {
+                  await handleSave();
+                  onStartTest();
+                }}
+                sx={{
+                  bgcolor: 'info.main',
+                  color: 'info.contrastText',
+                  boxShadow: (theme) => theme.customShadows?.info,
+                  '&:hover': { bgcolor: 'info.dark' }
+                }}
+              >
+                <Iconify icon="solar:play-bold" />
+              </IconButton>
+            </Tooltip>
           )}
         </Stack>
       </Stack>
@@ -190,7 +201,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         <Card sx={{ p: 3 }}>
           <Stack spacing={3}>
             <Typography variant="h6" sx={{ fontWeight: 800 }}>DRIVE에서 스크립트 추가</Typography>
-            
+
             <Autocomplete
               fullWidth
               options={driveFiles}
@@ -210,7 +221,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Iconify icon="solar:magnifer-bold" sx={{ color: 'text.disabled' }} />
+                          <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
                         </InputAdornment>
                       ),
                     },

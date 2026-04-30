@@ -53,7 +53,14 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const [allRevealed, setAllRevealed] = useState(false);
   const [showKoQuestion, setShowKoQuestion] = useState(false);
 
-  const [testMode, setTestMode] = useState(false);
+  const [testMode, setTestMode] = useState(true);
+  const [autoPlay, setAutoPlay] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('opic-auto-play');
+      return saved !== null ? JSON.parse(saved) : true;
+    }
+    return true;
+  });
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
@@ -155,6 +162,22 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     };
     loadCurrentScript();
   }, [playlist, currentIndex]);
+
+  // 3. Auto Play Question
+  useEffect(() => {
+    if (!loadingScript && scriptData && autoPlay) {
+      const questionText = scriptData.questions?.map((q: any) => q.en).filter(Boolean).join('. ');
+      if (questionText) {
+        handleSpeak(questionText);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scriptData, loadingScript, autoPlay]);
+
+  // 4. Persist Auto Play
+  useEffect(() => {
+    localStorage.setItem('opic-auto-play', JSON.stringify(autoPlay));
+  }, [autoPlay]);
 
   const handleNext = () => {
     if (playlist && currentIndex < playlist.fileIds.length - 1) {
@@ -379,21 +402,13 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
-          <Tooltip title="Test Mode">
+          <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
             <IconButton
-              color={testMode ? 'info' : 'default'}
-              onClick={() => {
-                setTestMode(!testMode);
-                if (!testMode) {
-                  setAllRevealed(false);
-                  setUserAnswers({});
-                  setTestResults({});
-                  setRevealedAnswers({});
-                }
-              }}
-              sx={{ bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral') }}
+              color={autoPlay ? 'primary' : 'default'}
+              onClick={() => setAutoPlay(!autoPlay)}
+              sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
             >
-              <Iconify icon="solar:pen-new-square-bold" />
+              <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
             </IconButton>
           </Tooltip>
 
@@ -409,7 +424,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
           <Tooltip title="Edit Playlist">
             <IconButton color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-              <Iconify icon="solar:settings-bold" />
+              <Iconify icon="solar:pen-bold" />
             </IconButton>
           </Tooltip>
         </Stack>
@@ -434,7 +449,23 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                         Q{index + 1}
                       </Typography>
                     </Box>
-                    <Typography variant="h6" sx={{ lineHeight: 1.5, fontWeight: 700, flexGrow: 1, color: 'text.primary' }}>
+                    <Typography 
+                      variant="h6" 
+                      onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
+                      sx={{ 
+                        lineHeight: 1.5, 
+                        fontWeight: 700, 
+                        flexGrow: 1, 
+                        color: 'text.primary',
+                        cursor: testMode ? 'pointer' : 'default',
+                        transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                        ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && { 
+                          filter: 'blur(8px)', 
+                          opacity: 0.3, 
+                          userSelect: 'none' 
+                        })
+                      }}
+                    >
                       {q.en || 'Untitled Question'}
                     </Typography>
                     {q.en && (
