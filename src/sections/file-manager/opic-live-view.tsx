@@ -53,6 +53,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
   const [isListening, setIsListening] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
+  const silenceTimerRef = useRef<any>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -79,6 +80,9 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   useEffect(() => () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
     }
     // Cleanup recorded audio URLs
     Object.values(recordedAudiosRef.current).forEach((url) => URL.revokeObjectURL(url));
@@ -153,6 +157,44 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
   };
 
+  const stopListening = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      } catch (e) {
+        // already stopped
+      }
+      recognitionRef.current = null;
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        // already stopped
+      }
+      mediaRecorderRef.current = null;
+    }
+
+    setIsListening(null);
+  }, []);
+
+  const resetSilenceTimer = useCallback((index: number) => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+    }
+    silenceTimerRef.current = setTimeout(() => {
+      stopListening();
+      toast.info('3초간 입력이 없어 녹음을 종료합니다.');
+    }, 3000);
+  }, [stopListening]);
+
   const startListening = async (index: number) => {
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -162,14 +204,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         return;
       }
 
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast.warning('마이크 접근을 지원하지 않는 환경입니다. (HTTPS 환경인지 확인해주세요)');
-        return;
-      }
-
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      // Cleanup existing instances
+      stopListening();
 
       // Initialize MediaRecorder for voice playback
       let stream: MediaStream;
@@ -179,8 +215,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         console.warn('Microphone access issues', err);
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
           toast.warning('마이크 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해 주세요.');
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          toast.warning('사용 가능한 마이크를 찾을 수 없습니다.');
         } else {
           toast.warning('마이크를 시작할 수 없습니다. 연결 상태를 확인해주세요.');
         }
@@ -198,14 +232,14 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setRecordedAudios((prev) => {
-          // Cleanup old URL if exists
-          if (prev[index]) URL.revokeObjectURL(prev[index]);
-          return { ...prev, [index]: audioUrl };
-        });
-        // Stop all tracks in the stream
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setRecordedAudios((prev) => {
+            if (prev[index]) URL.revokeObjectURL(prev[index]);
+            return { ...prev, [index]: audioUrl };
+          });
+        }
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -213,14 +247,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-US';
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
 
       recognition.onstart = () => {
         setIsListening(index);
+        resetSilenceTimer(index);
       };
 
       recognition.onresult = (event: any) => {
+        resetSilenceTimer(index);
         const transcript = Array.from(event.results)
           .map((result: any) => result[0])
           .map((result: any) => result.transcript)
@@ -229,22 +265,20 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
       };
 
+      recognition.onspeechstart = () => {
+        resetSilenceTimer(index);
+      };
+
       recognition.onerror = (event: any) => {
         console.warn('Speech recognition error', event.error);
-        if (event.error !== 'no-speech') {
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
           toast.warning(`음성 인식 오류: ${event.error}`);
         }
-        setIsListening(null);
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop();
-        }
+        stopListening();
       };
 
       recognition.onend = () => {
-        setIsListening(null);
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop();
-        }
+        stopListening();
       };
 
       recognitionRef.current = recognition;
@@ -254,16 +288,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       toast.warning('음성 인식을 시작하는 중 오류가 발생했습니다.');
       setIsListening(null);
     }
-  };
-
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    setIsListening(null);
   };
 
   const handleCheckAnswer = (index: number) => {
