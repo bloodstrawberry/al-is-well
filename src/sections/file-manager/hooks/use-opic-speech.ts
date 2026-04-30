@@ -173,37 +173,62 @@ export function useOpicSpeech() {
 
     if (isMobile) {
       // =========================================================
-      // 모바일 전용 경로: SpeechRecognition만 단독 사용
+      // 모바일 전용 경로: SpeechRecognition 우선, MediaRecorder 후순위
       // ---------------------------------------------------------
-      // 모바일에서는 getUserMedia(MediaRecorder)와 SpeechRecognition이
-      // 마이크를 동시에 점유하면 충돌이 발생합니다.
-      // → SpeechRecognition만 사용하여 마이크 독점권을 보장합니다.
-      // → 녹음은 음성 인식 종료 후 별도 패스로 진행합니다.
+      // 모바일에서는 마이크가 배타적 자원이므로 SpeechRecognition을 먼저
+      // 시작하여 마이크 우선권을 확보합니다.
+      // 인식이 시작된 후(onstart) MediaRecorder를 시도합니다.
+      // → 성공하면 녹음 + 인식 동시 동작
+      // → 실패해도 인식(텍스트 입력)은 정상 동작
       // =========================================================
       const recognition = setupRecognition(index, true);
 
-      // 모바일에서는 SpeechRecognition이 끝난 후 녹음을 시작하기 위해
-      // 원래 onend를 확장합니다.
-      const originalOnEnd = recognition.onend;
-      recognition.onend = () => {
-        // 세션 종료 시 지금까지의 텍스트 누적
-        if (currentSessionTranscriptRef.current) {
-          accumulatedTranscriptRef.current = (accumulatedTranscriptRef.current + ' ' + currentSessionTranscriptRef.current).trim();
-          currentSessionTranscriptRef.current = '';
-        }
+      // onstart를 확장: 인식이 성공적으로 시작된 후에 MediaRecorder를 시도
+      const originalOnStart = recognition.onstart;
+      recognition.onstart = () => {
+        setIsListening(index);
+        resetSilenceTimer();
 
-        if (!isManualStopRef.current && isListeningRef.current === index) {
-          // 아직 듣고 있는 상태면 재시작
+        // SpeechRecognition이 마이크를 잡은 후, MediaRecorder를 시도
+        // 약간의 딜레이를 두어 인식 엔진이 안정화된 후 시작
+        setTimeout(async () => {
+          if (isManualStopRef.current) return;
           try {
-            recognition.start();
-          } catch (e) {
-            console.warn('Speech recognition restart failed', e);
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaStreamRef.current = stream;
+
+            if (isManualStopRef.current) {
+              stream.getTracks().forEach(t => t.stop());
+              return;
+            }
+
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) audioChunksRef.current.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+              if (audioChunksRef.current.length > 0) {
+                const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                setRecordedAudios((prev) => {
+                  if (prev[index]) URL.revokeObjectURL(prev[index]);
+                  return { ...prev, [index]: audioUrl };
+                });
+              }
+            };
+
+            mediaRecorder.start();
+            console.log('Mobile MediaRecorder started successfully');
+          } catch (err) {
+            // 마이크 공유 불가능한 기기에서는 조용히 실패
+            // SpeechRecognition은 이미 동작 중이므로 텍스트 입력에는 영향 없음
+            console.warn('Mobile MediaRecorder failed (expected on some devices):', err);
           }
-        } else {
-          // 수동 중지 또는 침묵 타이머에 의해 종료됨
-          // → 이제 마이크가 해제되었으니 짧은 녹음 세션을 시작하지 않음
-          // (SpeechRecognition 세션 중에는 녹음 불가)
-        }
+        }, 300);
       };
 
       try {
