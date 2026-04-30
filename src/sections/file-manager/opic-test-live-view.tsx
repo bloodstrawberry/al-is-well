@@ -461,13 +461,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                       <Stack spacing={2}>
                         <TextField
                           fullWidth
-                                                    inputRef={(el) => (inputRefs.current[index] = el)}
+                                                      inputRef={(el) => (inputRefs.current[index] = el)}
                           multiline={isMobile}
                           minRows={isMobile ? 3 : 1}
-                                                     placeholder="Listen and type English..."
-                           multiline={isMobile}
-                           minRows={isMobile ? 3 : 1}
-                           value={userAnswers[index] || ''}
+                          placeholder="Listen and type English..."
+                          value={userAnswers[index] || ''}
                                                      onChange={(e) => {
                              const { value } = e.target;
                              setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
