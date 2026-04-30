@@ -119,17 +119,14 @@ export function useOpicSpeech() {
     recognition.onresult = (event: any) => {
       resetSilenceTimer(); 
       
-      let interimTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          accumulatedTranscriptRef.current += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
-        }
+      let sessionTranscript = '';
+      for (let i = 0; i < event.results.length; ++i) {
+        sessionTranscript += event.results[i][0].transcript;
       }
 
-      const fullTranscript = (accumulatedTranscriptRef.current + interimTranscript).trim();
+      // 이전 세션 결과와 현재 세션 결과를 합침
+      const fullTranscript = (accumulatedTranscriptRef.current + ' ' + sessionTranscript).trim();
+      
       setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
       
       if (inputRefs.current[index]) {
@@ -146,7 +143,10 @@ export function useOpicSpeech() {
     };
 
     recognition.onend = () => {
-      // 🌟 수정: onresult에서 이미 accumulatedTranscriptRef를 업데이트하므로 여기서 추가 누적 안 함
+      // 🌟 세션이 종료될 때 현재까지의 전체 텍스트를 누적 버퍼에 저장
+      const currentText = (userAnswersRef.current[index] || '');
+      accumulatedTranscriptRef.current = currentText;
+
       if (!isManualStopRef.current && isListeningRef.current === index) {
         try { recognition.start(); } catch (e) {}
       }

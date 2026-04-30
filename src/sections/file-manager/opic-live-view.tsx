@@ -480,7 +480,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           inputRef={(el) => (inputRefs.current[index] = el)}
                           placeholder="Listen and type English..."
                           value={userAnswers[index] || ''}
-                          onChange={(e) => setUserAnswers(prev => ({ ...prev, [index]: e.target.value }))}
+                                                     onChange={(e) => {
+                             const { value } = e.target;
+                             setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
+                           }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               handleCheckAnswer(index);

@@ -194,7 +194,10 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
 
   const handleChangeLine = (index: number, field: keyof Line, value: string) => {
     if (field === 'en') {
-      setUserAnswers((prev) => ({ ...prev, [index]: value }));
+      setUserAnswers((prev) => {
+        if (prev[index] === value) return prev;
+        return { ...prev, [index]: value };
+      });
     }
     setScriptData((prev) => {
       const newLines = [...prev.lines];
