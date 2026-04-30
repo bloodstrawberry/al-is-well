@@ -224,6 +224,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   };
 
   const isManualStopRef = useRef(false);
+  const isFirstStartRef = useRef(true);
+  const accumulatedTranscriptRef = useRef('');
 
   const stopListening = useCallback(() => {
     isManualStopRef.current = true;
@@ -272,13 +274,13 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
 
     isManualStopRef.current = false;
+    isFirstStartRef.current = true;
+    accumulatedTranscriptRef.current = '';
 
     // Cleanup previous
     if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
     if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-
-
 
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
@@ -288,22 +290,28 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     recognition.interimResults = true;
 
     recognition.onstart = () => {
-      setIsListening(index);
+      // Only show toast and start recorder on the very first start (not auto-restarts)
+      if (isFirstStartRef.current) {
+        isFirstStartRef.current = false;
+        setIsListening(index);
+        toast.info('인식을 시작합니다. 말씀해 주세요.');
+        startMediaRecorder(index);
+      }
       resetSilenceTimer();
-      toast.info('인식을 시작합니다. 말씀해 주세요.');
-
-      startMediaRecorder(index);
     };
 
     recognition.onresult = (event: any) => {
       resetSilenceTimer();
-      
-      let transcript = '';
+
+      // Get transcript from current recognition session
+      let sessionTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+        sessionTranscript += event.results[i][0].transcript;
       }
-      
-      setUserAnswers((prev) => ({ ...prev, [index]: transcript }));
+
+      // Combine with accumulated transcript from previous sessions
+      const fullTranscript = accumulatedTranscriptRef.current + sessionTranscript;
+      setUserAnswers((prev) => ({ ...prev, [index]: fullTranscript }));
     };
 
     recognition.onerror = (event: any) => {
@@ -319,6 +327,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     recognition.onend = () => {
       // On mobile, continuous mode may not work. Auto-restart if not manually stopped.
       if (!isManualStopRef.current && recognitionRef.current) {
+        // Save current transcript before restarting so it's not lost
+        setUserAnswers((prev) => {
+          accumulatedTranscriptRef.current = prev[index] || '';
+          return prev;
+        });
         try {
           recognition.start();
           return;
