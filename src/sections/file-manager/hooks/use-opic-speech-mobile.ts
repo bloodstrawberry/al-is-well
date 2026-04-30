@@ -146,7 +146,8 @@ export function useOpicSpeech() {
       };
       checkVolume();
 
-      // MediaRecorder 설정
+      // 🚨 임시 비활성화: 모바일 마이크 권한 충돌 원인 파악을 위해 녹음 기능(MediaRecorder) 임시 중단
+      /*
       const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
@@ -164,8 +165,10 @@ export function useOpicSpeech() {
         });
       };
 
-      // 🌟 핵심 수정: 즉시 녹음 시작 (모바일 마이크 충돌 방지)
+      // 즉시 녹음 시작 (모바일 마이크 충돌 방지)
       mediaRecorder.start();
+      */
+
       setIsListening(index);
       setIsPreparing(false);
       resetSilenceTimer();
@@ -217,11 +220,11 @@ export function useOpicSpeech() {
         }
       };
 
-      // 🌟 핵심 수정: 지연 시작 (MediaRecorder가 마이크를 선점한 후)
+      // 지연 시작 (MediaRecorder 비활성화로 딜레이 축소)
       setTimeout(() => {
         if (isManualStopRef.current) return;
         try { recognition.start(); } catch (e) {}
-      }, 600);
+      }, 100);
 
     } catch (err) {
       console.error(err);
