@@ -116,18 +116,20 @@ export function useOpicSpeech() {
 
     setIsPreparing(true);
 
+    // AudioContext (VAD 용) - 사용자 제스처 직후 바로 resume (iOS 정책 대응)
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioContextCtor();
+    audioContextRef.current = audioContext;
+    if (audioContext.state === 'suspended') {
+      audioContext.resume().catch(() => {});
+    }
+
     try {
       // 마이크 권한 및 스트림
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: { echoCancellation: true, noiseSuppression: true } 
       });
       mediaStreamRef.current = stream;
-
-      // AudioContext (VAD 용) - 모바일은 resume 필수
-      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioContextCtor();
-      audioContextRef.current = audioContext;
-      if (audioContext.state === 'suspended') await audioContext.resume();
 
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
@@ -139,7 +141,7 @@ export function useOpicSpeech() {
         if (isManualStopRef.current || isListeningRef.current === null) return;
         analyser.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        if (average > 12) resetSilenceTimer(); // 일정 데시벨 이상의 소리가 나면 타이머 리셋
+        if (average > 8) resetSilenceTimer(); // 문턱값을 8로 낮춰 민감도 상향
         requestAnimationFrame(checkVolume);
       };
       checkVolume();
@@ -162,6 +164,12 @@ export function useOpicSpeech() {
         });
       };
 
+      // 🌟 핵심 수정: 즉시 녹음 시작 (모바일 마이크 충돌 방지)
+      mediaRecorder.start();
+      setIsListening(index);
+      setIsPreparing(false);
+      resetSilenceTimer();
+
       // Speech Recognition 설정 (텍스트 입력 핵심)
       const recognition = new SpeechRecognitionCtor();
       recognitionRef.current = recognition;
@@ -170,10 +178,7 @@ export function useOpicSpeech() {
       recognition.interimResults = true;
 
       recognition.onstart = () => {
-        setIsListening(index);
-        setIsPreparing(false);
-        resetSilenceTimer();
-        if (mediaRecorder.state === 'inactive') mediaRecorder.start();
+        // 이미 위에서 상태 업데이트 완료
       };
 
       recognition.onresult = (event: any) => {
@@ -196,8 +201,9 @@ export function useOpicSpeech() {
       };
 
       recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error:', event.error);
         if (event.error === 'no-speech') return;
-        stopListening();
+        // 에러 발생 시 완전 종료하지 않고 녹음은 유지 (모바일 안정성)
       };
 
       recognition.onend = () => {
@@ -211,7 +217,11 @@ export function useOpicSpeech() {
         }
       };
 
-      recognition.start();
+      // 🌟 핵심 수정: 지연 시작 (MediaRecorder가 마이크를 선점한 후)
+      setTimeout(() => {
+        if (isManualStopRef.current) return;
+        try { recognition.start(); } catch (e) {}
+      }, 600);
 
     } catch (err) {
       console.error(err);
