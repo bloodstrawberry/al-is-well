@@ -33,6 +33,7 @@ type Props = FileItemProps & {
   selected?: boolean;
   onDelete: () => void;
   onEdit: () => void;
+  onCopy?: () => void;
   onSelect?: () => void;
   onNavigate?: VoidFunction;
   onFavorite?: (id: string) => void;
@@ -46,6 +47,7 @@ export const FileManagerFolderItem = memo(({
   onSelect,
   onDelete,
   onEdit,
+  onCopy,
   onNavigate,
   onFavorite,
   ...other
@@ -107,11 +109,31 @@ export const FileManagerFolderItem = memo(({
         <MenuItem
           onClick={() => {
             menuActions.onClose();
+            onNavigate?.();
+          }}
+        >
+          <Iconify icon="solar:eye-bold" />
+          Open
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            menuActions.onClose();
             onEdit();
           }}
         >
           <Iconify icon="solar:pen-bold" />
           Rename
+        </MenuItem>
+        
+        <MenuItem
+          onClick={() => {
+            menuActions.onClose();
+            onCopy?.();
+          }}
+        >
+          <Iconify icon="solar:copy-bold" />
+          Copy
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

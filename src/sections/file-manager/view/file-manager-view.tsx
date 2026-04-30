@@ -577,6 +577,71 @@ export function FileManagerView() {
     toast.success('Rename success!');
   }, []);
 
+  const handleCopyItem = useCallback(async (id: string) => {
+    const fullData = await getFullData();
+    const { tree, scripts } = fullData;
+
+    const generateUniqueLabel = (baseLabel: string, existingLabels: string[]) => {
+      let newLabel = `${baseLabel} - Copy`;
+      let counter = 2;
+
+      while (existingLabels.includes(newLabel)) {
+        newLabel = `${baseLabel} - Copy (${counter})`;
+        counter++;
+      }
+      return newLabel;
+    };
+
+    const findAndCopy = (nodes: any[]): { newNodes: any[]; copiedNode: any | null } => {
+      let copiedNode: any = null;
+
+      const copyNode = (node: any, isRootCopy: boolean, existingLabels: string[]): any => {
+        const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const newNode = {
+          ...node,
+          id: newId,
+          label: isRootCopy ? generateUniqueLabel(node.label, existingLabels) : node.label,
+          createdAt: new Date().toISOString(),
+          modifiedAt: new Date().toISOString(),
+        };
+
+        if (node.type === 'file' && scripts[node.id]) {
+          scripts[newId] = JSON.parse(JSON.stringify(scripts[node.id]));
+        }
+
+        if (node.children) {
+          newNode.children = node.children.map((child: any) => copyNode(child, false, []));
+        }
+
+        return newNode;
+      };
+
+      const traverse = (list: any[]): any[] => {
+        const existingLabels = list.map((n) => n.label);
+        return list.flatMap((node) => {
+          if (node.id === id) {
+            copiedNode = copyNode(node, true, existingLabels);
+            return [node, copiedNode];
+          }
+          if (node.children) {
+            return [{ ...node, children: traverse(node.children) }];
+          }
+          return [node];
+        });
+      };
+
+      return { newNodes: traverse(tree), copiedNode };
+    };
+
+    const { newNodes, copiedNode } = findAndCopy(tree);
+
+    if (copiedNode) {
+      await saveFullData({ ...fullData, tree: newNodes, scripts });
+      setTreeData(newNodes);
+      toast.success(`Copied ${copiedNode.label} successfully!`);
+    }
+  }, []);
+
   const renderFilters = () => (
     <Box
       sx={{
@@ -879,6 +944,7 @@ export function FileManagerView() {
                     onDeleteItem={handleDeleteItem}
                     onFavoriteItem={handleFavoriteItem}
                     onOpenRename={handleOpenRename}
+                    onCopyItem={handleCopyItem}
                     onCreateItem={handleCreateItem}
                     onOpenConfirm={confirmDialog.onTrue}
                     onNavigate={handleNavigate}

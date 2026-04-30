@@ -35,6 +35,7 @@ type Props = FileItemProps & {
   file: IFileManager;
   onDelete: () => void;
   onEdit: () => void;
+  onCopy?: () => void;
   onSelect?: () => void;
   onOpenFile?: () => void;
   onFavorite?: (id: string) => void;
@@ -46,6 +47,7 @@ export const FileManagerFileItem = memo(({
   onSelect,
   onDelete,
   onEdit,
+  onCopy,
   onOpenFile,
   onFavorite,
   sx,
@@ -116,6 +118,16 @@ export const FileManagerFileItem = memo(({
         >
           <Iconify icon="solar:pen-bold" />
           Rename
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            menuActions.onClose();
+            onCopy?.();
+          }}
+        >
+          <Iconify icon="solar:copy-bold" />
+          Copy
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

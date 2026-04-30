@@ -37,6 +37,7 @@ type Props = {
   onFavoriteItem?: (id: string) => void;
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   onOpenRename?: (id: string) => void;
+  onCopyItem?: (id: string) => void;
   onMoveItem?: (sourceId: string, targetFolderId: string | null) => void;
   notFound?: boolean;
   hideFolder?: boolean;
@@ -52,6 +53,7 @@ export function FileManagerGridView({
   onFavoriteItem,
   onCreateItem,
   onOpenRename,
+  onCopyItem,
   onMoveItem,
   notFound,
   hideFolder,
@@ -227,6 +229,7 @@ export function FileManagerGridView({
                 onSelect={() => onSelectItem(item.id)}
                 onDelete={() => onDeleteItem(item.id)}
                 onEdit={() => onOpenRename?.(item.id)}
+                onCopy={() => onCopyItem?.(item.id)}
                 onNavigate={() => onNavigate(item.id)}
                 onFavorite={() => onFavoriteItem?.(item.id)}
               />
@@ -240,6 +243,7 @@ export function FileManagerGridView({
                 onOpenFile={() => onOpenFile?.(item.id)}
                 onFavorite={() => onFavoriteItem?.(item.id)}
                 onEdit={() => onOpenRename?.(item.id)}
+                onCopy={() => onCopyItem?.(item.id)}
               />
             )
           )}

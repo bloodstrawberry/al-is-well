@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 import { getIsMobile } from 'src/utils/is-mobile';
+import { useOpicSpeech } from './hooks/use-opic-speech';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -104,13 +105,31 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
 
   const isMobile = getIsMobile();
 
-  const [isListening, setIsListening] = useState<number | null>(null);
-  const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
+  const {
+    userAnswers,
+    setUserAnswers,
+    recordedAudios,
+    setRecordedAudios,
+    isListening,
+    isPreparing,
+    playingIndex,
+    speakingIndex,
+    inputRefs,
+    startListening,
+    stopListening,
+    playRecordedAudio,
+    toggleSpeak,
+  } = useOpicSpeech();
 
-  const recognitionRef = useRef<any>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  // Sync userAnswers from speech to scriptData
+  useEffect(() => {
+    Object.entries(userAnswers).forEach(([idx, text]) => {
+      const index = parseInt(idx, 10);
+      if (scriptData.lines[index] && scriptData.lines[index].en !== text) {
+        handleChangeLine(index, 'en', text);
+      }
+    });
+  }, [userAnswers, scriptData.lines]);
 
   useEffect(() => {
     const loadScript = async () => {
@@ -203,103 +222,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     }
   };
 
-  const startListening = (index: number) => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.warning('이 브라우저는 음성 인식을 지원하지 않습니다.');
-      return;
-    }
 
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) {} }
-
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      setIsListening(index);
-      toast.info('인식을 시작합니다.');
-      startMediaRecorder(index);
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0].transcript)
-        .join('');
-      
-      handleChangeLine(index, 'en', transcript);
-
-      // Auto-scroll logic: move cursor to end and scroll
-      const input = inputRefs.current[index];
-      if (input) {
-        input.focus();
-        setTimeout(() => {
-          input.selectionStart = input.selectionEnd = input.value.length;
-          input.scrollLeft = input.scrollWidth;
-          input.scrollTop = input.scrollHeight;
-        }, 0);
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('Recognition error', event.error);
-      stopListening();
-    };
-
-    recognition.onend = () => {
-      stopListening();
-    };
-
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error(e);
-      setIsListening(null);
-    }
-  };
-
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
-    }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    setIsListening(null);
-  };
-
-  const startMediaRecorder = async (index: number) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setRecordedAudios((prev) => {
-            if (prev[index]) URL.revokeObjectURL(prev[index]);
-            return { ...prev, [index]: audioUrl };
-          });
-        }
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorder.start();
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  };
 
   if (loading) {
     return (
@@ -724,10 +647,17 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                             <InputAdornment position="end" sx={{ gap: 0.5 }}>
                               <IconButton
                                 size="small"
+                                color={speakingIndex === `tts-${index}` ? 'primary' : 'default'}
+                                onClick={() => toggleSpeak(line.en, `tts-${index}`)}
+                              >
+                                <Iconify icon={speakingIndex === `tts-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
+                              </IconButton>
+                              <IconButton
+                                size="small"
                                 color={isListening === index ? 'error' : 'default'}
                                 onClick={() => (isListening === index ? stopListening() : startListening(index))}
                                 sx={{
-                                  ...(isListening === index && {
+                                  ...(isListening === index && !isPreparing && {
                                     animation: 'pulse 1.5s infinite',
                                     '@keyframes pulse': {
                                       '0%': { transform: 'scale(1)', opacity: 1 },
@@ -735,23 +665,33 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                                       '100%': { transform: 'scale(1)', opacity: 1 },
                                     },
                                   }),
+                                  ...(isPreparing && isListening === index && {
+                                    animation: 'rotate 1s linear infinite',
+                                    '@keyframes rotate': {
+                                      'from': { transform: 'rotate(0deg)' },
+                                      'to': { transform: 'rotate(360deg)' },
+                                    },
+                                  }),
                                 }}
                               >
-                                <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                                <Iconify 
+                                  icon={
+                                    isListening === index 
+                                      ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold') 
+                                      : 'solar:microphone-bold'
+                                  } 
+                                />
                               </IconButton>
                               <IconButton
                                 size="small"
                                 disabled={!recordedAudios[index]}
-                                onClick={() => {
-                                  const audio = new Audio(recordedAudios[index]);
-                                  audio.play();
-                                }}
+                                onClick={() => playRecordedAudio(index)}
                                 sx={{
-                                  color: recordedAudios[index] ? 'info.main' : 'text.disabled',
-                                  bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                                  color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
+                                  bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
                                 }}
                               >
-                                <Iconify icon="solar:play-bold" />
+                                <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
                               </IconButton>
                             </InputAdornment>
                           )

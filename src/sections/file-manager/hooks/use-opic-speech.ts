@@ -16,7 +16,11 @@ export function useOpicSpeech() {
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
   const [isListening, setIsListening] = useState<number | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const [speakingIndex, setSpeakingIndex] = useState<number | string | null>(null);
+
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<any>(null);
   const inputRefs = useRef<Record<number, any>>({});
@@ -24,6 +28,7 @@ export function useOpicSpeech() {
   const audioChunksRef = useRef<Blob[]>([]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isManualStopRef = useRef(false);
   const accumulatedTranscriptRef = useRef('');
 
@@ -55,6 +60,7 @@ export function useOpicSpeech() {
     }
 
     setIsListening(null);
+    setIsPreparing(false);
   }, []);
 
   const resetSilenceTimer = useCallback(() => {
@@ -63,8 +69,8 @@ export function useOpicSpeech() {
     }
     silenceTimerRef.current = setTimeout(() => {
       stopListening();
-      toast.info('10초간 입력이 없어 녹음을 종료합니다.');
-    }, 10000);
+      toast.info('3초간 입력이 없어 녹음을 종료합니다.');
+    }, 3000);
   }, [stopListening]);
 
   const startListening = useCallback((index: number) => {
@@ -94,7 +100,7 @@ export function useOpicSpeech() {
 
     recognition.onstart = () => {
       setIsListening(index);
-      toast.info('인식을 시작합니다. 말씀해 주세요.');
+      setIsPreparing(true);
       resetSilenceTimer();
     };
 
@@ -175,39 +181,122 @@ export function useOpicSpeech() {
         };
         
         mediaRecorder.start();
+        setIsPreparing(false);
+        toast.info('준비되었습니다. 말씀해 주세요!');
       } catch (err) {
         console.warn('MediaRecorder setup failed', err);
+        setIsPreparing(false);
       }
-    }, 800);
+    }, 500);
   }, [isListening, resetSilenceTimer, stopListening]);
+
+  const recordedAudiosRef = useRef<Record<number, string>>({});
+  useEffect(() => {
+    recordedAudiosRef.current = recordedAudios;
+  }, [recordedAudios]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (mediaStreamRef.current) mediaStreamRef.current.getTracks().forEach(t => t.stop());
-      // Revoke URLs
-      Object.values(recordedAudios).forEach(url => URL.revokeObjectURL(url));
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(t => t.stop());
+      }
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+      }
+      // Revoke URLs only on unmount
+      Object.values(recordedAudiosRef.current).forEach(url => {
+        try { URL.revokeObjectURL(url); } catch (e) {}
+      });
     };
-  }, [recordedAudios]);
+  }, []);
 
   const playRecordedAudio = useCallback((index: number) => {
+    // Toggle off if already playing the same one
+    if (playingIndex === index && currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+      setPlayingIndex(null);
+      return;
+    }
+
+    // Stop previous if any
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+    }
+
     const url = recordedAudios[index];
     if (url) {
       const audio = new Audio(url);
+      currentAudioRef.current = audio;
+      setPlayingIndex(index);
+      audio.onended = () => {
+        setPlayingIndex(null);
+        currentAudioRef.current = null;
+      };
       audio.play();
     }
-  }, [recordedAudios]);
+  }, [recordedAudios, playingIndex]);
+
+  const toggleSpeak = useCallback((text: string, index: number | string) => {
+    if (speakingIndex === index && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setSpeakingIndex(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find((v) => v.lang.startsWith('en') && v.name.includes('Google')) ||
+                    voices.find((v) => v.lang.startsWith('en')) ||
+                    voices[0];
+    if (enVoice) utterance.voice = enVoice;
+
+    utterance.onend = () => setSpeakingIndex(null);
+    utterance.onerror = () => setSpeakingIndex(null);
+
+    setSpeakingIndex(index);
+    // Short delay to ensure cancel completes
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 50);
+  }, [speakingIndex]);
+
+  const resetStates = useCallback(() => {
+    setUserAnswers({});
+    setRecordedAudios((prev) => {
+      Object.values(prev).forEach(url => URL.revokeObjectURL(url));
+      return {};
+    });
+    setIsListening(null);
+    setPlayingIndex(null);
+    setSpeakingIndex(null);
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+  }, []);
 
   return {
     userAnswers,
     setUserAnswers,
     recordedAudios,
+    setRecordedAudios,
     isListening,
+    isPreparing,
+    playingIndex,
+    speakingIndex,
     inputRefs,
     startListening,
     stopListening,
     playRecordedAudio,
+    toggleSpeak,
+    resetStates,
   };
 }

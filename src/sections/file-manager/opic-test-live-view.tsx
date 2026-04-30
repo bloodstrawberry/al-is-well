@@ -67,11 +67,16 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     userAnswers,
     setUserAnswers,
     recordedAudios,
+    setRecordedAudios,
     isListening,
+    isPreparing,
+    playingIndex,
+    speakingIndex,
     inputRefs,
     startListening,
     stopListening,
     playRecordedAudio,
+    toggleSpeak,
   } = useOpicSpeech();
 
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
@@ -166,7 +171,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     if (!loadingScript && scriptData && autoPlay) {
       const questionText = scriptData.questions?.map((q: any) => q.en).filter(Boolean).join('. ');
       if (questionText) {
-        handleSpeak(questionText);
+        toggleSpeak(questionText, 'auto-play');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,19 +209,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       scriptData.questions.forEach((_: any, index: number) => { newRevealed[`q-${index}`] = newState; });
     }
     setRevealedLines(newRevealed);
-  };
-
-  const handleSpeak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
-      const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find((v) => v.lang.startsWith('en') && v.name.includes('Google')) || voices.find((v) => v.lang.startsWith('en')) || voices[0];
-      if (enVoice) utterance.voice = enVoice;
-      setTimeout(() => { window.speechSynthesis.speak(utterance); }, 50);
-    }
   };
 
   const handleCheckAnswer = (index: number) => {
@@ -396,8 +388,13 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                       {q.en || 'Untitled Question'}
                     </Typography>
                     {q.en && (
-                      <IconButton onClick={() => handleSpeak(q.en)} size="medium" color="primary" sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}>
-                        <Iconify icon="solar:volume-loud-bold" />
+                      <IconButton
+                        onClick={() => toggleSpeak(q.en, `q-${index}`)}
+                        size="medium"
+                        color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
+                        sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
+                      >
+                        <Iconify icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
                       </IconButton>
                     )}
                   </Stack>
@@ -475,15 +472,46 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                               readOnly: isListening === index,
                               endAdornment: (
                                 <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                                  <IconButton size="small" color={isListening === index ? 'error' : 'default'} onClick={() => (isListening === index ? stopListening() : startListening(index))} sx={{ ...(isListening === index && { animation: 'pulse 1.5s infinite', '@keyframes pulse': { '0%': { transform: 'scale(1)', opacity: 1 }, '50%': { transform: 'scale(1.2)', opacity: 0.7 }, '100%': { transform: 'scale(1)', opacity: 1 } } }) }}>
-                                    <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                                  <IconButton
+                                    size="small"
+                                    color={isListening === index ? 'error' : 'default'}
+                                    onClick={() => (isListening === index ? stopListening() : startListening(index))}
+                                    sx={{
+                                      ...(isListening === index && !isPreparing && {
+                                        animation: 'pulse 1.5s infinite',
+                                        '@keyframes pulse': {
+                                          '0%': { transform: 'scale(1)', opacity: 1 },
+                                          '50%': { transform: 'scale(1.2)', opacity: 0.7 },
+                                          '100%': { transform: 'scale(1)', opacity: 1 },
+                                        },
+                                      }),
+                                      ...(isPreparing && isListening === index && {
+                                        animation: 'rotate 1s linear infinite',
+                                        '@keyframes rotate': {
+                                          'from': { transform: 'rotate(0deg)' },
+                                          'to': { transform: 'rotate(360deg)' },
+                                        },
+                                      }),
+                                    }}
+                                  >
+                                    <Iconify
+                                      icon={
+                                        isListening === index
+                                          ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold')
+                                          : 'solar:microphone-bold'
+                                      }
+                                    />
                                   </IconButton>
-                                  <IconButton 
-                                    size="small" 
-                                    disabled={!recordedAudios[index]} 
-                                    onClick={() => playRecordedAudio(index)} 
-                                    sx={{ color: recordedAudios[index] ? 'info.main' : 'text.disabled', bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent' }}>
-                                    <Iconify icon="solar:play-bold" />
+                                  <IconButton
+                                    size="small"
+                                    disabled={!recordedAudios[index]}
+                                    onClick={() => playRecordedAudio(index)}
+                                    sx={{
+                                      color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
+                                      bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                                    }}
+                                  >
+                                    <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
                                   </IconButton>
                                   <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
                                     <Iconify icon="solar:check-read-bold" />
@@ -517,8 +545,12 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                               <IconButton size="small" onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))} sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}>
                                 <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
                               </IconButton>
-                              <IconButton size="small" onClick={() => handleSpeak(line.en)} sx={{ ml: 0.5, p: 0.5, color: 'primary.main' }}>
-                                <Iconify icon="solar:volume-loud-bold" width={16} />
+                              <IconButton
+                                size="small"
+                                onClick={() => toggleSpeak(line.en, `line-result-${index}`)}
+                                sx={{ ml: 0.5, p: 0.5, color: speakingIndex === `line-result-${index}` ? 'primary.main' : 'primary.main' }}
+                              >
+                                <Iconify icon={speakingIndex === `line-result-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} width={16} />
                               </IconButton>
                             </Box>
                           </Box>
@@ -529,8 +561,13 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                         <Box onClick={() => toggleLine(index)} sx={{ p: 1.5, flexGrow: 1, cursor: 'pointer', borderRadius: 1, bgcolor: isRevealed ? 'transparent' : (theme) => alpha(theme.palette.action.hover, 0.04), transition: (theme) => theme.transitions.create(['filter', 'opacity', 'background-color']), '&:hover': { bgcolor: (theme) => isRevealed ? 'transparent' : alpha(theme.palette.action.hover, 0.08) } }}>
                           <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary', lineHeight: 1.6, ...(!isRevealed && { filter: 'blur(8px)', opacity: 0.3, userSelect: 'none', transform: 'scale(0.99)' }) }}>{line.en}</Typography>
                         </Box>
-                        <IconButton onClick={() => handleSpeak(line.en)} color="primary" size="small" sx={{ mt: 1, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) } }}>
-                          <Iconify icon="solar:volume-loud-bold" />
+                        <IconButton
+                          onClick={() => toggleSpeak(line.en, `line-view-${index}`)}
+                          color={speakingIndex === `line-view-${index}` ? 'primary' : 'default'}
+                          size="small"
+                          sx={{ mt: 1, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) } }}
+                        >
+                          <Iconify icon={speakingIndex === `line-view-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
                         </IconButton>
                       </Stack>
                     )}

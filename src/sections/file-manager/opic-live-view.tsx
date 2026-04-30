@@ -52,14 +52,20 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     userAnswers,
     setUserAnswers,
     recordedAudios,
+    setRecordedAudios,
     isListening,
+    isPreparing,
+    playingIndex,
+    speakingIndex,
     inputRefs,
     startListening,
     stopListening,
     playRecordedAudio,
+    toggleSpeak,
   } = useOpicSpeech();
 
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
+  const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
 
   // Pre-load voices for mobile support
   useEffect(() => {
@@ -72,23 +78,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
   }, []);
 
-  const recordedAudiosRef = useRef<Record<number, string>>({});
 
-  useEffect(() => {
-    recordedAudiosRef.current = recordedAudios;
-  }, [recordedAudios]);
-
-  // Cleanup recognition and recordings on unmount
-  useEffect(() => () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-    }
-    // Cleanup recorded audio URLs
-    Object.values(recordedAudiosRef.current).forEach((url) => URL.revokeObjectURL(url));
-  }, []);
 
   useEffect(() => {
     const loadScript = async () => {
@@ -134,29 +124,6 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       });
     }
     setRevealedLines(newRevealed);
-  };
-
-  const handleSpeak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.85;
-
-      // Mobile fix: Select a voice explicitly
-      const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find((v) => v.lang.startsWith('en') && v.name.includes('Google')) ||
-                      voices.find((v) => v.lang.startsWith('en')) ||
-                      voices[0];
-      if (enVoice) utterance.voice = enVoice;
-
-      // Mobile fix: Some browsers need a short delay after cancel
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 50);
-    } else {
-      toast.error('Text-to-speech is not supported in this browser.');
-    }
   };
 
   const handleCheckAnswer = (index: number) => {
@@ -387,12 +354,12 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   </Typography>
                   {q.en && (
                     <IconButton
-                      onClick={() => handleSpeak(q.en)}
+                      onClick={() => toggleSpeak(q.en, `q-${index}`)}
                       size="medium"
-                      color="primary"
+                      color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
                       sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
                     >
-                      <Iconify icon="solar:volume-loud-bold" />
+                      <Iconify icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
                     </IconButton>
                   )}
                 </Stack>
@@ -531,7 +498,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                                     color={isListening === index ? 'error' : 'default'}
                                     onClick={() => (isListening === index ? stopListening() : startListening(index))}
                                     sx={{
-                                      ...(isListening === index && {
+                                      ...(isListening === index && !isPreparing && {
                                         animation: 'pulse 1.5s infinite',
                                         '@keyframes pulse': {
                                           '0%': { transform: 'scale(1)', opacity: 1 },
@@ -539,20 +506,33 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                                           '100%': { transform: 'scale(1)', opacity: 1 },
                                         },
                                       }),
+                                      ...(isPreparing && isListening === index && {
+                                        animation: 'rotate 1s linear infinite',
+                                        '@keyframes rotate': {
+                                          'from': { transform: 'rotate(0deg)' },
+                                          'to': { transform: 'rotate(360deg)' },
+                                        },
+                                      }),
                                     }}
                                   >
-                                    <Iconify icon={isListening === index ? 'solar:stop-circle-bold' : 'solar:microphone-bold'} />
+                                    <Iconify 
+                                      icon={
+                                        isListening === index 
+                                          ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold') 
+                                          : 'solar:microphone-bold'
+                                      } 
+                                    />
                                   </IconButton>
                                   <IconButton
                                     size="small"
                                     disabled={!recordedAudios[index]}
                                     onClick={() => playRecordedAudio(index)}
                                     sx={{
-                                      color: recordedAudios[index] ? 'info.main' : 'text.disabled',
-                                      bgcolor: (theme) => recordedAudios[index] ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                                      color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
+                                      bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
                                     }}
                                   >
-                                    <Iconify icon="solar:play-bold" />
+                                    <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
                                   </IconButton>
                                   <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
                                     <Iconify icon="solar:check-read-bold" />
@@ -635,10 +615,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
                             <IconButton
                               size="small"
-                              onClick={() => handleSpeak(line.en)}
-                              sx={{ ml: 0.5, p: 0.5, color: 'primary.main' }}
+                              onClick={() => toggleSpeak(line.en, `line-${index}`)}
+                              sx={{ ml: 0.5, p: 0.5, color: speakingIndex === `line-${index}` ? 'primary.main' : 'primary.main' }}
                             >
-                              <Iconify icon="solar:volume-loud-bold" width={16} />
+                              <Iconify icon={speakingIndex === `line-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} width={16} />
                             </IconButton>
                           </Box>
                         </Box>
@@ -678,8 +658,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         </Typography>
                       </Box>
                       <IconButton
-                        onClick={() => handleSpeak(line.en)}
-                        color="primary"
+                        onClick={() => toggleSpeak(line.en, `line-${index}`)}
+                        color={speakingIndex === `line-${index}` ? 'primary' : 'default'}
                         size="small"
                         sx={{
                           mt: 1,
@@ -687,7 +667,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) },
                         }}
                       >
-                        <Iconify icon="solar:volume-loud-bold" />
+                        <Iconify icon={speakingIndex === `line-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
                       </IconButton>
                     </Stack>
                   )}
