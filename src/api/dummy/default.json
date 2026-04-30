@@ -568,5 +568,33 @@
         }
       ]
     }
+  },
+  "sections": {
+    "speaking": {
+      "tree": [
+        {
+          "id": "1777527856590",
+          "label": "ssssss",
+          "type": "file",
+          "category": "speaking",
+          "createdAt": "2026-04-30T05:44:16.590Z",
+          "modifiedAt": "2026-04-30T05:44:16.590Z"
+        }
+      ],
+      "scripts": {}
+    },
+    "listening": {
+      "tree": [
+        {
+          "id": "1777527864910",
+          "label": "lllllll",
+          "type": "file",
+          "category": "listening",
+          "createdAt": "2026-04-30T05:44:24.910Z",
+          "modifiedAt": "2026-04-30T05:44:24.910Z"
+        }
+      ],
+      "scripts": {}
+    }
   }
 }

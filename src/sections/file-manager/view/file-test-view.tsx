@@ -27,8 +27,8 @@ import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
-import { OpicEditorView } from '../opic-editor-view';
-import { OpicLiveView } from '../opic-live-view';
+import { OpicTestEditorView } from '../opic-test-editor-view';
+import { OpicTestLiveView } from '../opic-test-live-view';
 
 // ----------------------------------------------------------------------
 
@@ -43,6 +43,8 @@ export function FileTestView({ title, category }: Props) {
   const searchParams = useSearchParams();
 
   const table = useTable({ defaultRowsPerPage: 20 });
+
+  const storageKey = useMemo(() => category, [category]);
 
   const confirmDialog = useBoolean();
   const renameDialog = useBoolean();
@@ -98,8 +100,9 @@ export function FileTestView({ title, category }: Props) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await getTreeData();
-        setTreeData(data);
+        const data = await getTreeData(storageKey);
+        const sanitizedData = sanitizeTreeData(data);
+        setTreeData(sanitizedData);
         setIsLoaded(true);
       } catch (error) {
         console.error('Failed to load tree data from IndexedDB', error);
@@ -108,15 +111,33 @@ export function FileTestView({ title, category }: Props) {
       }
     };
     loadData();
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (isLoaded) {
-      saveTreeData(treeData).catch((error) => {
+      saveTreeData(treeData, storageKey).catch((error) => {
         console.error('Failed to save tree data to IndexedDB', error);
       });
     }
-  }, [treeData, isLoaded]);
+  }, [treeData, isLoaded, storageKey]);
+
+// ----------------------------------------------------------------------
+
+function sanitizeTreeData(nodes: any[]): any[] {
+  const now = new Date().toISOString();
+  return nodes.map((node) => {
+    const updatedNode = {
+      ...node,
+      createdAt: node.createdAt || now,
+      modifiedAt: node.modifiedAt || now,
+    };
+    if (node.children) {
+      updatedNode.children = sanitizeTreeData(node.children);
+    }
+    return updatedNode;
+  });
+}
+
 
   const filters = useSetState<IFileFilters>({
     name: '',
@@ -126,38 +147,23 @@ export function FileTestView({ title, category }: Props) {
   });
   const { state: currentFilters } = filters;
 
-  // Flatten and filter by category
-  const flattenedData = useMemo(() => {
-    const results: any[] = [];
-    const flatten = (nodes: any[]) => {
-      nodes.forEach((node) => {
-        if (node.type === 'file' && node.category === category) {
-          results.push(node);
-        }
-        if (node.children) {
-          flatten(node.children);
-        }
-      });
-    };
-    flatten(treeData);
-    return results;
-  }, [treeData, category]);
-
   const dataForGrid = useMemo(() => {
-    return flattenedData.map((node: any) => ({
-      id: node.id,
-      name: node.label,
-      type: node.type,
-      url: '',
-      size: 0,
-      tags: [],
-      isFavorited: !!node.isFavorited,
-      createdAt: node.createdAt,
-      modifiedAt: node.modifiedAt,
-      shared: null,
-      totalFiles: 0,
-    })) as IFile[];
-  }, [flattenedData]);
+    return treeData
+      .filter((node: any) => node.type === 'file')
+      .map((node: any) => ({
+        id: node.id,
+        name: node.label,
+        type: node.type,
+        url: '',
+        size: 0,
+        tags: [],
+        isFavorited: !!node.isFavorited,
+        createdAt: node.createdAt,
+        modifiedAt: node.modifiedAt,
+        shared: null,
+        totalFiles: 0,
+      })) as IFile[];
+  }, [treeData]);
 
   const dataFiltered = useMemo(
     () =>
@@ -178,12 +184,12 @@ export function FileTestView({ title, category }: Props) {
 
   const handleOpenFile = useCallback(
     (id: string) => {
-      const item = flattenedData.find((f) => f.id === id);
+      const item = treeData.find((f) => f.id === id);
       if (item) {
         updateURL({ view: 'editor', fileId: item.id, fileName: item.label });
       }
     },
-    [flattenedData, updateURL]
+    [treeData, updateURL]
   );
 
   const handleCreateItem = useCallback(
@@ -260,7 +266,7 @@ export function FileTestView({ title, category }: Props) {
 
   const handleOpenRename = useCallback(
     (id: string) => {
-      const item = flattenedData.find((f) => f.id === id);
+      const item = treeData.find((f) => f.id === id);
       if (item) {
         setRenameItem({
           id: item.id,
@@ -277,7 +283,7 @@ export function FileTestView({ title, category }: Props) {
         renameDialog.onTrue();
       }
     },
-    [flattenedData, renameDialog]
+    [treeData, renameDialog]
   );
 
   const handleUpdateItemName = useCallback((id: string, name: string) => {
@@ -350,9 +356,10 @@ export function FileTestView({ title, category }: Props) {
               </Stack>
             </>
           ) : viewMode === 'editor' && selectedFile ? (
-            <OpicEditorView
+            <OpicTestEditorView
               fileId={selectedFile.id}
               fileName={selectedFile.name}
+              storageKey={storageKey}
               onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
               onSaveSuccess={() => {}}
               onStartTest={() => updateURL({ view: 'live' })}
@@ -371,9 +378,10 @@ export function FileTestView({ title, category }: Props) {
               }}
             />
           ) : viewMode === 'live' && selectedFile ? (
-            <OpicLiveView
+            <OpicTestLiveView
               fileId={selectedFile.id}
               fileName={selectedFile.name}
+              storageKey={storageKey}
               onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
               onEdit={() => updateURL({ view: 'editor' })}
             />

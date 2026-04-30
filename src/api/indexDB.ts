@@ -26,9 +26,13 @@ export async function openDB(): Promise<IDBDatabase> {
   });
 }
 
-type AppData = {
+type SectionData = {
   tree: any[];
   scripts: Record<string, any>;
+};
+
+type AppData = SectionData & {
+  sections?: Record<string, SectionData>;
 };
 
 async function getAppData(): Promise<AppData> {
@@ -70,31 +74,49 @@ async function saveAppData(data: AppData): Promise<void> {
   });
 }
 
-export async function getTreeData(): Promise<any[]> {
+export async function getTreeData(section?: string): Promise<any[]> {
   const data = await getAppData();
-  return data.tree;
+  if (!section || section === 'main') return data.tree;
+  return data.sections?.[section]?.tree || [];
 }
 
-export async function saveTreeData(tree: any[]): Promise<void> {
+export async function saveTreeData(tree: any[], section?: string): Promise<void> {
   const data = await getAppData();
-  data.tree = tree;
+  if (!section || section === 'main') {
+    data.tree = tree;
+  } else {
+    if (!data.sections) data.sections = {};
+    if (!data.sections[section]) data.sections[section] = { tree: [], scripts: {} };
+    data.sections[section].tree = tree;
+  }
   await saveAppData(data);
 }
 
-export async function getFileScript(fileId: string): Promise<any | null> {
+export async function getFileScript(fileId: string, section?: string): Promise<any | null> {
   const data = await getAppData();
-  return data.scripts[fileId] || null;
+  if (!section || section === 'main') return data.scripts[fileId] || null;
+  return data.sections?.[section]?.scripts[fileId] || null;
 }
 
-export async function saveFileScript(fileId: string, script: any): Promise<void> {
+export async function saveFileScript(fileId: string, script: any, section?: string): Promise<void> {
   const data = await getAppData();
-  data.scripts[fileId] = script;
+  if (!section || section === 'main') {
+    data.scripts[fileId] = script;
+  } else {
+    if (!data.sections) data.sections = {};
+    if (!data.sections[section]) data.sections[section] = { tree: [], scripts: {} };
+    data.sections[section].scripts[fileId] = script;
+  }
   await saveAppData(data);
 }
 
-export async function clearAllScripts(): Promise<void> {
+export async function clearAllScripts(section?: string): Promise<void> {
   const data = await getAppData();
-  data.scripts = {};
+  if (!section || section === 'main') {
+    data.scripts = {};
+  } else if (data.sections?.[section]) {
+    data.sections[section].scripts = {};
+  }
   await saveAppData(data);
 }
 
