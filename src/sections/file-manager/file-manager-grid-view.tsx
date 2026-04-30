@@ -38,13 +38,13 @@ type Props = {
   onCreateItem?: (name: string, type: 'folder' | 'file') => void;
   onOpenRename?: (id: string) => void;
   notFound?: boolean;
+  hideFolder?: boolean;
 };
 
 export function FileManagerGridView({
   table,
   dataFiltered,
   onDeleteItem,
-
   onOpenConfirm,
   onNavigate,
   onOpenFile,
@@ -52,6 +52,7 @@ export function FileManagerGridView({
   onCreateItem,
   onOpenRename,
   notFound,
+  hideFolder,
 }: Props) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
@@ -71,7 +72,7 @@ export function FileManagerGridView({
     setInviteEmail(event.target.value);
   }, []);
 
-  const [createType, setCreateType] = useState<'folder' | 'file'>('folder');
+  const [createType, setCreateType] = useState<'folder' | 'file'>(hideFolder ? 'file' : 'folder');
 
   const sortedData = useMemo(() => {
     return [...dataFiltered].sort((a, b) => {
@@ -129,16 +130,18 @@ export function FileManagerGridView({
       slotProps={{ arrow: { placement: 'top-center' } }}
     >
       <MenuList>
-        <MenuItem
-          onClick={() => {
-            setCreateType('folder');
-            newFolderDialog.onTrue();
-            menuActions.onClose();
-          }}
-        >
-          <Iconify icon="solar:folder-plus-bold" />
-          New folder
-        </MenuItem>
+        {!hideFolder && (
+          <MenuItem
+            onClick={() => {
+              setCreateType('folder');
+              newFolderDialog.onTrue();
+              menuActions.onClose();
+            }}
+          >
+            <Iconify icon="solar:folder-plus-bold" />
+            New folder
+          </MenuItem>
+        )}
 
         <MenuItem
           onClick={() => {

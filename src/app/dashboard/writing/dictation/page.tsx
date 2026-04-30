@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 
 import { CONFIG } from 'src/global-config';
 
-import { WritingDictationView } from 'src/sections/writing/view';
+import { FileTestView } from 'src/sections/file-manager/view/file-test-view';
 
 // ----------------------------------------------------------------------
 
-export const metadata: Metadata = { title: `받아쓰기 | Dashboard - ${CONFIG.appName}` };
+export const metadata: Metadata = { title: `내 받아쓰기 | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <WritingDictationView />;
+  return <FileTestView title="내 받아쓰기" category="writing" />;
 }

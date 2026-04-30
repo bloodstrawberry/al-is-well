@@ -82,10 +82,11 @@ type Props = {
   fileName: string;
   onBack: () => void;
   onSaveSuccess: () => void;
+  onStartTest?: () => void;
   onSave?: (fileId: string) => void;
 };
 
-export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave }: Props) {
+export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onStartTest, onSave }: Props) {
   const theme = useTheme();
 
   const [scriptData, setScriptData] = useState<ScriptData>({
@@ -234,15 +235,32 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
           Edit: {fileName}
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          startIcon={<Iconify icon="solar:diskette-bold" />}
-          sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
-        >
-          Save
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            startIcon={<Iconify icon="solar:diskette-bold" />}
+            sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
+          >
+            Save
+          </Button>
+
+          {onStartTest && (
+            <Button
+              variant="contained"
+              color="info"
+              onClick={async () => {
+                await handleSave();
+                onStartTest();
+              }}
+              startIcon={<Iconify icon="solar:play-bold" />}
+              sx={{ boxShadow: (theme) => theme.customShadows?.info }}
+            >
+              Test 시작
+            </Button>
+          )}
+        </Stack>
       </Stack>
 
       <Stack spacing={4}>
