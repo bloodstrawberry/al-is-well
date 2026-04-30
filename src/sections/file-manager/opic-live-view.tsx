@@ -666,6 +666,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         autoComplete="off"
                         slotProps={{
                           input: {
+                            readOnly: isListening === index,
                             inputMode: isListening === index ? 'none' : 'text',
                             endAdornment: (
                               <InputAdornment position="end" sx={{ gap: 0.5 }}>
