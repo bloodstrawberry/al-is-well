@@ -233,120 +233,134 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       {/* Header */}
       <Stack
         direction="row"
-        alignItems="center"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
         spacing={2}
-        sx={{ 
-          mb: 4, 
-          position: 'sticky', 
-          top: 0, 
-          bgcolor: 'background.default', 
-          zIndex: 10, 
+        sx={{
+          mb: 4,
+          position: 'sticky',
+          top: 0,
+          bgcolor: 'background.default',
+          zIndex: 10,
           py: 1.5,
           mx: { xs: -2, md: -8 },
           px: { xs: 2, md: 8 },
         }}
       >
-        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
+        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', mt: { xs: 0.5, md: 0 } }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
 
-        <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
-          <Typography
-            variant="h5"
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={{ xs: 1, md: 2 }}
+          sx={{ flexGrow: 1, overflow: 'hidden' }}
+        >
+          <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {fileName}
+            </Typography>
+
+            {(scriptData?.category || scriptData?.comboPositions?.length > 0) && (
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {scriptData.category && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: 0.5,
+                      bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
+                      color: 'info.main',
+                      fontWeight: 800,
+                      fontSize: 10,
+                      whiteSpace: 'nowrap',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {scriptData.category} {scriptData.subCategory && `• ${scriptData.subCategory}`}
+                  </Typography>
+                )}
+                {scriptData.comboPositions?.map((pos: number) => (
+                  <Box
+                    key={pos}
+                    sx={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      bgcolor: 'text.primary',
+                      color: 'background.paper',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 10,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {pos}
+                  </Box>
+                ))}
+              </Stack>
+            )}
+          </Stack>
+
+          <Stack
+            direction="row"
+            spacing={1}
             sx={{
-              fontWeight: 800,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              justifyContent: { xs: 'flex-end', md: 'flex-start' },
+              alignItems: 'center',
             }}
           >
-            {fileName}
-          </Typography>
+            <Tooltip title="Test Mode">
+              <IconButton
+                color={testMode ? 'info' : 'default'}
+                onClick={() => {
+                  setTestMode(!testMode);
+                  if (!testMode) {
+                    setAllRevealed(false);
+                    setUserAnswers({});
+                    setTestResults({});
+                    setRevealedAnswers({});
+                  }
+                }}
+                sx={{
+                  bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
+                }}
+              >
+                <Iconify icon="solar:pen-new-square-bold" />
+              </IconButton>
+            </Tooltip>
 
-          {(scriptData?.category || scriptData?.comboPositions?.length > 0) && (
-            <Stack direction="row" alignItems="center" spacing={1}>
-              {scriptData.category && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: 0.5,
-                    bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
-                    color: 'info.main',
-                    fontWeight: 800,
-                    fontSize: 10,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {scriptData.category} {scriptData.subCategory && `• ${scriptData.subCategory}`}
-                </Typography>
-              )}
-              {scriptData.comboPositions?.map((pos: number) => (
-                <Box
-                  key={pos}
-                  sx={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    bgcolor: 'text.primary',
-                    color: 'background.paper',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 10,
-                    fontWeight: 900,
-                  }}
-                >
-                  {pos}
-                </Box>
-              ))}
-            </Stack>
-          )}
-        </Stack>
+            <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
+              <IconButton
+                color={allRevealed ? 'warning' : 'success'}
+                onClick={toggleAll}
+                sx={{
+                  bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)),
+                }}
+              >
+                <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              </IconButton>
+            </Tooltip>
 
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Test Mode">
-            <IconButton
-              color={testMode ? 'info' : 'default'}
-              onClick={() => {
-                setTestMode(!testMode);
-                if (!testMode) {
-                  setAllRevealed(false);
-                  setUserAnswers({});
-                  setTestResults({});
-                  setRevealedAnswers({});
-                }
-              }}
-              sx={{
-                bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
-              }}
-            >
-              <Iconify icon="solar:pen-new-square-bold" />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
-            <IconButton
-              color={allRevealed ? 'warning' : 'success'}
-              onClick={toggleAll}
-              sx={{
-                bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)),
-              }}
-            >
-              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Edit">
-            <IconButton
-              color="primary"
-              onClick={onEdit}
-              sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}
-            >
-              <Iconify icon="solar:pen-bold" />
-            </IconButton>
-          </Tooltip>
+            <Tooltip title="Edit">
+              <IconButton
+                color="primary"
+                onClick={onEdit}
+                sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}
+              >
+                <Iconify icon="solar:pen-bold" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
 
@@ -364,20 +378,20 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                       Q{index + 1}
                     </Typography>
                   </Box>
-                  <Typography 
-                    variant="h6" 
+                  <Typography
+                    variant="h6"
                     onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
-                    sx={{ 
-                      lineHeight: 1.5, 
-                      fontWeight: 700, 
-                      flexGrow: 1, 
+                    sx={{
+                      lineHeight: 1.5,
+                      fontWeight: 700,
+                      flexGrow: 1,
                       color: 'text.primary',
                       cursor: testMode ? 'pointer' : 'default',
                       transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                      ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && { 
-                        filter: 'blur(8px)', 
-                        opacity: 0.3, 
-                        userSelect: 'none' 
+                      ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
+                        filter: 'blur(8px)',
+                        opacity: 0.3,
+                        userSelect: 'none'
                       })
                     }}
                   >
@@ -418,7 +432,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                         color: 'text.secondary',
                         textAlign: 'justify',
                         transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                        ...( ! (revealedLines[`q-${index}`] ?? allRevealed) && {
+                        ...(!(revealedLines[`q-${index}`] ?? allRevealed) && {
                           filter: 'blur(6px)',
                           opacity: 0.4,
                           userSelect: 'none'

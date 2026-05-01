@@ -296,9 +296,9 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
         <Stack 
           direction={{ xs: 'column', md: 'row' }} 
           spacing={2} 
-          sx={{ width: '100%', alignItems: 'center' }}
+          sx={{ width: '100%', alignItems: { xs: 'stretch', md: 'center' } }}
         >
-          <FormControl sx={{ flex: 1, minWidth: { md: 200 } }}>
+          <FormControl sx={{ flex: 1, minWidth: { md: 200 }, width: '100%' }}>
             <InputLabel>문제 유형 (Category)</InputLabel>
             <Select
               label="문제 유형 (Category)"
@@ -331,7 +331,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
           </FormControl>
 
           {scriptData.category && scriptData.category !== '자기소개' && (
-            <FormControl sx={{ flex: 1, minWidth: { md: 200 } }}>
+            <FormControl sx={{ flex: 1, minWidth: { md: 200 }, width: '100%' }}>
               <InputLabel>세부 유형 (Sub-category)</InputLabel>
               <Select
                 label="세부 유형 (Sub-category)"
@@ -381,6 +381,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                 bgcolor: 'background.paper',
                 border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
                 flexShrink: 0,
+                alignSelf: { xs: 'flex-end', md: 'center' },
                 ...((
                   scriptData.category === '자기소개' ||
                   (scriptData.category === '롤플레이' && scriptData.subCategory === '13번 - 과거 경험') ||
