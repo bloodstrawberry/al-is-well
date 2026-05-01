@@ -15,22 +15,15 @@ declare global {
 
 export function useOpicSpeech() {
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [recordedAudios, setRecordedAudios] = useState<Record<number, string>>({});
   const [isListening, setIsListening] = useState<number | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [speakingIndex, setSpeakingIndex] = useState<number | string | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<any>(null);
   const inputRefs = useRef<Record<number, any>>({});
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const isManualStopRef = useRef(false);
   const accumulatedTranscriptRef = useRef('');
   const isListeningRef = useRef<number | null>(null);
@@ -60,11 +53,6 @@ export function useOpicSpeech() {
         recognitionRef.current.stop();
       } catch (e) { /* 이미 중지됨 */ }
       recognitionRef.current = null;
-    }
-
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
     }
 
     setIsListening(null);
@@ -182,24 +170,6 @@ export function useOpicSpeech() {
     }
   }, [resetSilenceTimer, stopListening]);
 
-  const playRecordedAudio = useCallback((index: number) => {
-    if (playingIndex === index && currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      setPlayingIndex(null);
-      return;
-    }
-    if (currentAudioRef.current) currentAudioRef.current.pause();
-
-    const url = recordedAudios[index];
-    if (url) {
-      const audio = new Audio(url);
-      currentAudioRef.current = audio;
-      setPlayingIndex(index);
-      audio.onended = () => setPlayingIndex(null);
-      audio.play().catch(() => setPlayingIndex(null));
-    }
-  }, [recordedAudios, playingIndex]);
-
   const toggleSpeak = useCallback((text: string, index: number | string) => {
     if (speakingIndex === index && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
@@ -217,32 +187,23 @@ export function useOpicSpeech() {
 
   const resetStates = useCallback(() => {
     setUserAnswers({});
-    setRecordedAudios((prev) => {
-      Object.values(prev).forEach(url => URL.revokeObjectURL(url));
-      return {};
-    });
     setIsListening(null);
-    setPlayingIndex(null);
     setSpeakingIndex(null);
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
   }, []);
 
   return {
     userAnswers,
     setUserAnswers,
-    recordedAudios,
-    setRecordedAudios,
+    recordedAudios: {},
+    setRecordedAudios: () => {},
     isListening,
     isPreparing,
-    playingIndex,
+    playingIndex: null,
     speakingIndex,
     inputRefs,
     startListening,
     stopListening,
-    playRecordedAudio,
+    playRecordedAudio: () => {},
     toggleSpeak,
     resetStates,
   };

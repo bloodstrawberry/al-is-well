@@ -230,17 +230,19 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           }
         />
       </IconButton>
-      <IconButton
-        size="small"
-        disabled={!recordedAudios[index]}
-        onClick={() => playRecordedAudio(index)}
-        sx={{
-          color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
-          bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-        }}
-      >
-        <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
-      </IconButton>
+      {!isMobile && (
+        <IconButton
+          size="small"
+          disabled={!recordedAudios[index]}
+          onClick={() => playRecordedAudio(index)}
+          sx={{
+            color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
+            bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+          }}
+        >
+          <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
+        </IconButton>
+      )}
       <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
         <Iconify icon="solar:check-read-bold" />
       </IconButton>
