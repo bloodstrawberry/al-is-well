@@ -276,7 +276,15 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
+    <Container 
+      maxWidth={false} 
+      sx={{ 
+        py: { xs: 2, md: 5 }, 
+        px: { xs: 2, md: 8 },
+        WebkitOverflowScrolling: 'touch',
+        backfaceVisibility: 'hidden',
+      }}
+    >
       {/* Header */}
       <Stack
         direction="row"
@@ -285,10 +293,12 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         sx={{ 
           mb: 4, 
           position: 'sticky', 
-          top: 0, 
+          top: -1, // Slightly above 0 to prevent sub-pixel gaps
           zIndex: 1000, 
           bgcolor: theme.palette.background.default,
           backgroundImage: 'none',
+          transform: 'translate3d(0, 0, 0)', // Force GPU acceleration
+          willChange: 'transform',
           '&:before': {
             content: '""',
             position: 'absolute',

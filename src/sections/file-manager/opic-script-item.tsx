@@ -172,6 +172,8 @@ export const OpicScriptItem = memo(({
         bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
         boxShadow: (theme) => theme.customShadows?.z1,
         transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)',
       }}
     >
       <Stack spacing={2}>
