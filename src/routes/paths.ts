@@ -13,8 +13,6 @@ export const paths = {
   maintenance: '/maintenance',
   pricing: '/pricing',
   payment: '/payment',
-  about: '/about-us',
-  contact: '/contact-us',
   faqs: '/faqs',
   page403: '/error/403',
   page404: '/error/404',
