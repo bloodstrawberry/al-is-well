@@ -374,7 +374,7 @@ export const OpicScriptItem = memo(({
             >
               <Iconify
                 icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'}
-                width={{ xs: 18, md: 20 }}
+                sx={{ width: { xs: 18, md: 20 }, height: { xs: 18, md: 20 } }}
               />
             </IconButton>
           </Stack>
