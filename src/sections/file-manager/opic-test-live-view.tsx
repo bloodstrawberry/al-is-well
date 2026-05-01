@@ -307,7 +307,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
             zIndex: -1,
             bgcolor: 'background.default',
           },
-          borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`,
           pb: 1.5,
           pt: { xs: 1, md: 1.5 },
           mx: { xs: 0, md: -3 },

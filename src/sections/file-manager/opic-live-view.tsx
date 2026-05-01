@@ -235,7 +235,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         direction="row"
         alignItems="center"
         spacing={2}
-        sx={{ mb: 4, position: 'sticky', top: 0, bgcolor: 'background.default', zIndex: 10, py: 1 }}
+        sx={{ 
+          mb: 4, 
+          position: 'sticky', 
+          top: 0, 
+          bgcolor: 'background.default', 
+          zIndex: 10, 
+          py: 1.5,
+          mx: { xs: -2, md: -8 },
+          px: { xs: 2, md: 8 },
+        }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
           <Iconify icon="eva:arrow-ios-back-fill" />

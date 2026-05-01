@@ -147,8 +147,9 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           top: 0,
           bgcolor: 'background.default',
           zIndex: 10,
-          py: 1,
-          borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`,
+          py: 1.5,
+          mx: { xs: -1, md: -3 },
+          px: { xs: 1, md: 3 },
         }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
