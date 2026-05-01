@@ -157,7 +157,7 @@ export function useOpicSpeech() {
     if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) { } }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') { try { mediaRecorderRef.current.stop(); } catch (e) { } }
     if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach((t) => t.stop()); mediaStreamRef.current = null; }
-    if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
+    if (typeof window !== 'undefined' && window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
     setIsPreparing(true);
 

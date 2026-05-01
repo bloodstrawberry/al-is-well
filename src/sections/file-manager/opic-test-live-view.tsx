@@ -81,10 +81,12 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   // Pre-load voices
   useEffect(() => {
-    const loadVoices = () => { window.speechSynthesis.getVoices(); };
-    loadVoices();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const loadVoices = () => { window.speechSynthesis.getVoices(); };
+      loadVoices();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
     }
   }, []);
 

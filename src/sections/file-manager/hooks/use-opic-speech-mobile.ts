@@ -86,7 +86,7 @@ export function useOpicSpeech() {
     accumulatedTranscriptRef.current = '';
     isFirstStartRef.current = true;
     
-    if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
+    if (typeof window !== 'undefined' && window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
     const recognition = new SpeechRecognitionCtor();
     recognitionRef.current = recognition;
