@@ -25,6 +25,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { alpha, useTheme } from '@mui/material/styles';
 
+import { OpicEditorItem } from './opic-editor-item';
+
 import { Iconify } from 'src/components/iconify';
 import { getFileScript, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
@@ -178,21 +180,21 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     }
   };
 
-  const handleAddLine = () => {
+  const handleAddLine = useCallback(() => {
     setScriptData((prev) => ({
       ...prev,
       lines: [...prev.lines, { ko: '', en: '' }],
     }));
-  };
+  }, []);
 
-  const handleRemoveLine = (index: number) => {
+  const handleRemoveLine = useCallback((index: number) => {
     setScriptData((prev) => ({
       ...prev,
       lines: prev.lines.filter((_, i) => i !== index),
     }));
-  };
+  }, []);
 
-  const handleChangeLine = (index: number, field: keyof Line, value: string) => {
+  const handleChangeLine = useCallback((index: number, field: keyof Line, value: string) => {
     if (field === 'en') {
       setUserAnswers((prev) => {
         if (prev[index] === value) return prev;
@@ -201,10 +203,15 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     }
     setScriptData((prev) => {
       const newLines = [...prev.lines];
+      if (newLines[index] && newLines[index][field] === value) return prev;
       newLines[index] = { ...newLines[index], [field]: value };
       return { ...prev, lines: newLines };
     });
-  };
+  }, [setUserAnswers]);
+
+  const setInputRef = useCallback((index: number, el: any) => {
+    inputRefs.current[index] = el;
+  }, [inputRefs]);
 
   const handleBulkApply = () => {
     const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -594,138 +601,24 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
 
           <Stack spacing={2}>
             {scriptData.lines.map((line, index) => (
-              <Card
+              <OpicEditorItem
                 key={index}
-                sx={{
-                  p: 2.5,
-                  border: (theme) => `solid 1px ${theme.vars.palette.divider}`,
-                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.3),
-                  position: 'relative',
-                  '&:hover .delete-btn': { opacity: 1 }
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="flex-start">
-                  <Box
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      bgcolor: 'text.disabled',
-                      color: 'background.paper',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 11,
-                      fontWeight: 800,
-                      flexShrink: 0,
-                      mt: 1.5
-                    }}
-                  >
-                    {index + 1}
-                  </Box>
-
-                  <Stack spacing={2.5} sx={{ flexGrow: 1 }}>
-                    <TextField
-                      fullWidth
-                      label="Korean"
-                      value={line.ko}
-                      onChange={(e) => handleChangeLine(index, 'ko', e.target.value)}
-                      multiline
-                      variant="standard"
-                      placeholder="Korean line..."
-                      slotProps={{
-                        input: { sx: { fontWeight: 600 } }
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="English"
-                      value={line.en}
-                      onChange={(e) => handleChangeLine(index, 'en', e.target.value)}
-                      multiline
-                      minRows={isMobile ? 3 : 1}
-                      inputRef={(el) => (inputRefs.current[index] = el)}
-                      variant="standard"
-                      placeholder="English translation..."
-                      slotProps={{
-                        input: { 
-                          sx: { color: 'primary.main', fontWeight: 500 },
-                          endAdornment: (
-                            <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                              <IconButton
-                                size="small"
-                                color={speakingIndex === `tts-${index}` ? 'primary' : 'default'}
-                                onClick={() => toggleSpeak(line.en, `tts-${index}`)}
-                              >
-                                <Iconify icon={speakingIndex === `tts-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                color={isListening === index ? 'error' : 'default'}
-                                onClick={() => (isListening === index ? stopListening() : startListening(index))}
-                                sx={{
-                                  ...(isListening === index && !isPreparing && {
-                                    animation: 'pulse 1.5s infinite',
-                                    '@keyframes pulse': {
-                                      '0%': { transform: 'scale(1)', opacity: 1 },
-                                      '50%': { transform: 'scale(1.2)', opacity: 0.7 },
-                                      '100%': { transform: 'scale(1)', opacity: 1 },
-                                    },
-                                  }),
-                                  ...(isPreparing && isListening === index && {
-                                    animation: 'rotate 1s linear infinite',
-                                    '@keyframes rotate': {
-                                      'from': { transform: 'rotate(0deg)' },
-                                      'to': { transform: 'rotate(360deg)' },
-                                    },
-                                  }),
-                                }}
-                              >
-                                <Iconify 
-                                  icon={
-                                    isListening === index 
-                                      ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold') 
-                                      : 'solar:microphone-bold'
-                                  } 
-                                />
-                              </IconButton>
-                              {!isMobile && (
-                                <IconButton
-                                  size="small"
-                                  disabled={!recordedAudios[index]}
-                                  onClick={() => playRecordedAudio(index)}
-                                  sx={{
-                                    color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
-                                    bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-                                  }}
-                                >
-                                  <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
-                                </IconButton>
-                              )}
-                            </InputAdornment>
-                          )
-                        }
-                      }}
-                    />
-                  </Stack>
-
-                  <IconButton
-                    className="delete-btn"
-                    color="error"
-                    onClick={() => handleRemoveLine(index)}
-                    disabled={scriptData.lines.length === 1}
-                    sx={{
-                      mt: 1,
-                      opacity: { xs: 1, md: 0 },
-                      transition: (theme) => theme.transitions.create('opacity'),
-                      bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
-                      '&:hover': { bgcolor: (theme) => alpha(theme.palette.error.main, 0.16) }
-                    }}
-                  >
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Stack>
-              </Card>
+                index={index}
+                line={line}
+                isMobile={isMobile}
+                speakingIndex={speakingIndex === `tts-${index}`}
+                isListening={isListening === index}
+                isPreparing={isPreparing}
+                playingIndex={playingIndex === index}
+                recordedAudio={recordedAudios[index]}
+                setInputRef={setInputRef}
+                onRemoveLine={handleRemoveLine}
+                onChangeLine={handleChangeLine}
+                onToggleSpeak={toggleSpeak}
+                onStartListening={startListening}
+                onStopListening={stopListening}
+                onPlayRecordedAudio={playRecordedAudio}
+              />
             ))}
           </Stack>
 

@@ -170,8 +170,14 @@ export function useOpicSpeech() {
     }
   }, [resetSilenceTimer, stopListening]);
 
+  const speakingIndexRef = useRef(speakingIndex);
+  useEffect(() => {
+    speakingIndexRef.current = speakingIndex;
+  }, [speakingIndex]);
+
   const toggleSpeak = useCallback((text: string, index: number | string) => {
-    if (speakingIndex === index && window.speechSynthesis.speaking) {
+    const currentSpeaking = speakingIndexRef.current;
+    if (currentSpeaking === index && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
       setSpeakingIndex(null);
       return;
@@ -183,7 +189,7 @@ export function useOpicSpeech() {
     utterance.onend = () => setSpeakingIndex(null);
     setSpeakingIndex(index);
     window.speechSynthesis.speak(utterance);
-  }, [speakingIndex]);
+  }, []);
 
   const resetStates = useCallback(() => {
     setUserAnswers({});

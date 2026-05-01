@@ -241,8 +241,24 @@ export function useOpicSpeech() {
     };
   }, []);
 
+  const recordedAudiosRefInternal = useRef(recordedAudios);
+  useEffect(() => {
+    recordedAudiosRefInternal.current = recordedAudios;
+  }, [recordedAudios]);
+
+  const playingIndexRef = useRef(playingIndex);
+  useEffect(() => {
+    playingIndexRef.current = playingIndex;
+  }, [playingIndex]);
+
+  const speakingIndexRef = useRef(speakingIndex);
+  useEffect(() => {
+    speakingIndexRef.current = speakingIndex;
+  }, [speakingIndex]);
+
   const playRecordedAudio = useCallback((index: number) => {
-    if (playingIndex === index && currentAudioRef.current) {
+    const currentPlaying = playingIndexRef.current;
+    if (currentPlaying === index && currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
       setPlayingIndex(null);
@@ -253,7 +269,7 @@ export function useOpicSpeech() {
       currentAudioRef.current.pause();
     }
 
-    const url = recordedAudios[index];
+    const url = recordedAudiosRefInternal.current[index];
     if (url) {
       const audio = new Audio(url);
       currentAudioRef.current = audio;
@@ -264,10 +280,11 @@ export function useOpicSpeech() {
       };
       audio.play();
     }
-  }, [recordedAudios, playingIndex]);
+  }, []);
 
   const toggleSpeak = useCallback((text: string, index: number | string) => {
-    if (speakingIndex === index && window.speechSynthesis.speaking) {
+    const currentSpeaking = speakingIndexRef.current;
+    if (currentSpeaking === index && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
       setSpeakingIndex(null);
       return;
@@ -291,7 +308,7 @@ export function useOpicSpeech() {
     setTimeout(() => {
       window.speechSynthesis.speak(utterance);
     }, 50);
-  }, [speakingIndex]);
+  }, []);
 
   const resetStates = useCallback(() => {
     setUserAnswers({});

@@ -4,14 +4,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
-import TextField from '@mui/material/TextField';
-import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
@@ -19,6 +15,7 @@ import { getFileScript, getTreeData } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
 import { useOpicSpeech } from './hooks/use-opic-speech';
+import { OpicScriptItem } from './opic-script-item';
 
 // ----------------------------------------------------------------------
 
@@ -52,7 +49,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const [revealedLines, setRevealedLines] = useState<Record<string, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
-  const [showKoQuestion, setShowKoQuestion] = useState(false);
 
   const [testMode, setTestMode] = useState(true);
   const [autoPlay, setAutoPlay] = useState(() => {
@@ -91,8 +87,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   }, []);
 
-
-
   // 1. Load Playlist
   useEffect(() => {
     const loadPlaylist = async () => {
@@ -103,7 +97,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           setPlaylist(data);
           setCurrentIndex(0);
         } else {
-          // If not a playlist (fallback), treat as single script
           setPlaylist({ fileIds: [fileId] });
         }
       } catch (error) {
@@ -123,7 +116,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       const currentId = playlist.fileIds[currentIndex];
       setLoadingScript(true);
 
-      // Reset current state
       setRevealedLines({});
       setAllRevealed(false);
       setUserAnswers({});
@@ -132,10 +124,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       setRecordedAudios({});
 
       try {
-        // Referenced scripts are ALWAYS from main DRIVE
         const data = await getFileScript(currentId);
-
-        // Try to get the file name from DRIVE tree
         const tree = await getTreeData();
         const findName = (nodes: any[]): string => {
           for (const node of nodes) {
@@ -164,7 +153,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
     };
     loadCurrentScript();
-  }, [playlist, currentIndex]);
+  }, [playlist, currentIndex, setRecordedAudios, setUserAnswers]);
 
   // 3. Auto Play Question
   useEffect(() => {
@@ -211,8 +200,14 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     setRevealedLines(newRevealed);
   };
 
-  const handleCheckAnswer = (index: number) => {
-    const userAnswer = (userAnswers[index] || '').trim();
+  const userAnswersRef = useRef(userAnswers);
+  useEffect(() => {
+    userAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  const handleCheckAnswer = useCallback((index: number) => {
+    const currentAnswers = userAnswersRef.current;
+    const userAnswer = (currentAnswers[index] || '').trim();
     const correctAnswer = (scriptData.lines[index].en || '').trim();
     if (!userAnswer) return;
 
@@ -246,58 +241,19 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     setTestResults(prev => ({ ...prev, [index]: results }));
     if (results.every(r => r.isCorrect)) setRevealedAnswers(prev => ({ ...prev, [index]: true }));
-  };
+  }, [scriptData?.lines]);
 
-  const renderActionButtons = (index: number) => (
-    <>
-      <IconButton
-        size="small"
-        color={isListening === index ? 'error' : 'default'}
-        onClick={() => (isListening === index ? stopListening() : startListening(index))}
-        sx={{
-          ...(isListening === index && !isPreparing && {
-            animation: 'pulse 1.5s infinite',
-            '@keyframes pulse': {
-              '0%': { transform: 'scale(1)', opacity: 1 },
-              '50%': { transform: 'scale(1.2)', opacity: 0.7 },
-              '100%': { transform: 'scale(1)', opacity: 1 },
-            },
-          }),
-          ...(isPreparing && isListening === index && {
-            animation: 'rotate 1s linear infinite',
-            '@keyframes rotate': {
-              'from': { transform: 'rotate(0deg)' },
-              'to': { transform: 'rotate(360deg)' },
-            },
-          }),
-        }}
-      >
-        <Iconify
-          icon={
-            isListening === index
-              ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold')
-              : 'solar:microphone-bold'
-          }
-        />
-      </IconButton>
-      {!isMobile && (
-        <IconButton
-          size="small"
-          disabled={!recordedAudios[index]}
-          onClick={() => playRecordedAudio(index)}
-          sx={{
-            color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
-            bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-          }}
-        >
-          <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
-        </IconButton>
-      )}
-      <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
-        <Iconify icon="solar:check-read-bold" />
-      </IconButton>
-    </>
-  );
+  const handleChangeAnswer = useCallback((index: number, value: string) => {
+    setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
+  }, [setUserAnswers]);
+
+  const handleToggleAnswerReveal = useCallback((index: number) => {
+    setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }));
+  }, []);
+
+  const setInputRef = useCallback((index: number, el: any) => {
+    inputRefs.current[index] = el;
+  }, [inputRefs]);
 
   if (loading) {
     return (
@@ -482,117 +438,33 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               </Typography>
             </Stack>
 
-            {scriptData?.lines?.map((line: any, index: number) => {
-              const isRevealed = revealedLines[index] ?? allRevealed;
-              const result = testResults[index];
-              const isAnswerRevealed = revealedAnswers[index] || allRevealed;
-
-              return (
-                <Card
-                  key={index}
-                  sx={{
-                    p: { xs: 1, md: 2.5 },
-                    border: (theme) => `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`,
-                    bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
-                    boxShadow: (theme) => theme.customShadows?.z1,
-                    transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
-                  }}
-                >
-                  <Stack spacing={2}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
-                        {index + 1}
-                      </Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.5, flexGrow: 1 }}>
-                        {line.ko}
-                      </Typography>
-                    </Stack>
-                    <Divider sx={{ borderStyle: 'dashed' }} />
-                     {testMode ? (
-                        <Stack spacing={1.5}>
-                          <TextField
-                            fullWidth
-                            inputRef={(el) => (inputRefs.current[index] = el)}
-                            placeholder="Listen and type English..."
-                            multiline={isMobile}
-                            minRows={isMobile ? 3 : 1}
-                            value={userAnswers[index] || ''}
-                            onChange={(e) => {
-                              const { value } = e.target;
-                              setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
-                            }}
-                            onKeyDown={(e) => { if (e.key === 'Enter') handleCheckAnswer(index); }}
-                            autoComplete="off"
-                            slotProps={{
-                              input: {
-                                readOnly: isListening === index,
-                                endAdornment: !isMobile && (
-                                  <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                                    {renderActionButtons(index)}
-                                  </InputAdornment>
-                                ),
-                              }
-                            }}
-                          />
-                          {isMobile && (
-                            <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                              {renderActionButtons(index)}
-                            </Stack>
-                          )}
-                        {(result || allRevealed) && (
-                          <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
-                            {result && (
-                              <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
-                                <Box sx={{ px: 0.75, py: 0.25, borderRadius: 0.5, bgcolor: (theme) => alpha(theme.palette.info.main, 0.1), color: 'info.main', fontSize: 10, fontWeight: 900, mr: 0.5, flexShrink: 0 }}>답변</Box>
-                                {result.map((word: any, wIndex: number) => word.uWord && (
-                                  <Typography key={wIndex} variant="body1" sx={{ color: word.isCorrect ? 'info.main' : 'error.main', fontWeight: 700, textDecoration: word.isCorrect ? 'none' : 'line-through' }}>{word.uWord}</Typography>
-                                ))}
-                              </Box>
-                            )}
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
-                              <Box sx={{ px: 0.75, py: 0.25, borderRadius: 0.5, bgcolor: (theme) => alpha(theme.palette.success.main, 0.1), color: 'success.main', fontSize: 10, fontWeight: 900, mr: 0.5, flexShrink: 0 }}>정답</Box>
-                              {result ? (
-                                result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
-                                  <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled', letterSpacing: isAnswerRevealed ? 0 : 1 }}>{isAnswerRevealed ? word.cWord : word.masked}</Typography>
-                                ))
-                              ) : (
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled' }}>
-                                  {isAnswerRevealed ? line.en : line.en.replace(/[a-zA-Z0-9]/g, '*')}
-                                </Typography>
-                              )}
-                              <IconButton size="small" onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))} sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}>
-                                <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() => toggleSpeak(line.en, `line-result-${index}`)}
-                                sx={{ ml: 0.5, p: 0.5, color: speakingIndex === `line-result-${index}` ? 'primary.main' : 'primary.main' }}
-                              >
-                                <Iconify icon={speakingIndex === `line-result-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} width={16} />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        )}
-                      </Stack>
-                    ) : (
-                      <Stack direction="row" spacing={1} alignItems="flex-start">
-                        <Box onClick={() => toggleLine(index)} sx={{ p: 1.5, flexGrow: 1, cursor: 'pointer', borderRadius: 1, bgcolor: isRevealed ? 'transparent' : (theme) => alpha(theme.palette.action.hover, 0.04), transition: (theme) => theme.transitions.create(['filter', 'opacity', 'background-color']), '&:hover': { bgcolor: (theme) => isRevealed ? 'transparent' : alpha(theme.palette.action.hover, 0.08) } }}>
-                          <Typography variant="body1" sx={{ fontWeight: 500, color: 'text.primary', lineHeight: 1.6, ...(!isRevealed && { filter: 'blur(8px)', opacity: 0.3, userSelect: 'none', transform: 'scale(0.99)' }) }}>{line.en}</Typography>
-                        </Box>
-                        <IconButton
-                          onClick={() => toggleSpeak(line.en, `line-view-${index}`)}
-                          color={speakingIndex === `line-view-${index}` ? 'primary' : 'default'}
-                          size="small"
-                          sx={{ mt: 1, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) } }}
-                        >
-                          <Iconify icon={speakingIndex === `line-view-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
-                        </IconButton>
-                      </Stack>
-                    )}
-                  </Stack>
-                </Card>
-              );
-            })}
+            {scriptData?.lines?.map((line: any, index: number) => (
+              <OpicScriptItem
+                key={index}
+                index={index}
+                line={line}
+                testMode={testMode}
+                isRevealed={revealedLines[index] ?? allRevealed}
+                userAnswer={userAnswers[index]}
+                result={testResults[index]}
+                isAnswerRevealed={revealedAnswers[index] || allRevealed}
+                isListening={isListening === index}
+                isPreparing={isPreparing}
+                playingIndex={playingIndex === index}
+                speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}`}
+                isMobile={isMobile}
+                recordedAudio={recordedAudios[index]}
+                setInputRef={setInputRef}
+                onToggleLine={toggleLine}
+                onToggleSpeak={toggleSpeak}
+                onChangeAnswer={handleChangeAnswer}
+                onCheckAnswer={handleCheckAnswer}
+                onStartListening={startListening}
+                onStopListening={stopListening}
+                onPlayRecordedAudio={playRecordedAudio}
+                onToggleAnswerReveal={handleToggleAnswerReveal}
+              />
+            ))}
           </Stack>
         </Stack>
       ) : (
@@ -604,4 +476,3 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     </Box>
   );
 }
-

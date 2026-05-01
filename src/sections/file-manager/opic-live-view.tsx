@@ -22,6 +22,10 @@ import { useOpicSpeech } from './hooks/use-opic-speech';
 
 // ----------------------------------------------------------------------
 
+import { OpicScriptItem } from './opic-script-item';
+
+// ----------------------------------------------------------------------
+
 declare global {
   interface Window {
     webkitSpeechRecognition: any;
@@ -126,8 +130,14 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     setRevealedLines(newRevealed);
   };
 
-  const handleCheckAnswer = (index: number) => {
-    const userAnswer = (userAnswers[index] || '').trim();
+  const userAnswersRef = useRef(userAnswers);
+  useEffect(() => {
+    userAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  const handleCheckAnswer = useCallback((index: number) => {
+    const currentAnswers = userAnswersRef.current;
+    const userAnswer = (currentAnswers[index] || '').trim();
     const correctAnswer = (scriptData.lines[index].en || '').trim();
 
     if (!userAnswer) return;
@@ -196,58 +206,19 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     if (isAllCorrect) {
       setRevealedAnswers(prev => ({ ...prev, [index]: true }));
     }
-  };
+  }, [scriptData?.lines]);
 
-  const renderActionButtons = (index: number) => (
-    <>
-      <IconButton
-        size="small"
-        color={isListening === index ? 'error' : 'default'}
-        onClick={() => (isListening === index ? stopListening() : startListening(index))}
-        sx={{
-          ...(isListening === index && !isPreparing && {
-            animation: 'pulse 1.5s infinite',
-            '@keyframes pulse': {
-              '0%': { transform: 'scale(1)', opacity: 1 },
-              '50%': { transform: 'scale(1.2)', opacity: 0.7 },
-              '100%': { transform: 'scale(1)', opacity: 1 },
-            },
-          }),
-          ...(isPreparing && isListening === index && {
-            animation: 'rotate 1s linear infinite',
-            '@keyframes rotate': {
-              'from': { transform: 'rotate(0deg)' },
-              'to': { transform: 'rotate(360deg)' },
-            },
-          }),
-        }}
-      >
-        <Iconify
-          icon={
-            isListening === index
-              ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold')
-              : 'solar:microphone-bold'
-          }
-        />
-      </IconButton>
-      {!isMobile && (
-        <IconButton
-          size="small"
-          disabled={!recordedAudios[index]}
-          onClick={() => playRecordedAudio(index)}
-          sx={{
-            color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
-            bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-          }}
-        >
-          <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
-        </IconButton>
-      )}
-      <IconButton onClick={() => handleCheckAnswer(index)} size="small" color="success">
-        <Iconify icon="solar:check-read-bold" />
-      </IconButton>
-    </>
-  );
+  const handleChangeAnswer = useCallback((index: number, value: string) => {
+    setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
+  }, [setUserAnswers]);
+
+  const handleToggleAnswerReveal = useCallback((index: number) => {
+    setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }));
+  }, []);
+
+  const setInputRef = useCallback((index: number, el: any) => {
+    inputRefs.current[index] = el;
+  }, [inputRefs]);
 
   if (loading) {
     return (
@@ -471,228 +442,33 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             </Typography>
           </Stack>
 
-          {scriptData?.lines?.map((line: any, index: number) => {
-            const isRevealed = revealedLines[index] ?? allRevealed;
-            const result = testResults[index];
-            const isAnswerRevealed = revealedAnswers[index] || allRevealed;
-
-            return (
-              <Card
-                key={index}
-                sx={{
-                  p: { xs: 2, md: 2.5 },
-                  border: (theme) => `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
-                    }`,
-                  bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
-                  boxShadow: (theme) => theme.customShadows?.z1,
-                  transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
-                }}
-              >
-                <Stack spacing={2}>
-                  {/* Korean Text */}
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 800,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {index + 1}
-                    </Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 700,
-                        color: 'text.primary',
-                        lineHeight: 1.5,
-                        flexGrow: 1
-                      }}
-                    >
-                      {line.ko}
-                    </Typography>
-                  </Stack>
-
-                  <Divider sx={{ borderStyle: 'dashed' }} />
-
-                  {/* English Text / Input */}
-                  {testMode ? (
-                    <Stack spacing={1.5}>
-                      <TextField
-                        fullWidth
-                        inputRef={(el) => (inputRefs.current[index] = el)}
-                        placeholder="Listen and type English..."
-                        multiline={isMobile}
-                        minRows={isMobile ? 3 : 1}
-                        value={userAnswers[index] || ''}
-                        onChange={(e) => {
-                          const { value } = e.target;
-                          setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleCheckAnswer(index);
-                          }
-                        }}
-                        autoComplete="off"
-                        slotProps={{
-                          input: {
-                            readOnly: isListening === index,
-                            endAdornment: !isMobile && (
-                              <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                                {renderActionButtons(index)}
-                              </InputAdornment>
-                            ),
-                          },
-                        }}
-                      />
-
-                      {isMobile && (
-                        <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                          {renderActionButtons(index)}
-                        </Stack>
-                      )}
-
-                      {(result || allRevealed) && (
-                        <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
-                          {/* Your Answer */}
-                          {result && (
-                            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
-                              <Box
-                                sx={{
-                                  px: 0.75,
-                                  py: 0.25,
-                                  borderRadius: 0.5,
-                                  bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
-                                  color: 'info.main',
-                                  fontSize: 10,
-                                  fontWeight: 900,
-                                  mr: 0.5,
-                                  flexShrink: 0
-                                }}
-                              >
-                                답변
-                              </Box>
-                              {result.map((word: any, wIndex: number) => word.uWord && (
-                                <Typography
-                                  key={wIndex}
-                                  variant="body1"
-                                  sx={{
-                                    color: word.isCorrect ? 'info.main' : 'error.main',
-                                    fontWeight: 700,
-                                    textDecoration: word.isCorrect ? 'none' : 'line-through'
-                                  }}
-                                >
-                                  {word.uWord}
-                                </Typography>
-                              ))}
-                            </Box>
-                          )}
-
-                          {/* Correct Answer */}
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
-                            <Box
-                              sx={{
-                                px: 0.75,
-                                py: 0.25,
-                                borderRadius: 0.5,
-                                bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
-                                color: 'success.main',
-                                fontSize: 10,
-                                fontWeight: 900,
-                                mr: 0.5,
-                                flexShrink: 0
-                              }}
-                            >
-                              정답
-                            </Box>
-                            {result ? (
-                              result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
-                                <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled', letterSpacing: isAnswerRevealed ? 0 : 1 }}>{isAnswerRevealed ? word.cWord : word.masked}</Typography>
-                              ))
-                            ) : (
-                              <Typography variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled' }}>
-                                {isAnswerRevealed ? line.en : line.en.replace(/[a-zA-Z0-9]/g, '*')}
-                              </Typography>
-                            )}
-                            <IconButton
-                              size="small"
-                              onClick={() => setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }))}
-                              sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
-                            >
-                              <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
-                            </IconButton>
-
-                            <IconButton
-                              size="small"
-                              onClick={() => toggleSpeak(line.en, `line-${index}`)}
-                              sx={{ ml: 0.5, p: 0.5, color: speakingIndex === `line-${index}` ? 'primary.main' : 'primary.main' }}
-                            >
-                              <Iconify icon={speakingIndex === `line-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} width={16} />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      )}
-                    </Stack>
-                  ) : (
-                    <Stack direction="row" spacing={1} alignItems="flex-start">
-                      <Box
-                        onClick={() => toggleLine(index)}
-                        sx={{
-                          p: 1.5,
-                          flexGrow: 1,
-                          cursor: 'pointer',
-                          borderRadius: 1,
-                          bgcolor: isRevealed ? 'transparent' : (theme) => alpha(theme.palette.action.hover, 0.04),
-                          transition: (theme) => theme.transitions.create(['filter', 'opacity', 'background-color']),
-                          '&:hover': {
-                            bgcolor: (theme) => isRevealed ? 'transparent' : alpha(theme.palette.action.hover, 0.08),
-                          },
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            lineHeight: 1.6,
-                            ...(!isRevealed && {
-                              filter: 'blur(8px)',
-                              opacity: 0.3,
-                              userSelect: 'none',
-                              transform: 'scale(0.99)',
-                            }),
-                          }}
-                        >
-                          {line.en}
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        onClick={() => toggleSpeak(line.en, `line-${index}`)}
-                        color={speakingIndex === `line-${index}` ? 'primary' : 'default'}
-                        size="small"
-                        sx={{
-                          mt: 1,
-                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                          '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) },
-                        }}
-                      >
-                        <Iconify icon={speakingIndex === `line-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
-                      </IconButton>
-                    </Stack>
-                  )}
-                </Stack>
-              </Card>
-            );
-          }) || (
+          {scriptData?.lines?.map((line: any, index: number) => (
+            <OpicScriptItem
+              key={index}
+              index={index}
+              line={line}
+              testMode={testMode}
+              isRevealed={revealedLines[index] ?? allRevealed}
+              userAnswer={userAnswers[index]}
+              result={testResults[index]}
+              isAnswerRevealed={revealedAnswers[index] || allRevealed}
+              isListening={isListening === index}
+              isPreparing={isPreparing}
+              playingIndex={playingIndex === index}
+              speakingIndex={speakingIndex === `line-${index}`}
+              isMobile={isMobile}
+              recordedAudio={recordedAudios[index]}
+              setInputRef={setInputRef}
+              onToggleLine={toggleLine}
+              onToggleSpeak={toggleSpeak}
+              onChangeAnswer={handleChangeAnswer}
+              onCheckAnswer={handleCheckAnswer}
+              onStartListening={startListening}
+              onStopListening={stopListening}
+              onPlayRecordedAudio={playRecordedAudio}
+              onToggleAnswerReveal={handleToggleAnswerReveal}
+            />
+          )) || (
               <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
                 <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
                 <Typography variant="body2" sx={{ color: 'text.disabled' }}>
