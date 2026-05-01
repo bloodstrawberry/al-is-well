@@ -265,214 +265,260 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   return (
     <Box sx={{ py: { xs: 2, md: 5 }, px: { xs: 0, md: 3 }, width: 1 }}>
-      {/* Header */}
-      <Stack
-        spacing={{ xs: 1, md: 0 }}
-        direction={{ xs: 'column', md: 'row' }}
-        alignItems={{ xs: 'stretch', md: 'center' }}
-        sx={{
-          mb: 4,
-          py: 1.5,
-          borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`
+      {/* Mobile Title Row (Non-sticky) */}
+      <Stack 
+        direction="row" 
+        alignItems="center" 
+        spacing={1} 
+        sx={{ 
+          display: { xs: 'flex', md: 'none' }, 
+          mb: 1,
+          px: 1
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, minWidth: 0 }}>
-          <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', flexShrink: 0 }}>
-            <Iconify icon="eva:arrow-ios-back-fill" />
-          </IconButton>
-
-          <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-              {fileName}
-            </Typography>
-            <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
-              {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
-            </Typography>
-          </Stack>
-        </Stack>
-
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent={{ xs: 'center', md: 'flex-end' }}
-          spacing={1}
-          sx={{ flexShrink: 0 }}
-        >
-          <Tooltip title="Previous Script">
-            <span>
-              <IconButton
-                size="small"
-                disabled={currentIndex === 0}
-                onClick={handlePrev}
-                sx={{ bgcolor: 'background.neutral' }}
-              >
-                <Iconify icon="solar:alt-arrow-left-bold" />
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <Tooltip title="Next Script">
-            <span>
-              <IconButton
-                size="small"
-                disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
-                onClick={handleNext}
-                sx={{ bgcolor: 'background.neutral' }}
-              >
-                <Iconify icon="solar:alt-arrow-right-bold" />
-              </IconButton>
-            </span>
-          </Tooltip>
-
-          <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.5, md: 1 }, height: 24, alignSelf: 'center' }} />
-
-          <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
-            <IconButton
-              size="small"
-              color={autoPlay ? 'primary' : 'default'}
-              onClick={() => setAutoPlay(!autoPlay)}
-              sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
-            >
-              <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
-            <IconButton
-              size="small"
-              color={allRevealed ? 'warning' : 'success'}
-              onClick={toggleAll}
-              sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
-            >
-              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Edit Playlist">
-            <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-              <Iconify icon="solar:pen-bold" />
-            </IconButton>
-          </Tooltip>
+        <IconButton onClick={onBack} size="small" sx={{ bgcolor: 'background.neutral' }}>
+          <Iconify icon="eva:arrow-ios-back-fill" />
+        </IconButton>
+        <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
+          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+            {fileName}
+          </Typography>
+          <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
+            {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
+          </Typography>
         </Stack>
       </Stack>
 
-      {loadingScript ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
-          <Typography variant="body1" color="text.secondary">Loading script details...</Typography>
-        </Box>
-      ) : scriptData ? (
-        <Stack spacing={4}>
-          {/* Question Section */}
-          <Card sx={{ p: { xs: 1, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
-            <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
+      {/* Sticky Header */}
+      <Box 
+        sx={{ 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 1100, 
+          bgcolor: 'background.default',
+          // Force opacity 1 and ensure no transparency from theme defaults
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: -100, // Cover any potential top gap
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+            bgcolor: 'background.default',
+          },
+          borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`,
+          pb: 1.5,
+          pt: { xs: 1, md: 1.5 },
+          mx: { xs: 0, md: -3 },
+          px: { xs: 1, md: 3 },
+        }}
+      >
+        <Stack
+          spacing={{ xs: 1.5, md: 0 }}
+          direction={{ xs: 'column', md: 'row' }}
+          alignItems={{ xs: 'stretch', md: 'center' }}
+        >
+          <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, minWidth: 0, display: { xs: 'none', md: 'flex' } }}>
+            <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', flexShrink: 0 }}>
+              <Iconify icon="eva:arrow-ios-back-fill" />
+            </IconButton>
 
-            <Stack spacing={3}>
-              {scriptData?.questions?.map((q: any, index: number) => (
-                <Stack key={index} spacing={2.5}>
-                  <Stack direction="row" alignItems="flex-start" spacing={2}>
-                    <Box sx={{ mt: 0.5, flexShrink: 0 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', bgcolor: 'background.neutral', px: 0.5, py: 0.25, borderRadius: 0.5 }}>
-                        Q{index + 1}
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
-                      sx={{
-                        lineHeight: 1.5,
-                        fontWeight: 700,
-                        flexGrow: 1,
-                        color: 'text.primary',
-                        cursor: testMode ? 'pointer' : 'default',
-                        transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                        ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
-                          filter: 'blur(8px)',
-                          opacity: 0.3,
-                          userSelect: 'none'
-                        })
-                      }}
-                    >
-                      {q.en || 'Untitled Question'}
-                    </Typography>
-                    {q.en && (
-                      <IconButton
-                        onClick={() => toggleSpeak(q.en, `q-${index}`)}
-                        size="medium"
-                        color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
-                        sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
-                      >
-                        <Iconify icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
-                      </IconButton>
-                    )}
-                  </Stack>
-
-                  {q.ko && (
-                    <Box
-                      onClick={() => { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); }}
-                      sx={{ ml: 4, p: 2, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'background.paper', border: (theme) => `dashed 1px ${theme.vars.palette.divider}`, transition: (theme) => theme.transitions.create(['background-color']), '&:hover': { bgcolor: 'action.hover' } }}
-                    >
-                      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'justify', transition: (theme) => theme.transitions.create(['filter', 'opacity']), ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }) }}>
-                        {q.ko}
-                      </Typography>
-                    </Box>
-                  )}
-                  {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
-                </Stack>
-              ))}
-            </Stack>
-
-            {scriptData?.audioUrl && (
-              <Box sx={{ mt: 3 }}>
-                <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
-                <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
-              </Box>
-            )}
-          </Card>
-
-          {/* Script Lines */}
-          <Stack spacing={2.5}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Script</Typography>
-              <Typography variant="caption" sx={{ color: testMode ? 'info.main' : 'text.disabled', fontWeight: 'bold' }}>
-                {testMode ? 'TEST MODE' : '* Click to reveal English'}
+            <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {fileName}
+              </Typography>
+              <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
+                {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
               </Typography>
             </Stack>
+          </Stack>
 
-            {scriptData?.lines?.map((line: any, index: number) => (
-              <OpicScriptItem
-                key={index}
-                index={index}
-                line={line}
-                testMode={testMode}
-                isRevealed={revealedLines[index] ?? allRevealed}
-                userAnswer={userAnswers[index]}
-                result={testResults[index]}
-                isAnswerRevealed={revealedAnswers[index] || allRevealed}
-                isListening={isListening === index}
-                isPreparing={isPreparing}
-                playingIndex={playingIndex === index}
-                speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}`}
-                isMobile={isMobile}
-                recordedAudio={recordedAudios[index]}
-                setInputRef={setInputRef}
-                onToggleLine={toggleLine}
-                onToggleSpeak={toggleSpeak}
-                onChangeAnswer={handleChangeAnswer}
-                onCheckAnswer={handleCheckAnswer}
-                onStartListening={startListening}
-                onStopListening={stopListening}
-                onPlayRecordedAudio={playRecordedAudio}
-                onToggleAnswerReveal={handleToggleAnswerReveal}
-              />
-            ))}
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent={{ xs: 'center', md: 'flex-end' }}
+            spacing={{ xs: 0.5, md: 1 }}
+            sx={{ flexShrink: 0 }}
+          >
+            <Tooltip title="Previous Script">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={currentIndex === 0}
+                  onClick={handlePrev}
+                  sx={{ bgcolor: 'background.neutral' }}
+                >
+                  <Iconify icon="solar:alt-arrow-left-bold" />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Tooltip title="Next Script">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
+                  onClick={handleNext}
+                  sx={{ bgcolor: 'background.neutral' }}
+                >
+                  <Iconify icon="solar:alt-arrow-right-bold" />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.5, md: 1 }, height: 24, alignSelf: 'center' }} />
+
+            <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
+              <IconButton
+                size="small"
+                color={autoPlay ? 'primary' : 'default'}
+                onClick={() => setAutoPlay(!autoPlay)}
+                sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
+              >
+                <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
+              <IconButton
+                size="small"
+                color={allRevealed ? 'warning' : 'success'}
+                onClick={toggleAll}
+                sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
+              >
+                <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Edit Playlist">
+              <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
+                <Iconify icon="solar:pen-bold" />
+              </IconButton>
+            </Tooltip>
           </Stack>
         </Stack>
-      ) : (
-        <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
-          <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
-          <Typography variant="body1" sx={{ color: 'text.disabled' }}>스크립트 정보가 없습니다.</Typography>
-        </Box>
-      )}
+      </Box>
+
+      <Box sx={{ pt: 4 }}>
+        {loadingScript ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
+            <Typography variant="body1" color="text.secondary">Loading script details...</Typography>
+          </Box>
+        ) : scriptData ? (
+          <Stack spacing={4}>
+            {/* Question Section */}
+            <Card sx={{ p: { xs: 1, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+              <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
+
+              <Stack spacing={3}>
+                {scriptData?.questions?.map((q: any, index: number) => (
+                  <Stack key={index} spacing={2.5}>
+                    <Stack direction="row" alignItems="flex-start" spacing={2}>
+                      <Box sx={{ mt: 0.5, flexShrink: 0 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', bgcolor: 'background.neutral', px: 0.5, py: 0.25, borderRadius: 0.5 }}>
+                          Q{index + 1}
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="h6"
+                        onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
+                        sx={{
+                          lineHeight: 1.5,
+                          fontWeight: 700,
+                          flexGrow: 1,
+                          color: 'text.primary',
+                          cursor: testMode ? 'pointer' : 'default',
+                          transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                          ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
+                            filter: 'blur(8px)',
+                            opacity: 0.3,
+                            userSelect: 'none'
+                          })
+                        }}
+                      >
+                        {q.en || 'Untitled Question'}
+                      </Typography>
+                      {q.en && (
+                        <IconButton
+                          onClick={() => toggleSpeak(q.en, `q-${index}`)}
+                          size="medium"
+                          color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
+                          sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
+                        >
+                          <Iconify icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
+                        </IconButton>
+                      )}
+                    </Stack>
+
+                    {q.ko && (
+                      <Box
+                        onClick={() => { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); }}
+                        sx={{ ml: 4, p: 2, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'background.paper', border: (theme) => `dashed 1px ${theme.vars.palette.divider}`, transition: (theme) => theme.transitions.create(['background-color']), '&:hover': { bgcolor: 'action.hover' } }}
+                      >
+                        <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'justify', transition: (theme) => theme.transitions.create(['filter', 'opacity']), ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }) }}>
+                          {q.ko}
+                        </Typography>
+                      </Box>
+                    )}
+                    {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
+                  </Stack>
+                ))}
+              </Stack>
+
+              {scriptData?.audioUrl && (
+                <Box sx={{ mt: 3 }}>
+                  <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
+                  <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
+                </Box>
+              )}
+            </Card>
+
+            {/* Script Lines */}
+            <Stack spacing={2.5}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>Script</Typography>
+                <Typography variant="caption" sx={{ color: testMode ? 'info.main' : 'text.disabled', fontWeight: 'bold' }}>
+                  {testMode ? 'TEST MODE' : '* Click to reveal English'}
+                </Typography>
+              </Stack>
+
+              {scriptData?.lines?.map((line: any, index: number) => (
+                <OpicScriptItem
+                  key={index}
+                  index={index}
+                  line={line}
+                  testMode={testMode}
+                  isRevealed={revealedLines[index] ?? allRevealed}
+                  userAnswer={userAnswers[index]}
+                  result={testResults[index]}
+                  isAnswerRevealed={revealedAnswers[index] || allRevealed}
+                  isListening={isListening === index}
+                  isPreparing={isPreparing}
+                  playingIndex={playingIndex === index}
+                  speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}`}
+                  isMobile={isMobile}
+                  recordedAudio={recordedAudios[index]}
+                  setInputRef={setInputRef}
+                  onToggleLine={toggleLine}
+                  onToggleSpeak={toggleSpeak}
+                  onChangeAnswer={handleChangeAnswer}
+                  onCheckAnswer={handleCheckAnswer}
+                  onStartListening={startListening}
+                  onStopListening={stopListening}
+                  onPlayRecordedAudio={playRecordedAudio}
+                  onToggleAnswerReveal={handleToggleAnswerReveal}
+                />
+              ))}
+            </Stack>
+          </Stack>
+        ) : (
+          <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
+            <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+            <Typography variant="body1" sx={{ color: 'text.disabled' }}>스크립트 정보가 없습니다.</Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
