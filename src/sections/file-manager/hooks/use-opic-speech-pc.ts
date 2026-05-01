@@ -323,6 +323,5 @@ export function useOpicSpeech() {
     playRecordedAudio,
     toggleSpeak,
     resetStates,
-    supportAudio: true,
   };
 }
