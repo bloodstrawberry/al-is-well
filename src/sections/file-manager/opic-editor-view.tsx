@@ -246,7 +246,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
       {/* Sticky Header */}
       <Stack
         direction="row"

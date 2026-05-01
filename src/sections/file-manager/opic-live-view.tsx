@@ -229,7 +229,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
       {/* Header */}
       <Stack
         direction="row"
