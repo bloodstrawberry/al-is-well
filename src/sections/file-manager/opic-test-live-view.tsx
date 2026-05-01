@@ -289,48 +289,57 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         </Stack>
       </Stack>
 
-      {/* Sticky Header Container */}
+      {/* Sticky Header */}
       <Box 
         sx={{ 
           position: 'sticky', 
-          top: { xs: 'var(--layout-header-mobile-height)', md: 'var(--layout-header-desktop-height)' },
+          top: 0, 
           zIndex: 1100, 
           bgcolor: 'background.default',
+          // Force opacity 1 and ensure no transparency from theme defaults
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: -100, // Cover any potential top gap
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+            bgcolor: 'background.default',
+          },
           borderBottom: (theme) => `solid 1px ${theme.vars.palette.divider}`,
           pb: 1.5,
           pt: { xs: 1, md: 1.5 },
-          mx: { md: -3 },
+          mx: { xs: 0, md: -3 },
           px: { xs: 1, md: 3 },
-          willChange: 'transform',
-          WebkitTransform: 'translateZ(0)',
         }}
       >
         <Stack
-          direction={{ xs: 'row', md: 'row' }} // Keep it row on mobile if it fits, or adjust spacing
-          spacing={{ xs: 0.5, md: 1 }}
-          alignItems="center"
-          justifyContent="space-between"
+          spacing={{ xs: 1.5, md: 0 }}
+          direction={{ xs: 'column', md: 'row' }}
+          alignItems={{ xs: 'stretch', md: 'center' }}
         >
-          {/* Web Title (Left side) */}
-          <Stack direction="row" alignItems="center" spacing={2} sx={{ flexGrow: 1, minWidth: 0, display: { xs: 'none', md: 'flex' } }}>
+          <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, minWidth: 0, display: { xs: 'none', md: 'flex' } }}>
             <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', flexShrink: 0 }}>
               <Iconify icon="eva:arrow-ios-back-fill" />
             </IconButton>
+
             <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
-              <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>{fileName}</Typography>
+              <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {fileName}
+              </Typography>
               <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
                 {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
               </Typography>
             </Stack>
           </Stack>
 
-          {/* Action Buttons (Centered on Mobile, Right on Web) */}
           <Stack
             direction="row"
             alignItems="center"
             justifyContent={{ xs: 'center', md: 'flex-end' }}
             spacing={{ xs: 0.5, md: 1 }}
-            sx={{ flexGrow: { xs: 1, md: 0 } }}
+            sx={{ flexShrink: 0 }}
           >
             <Tooltip title="Previous Script">
               <span>
