@@ -119,6 +119,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     stopListening,
     playRecordedAudio,
     toggleSpeak,
+    supportAudio,
   } = useOpicSpeech();
 
   // Sync userAnswers from speech to scriptData
@@ -659,47 +660,51 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                               >
                                 <Iconify icon={speakingIndex === `tts-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
                               </IconButton>
-                              <IconButton
-                                size="small"
-                                color={isListening === index ? 'error' : 'default'}
-                                onClick={() => (isListening === index ? stopListening() : startListening(index))}
-                                sx={{
-                                  ...(isListening === index && !isPreparing && {
-                                    animation: 'pulse 1.5s infinite',
-                                    '@keyframes pulse': {
-                                      '0%': { transform: 'scale(1)', opacity: 1 },
-                                      '50%': { transform: 'scale(1.2)', opacity: 0.7 },
-                                      '100%': { transform: 'scale(1)', opacity: 1 },
-                                    },
-                                  }),
-                                  ...(isPreparing && isListening === index && {
-                                    animation: 'rotate 1s linear infinite',
-                                    '@keyframes rotate': {
-                                      'from': { transform: 'rotate(0deg)' },
-                                      'to': { transform: 'rotate(360deg)' },
-                                    },
-                                  }),
-                                }}
-                              >
-                                <Iconify 
-                                  icon={
-                                    isListening === index 
-                                      ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold') 
-                                      : 'solar:microphone-bold'
-                                  } 
-                                />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                disabled={!recordedAudios[index]}
-                                onClick={() => playRecordedAudio(index)}
-                                sx={{
-                                  color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
-                                  bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
-                                }}
-                              >
-                                <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
-                              </IconButton>
+                              {supportAudio && (
+                                <>
+                                  <IconButton
+                                    size="small"
+                                    color={isListening === index ? 'error' : 'default'}
+                                    onClick={() => (isListening === index ? stopListening() : startListening(index))}
+                                    sx={{
+                                      ...(isListening === index && !isPreparing && {
+                                        animation: 'pulse 1.5s infinite',
+                                        '@keyframes pulse': {
+                                          '0%': { transform: 'scale(1)', opacity: 1 },
+                                          '50%': { transform: 'scale(1.2)', opacity: 0.7 },
+                                          '100%': { transform: 'scale(1)', opacity: 1 },
+                                        },
+                                      }),
+                                      ...(isPreparing && isListening === index && {
+                                        animation: 'rotate 1s linear infinite',
+                                        '@keyframes rotate': {
+                                          'from': { transform: 'rotate(0deg)' },
+                                          'to': { transform: 'rotate(360deg)' },
+                                        },
+                                      }),
+                                    }}
+                                  >
+                                    <Iconify
+                                      icon={
+                                        isListening === index
+                                          ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold')
+                                          : 'solar:microphone-bold'
+                                      }
+                                    />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    disabled={!recordedAudios[index]}
+                                    onClick={() => playRecordedAudio(index)}
+                                    sx={{
+                                      color: playingIndex === index ? 'info.main' : recordedAudios[index] ? 'info.main' : 'text.disabled',
+                                      bgcolor: (theme) => (playingIndex === index || recordedAudios[index]) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
+                                    }}
+                                  >
+                                    <Iconify icon={playingIndex === index ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
+                                  </IconButton>
+                                </>
+                              )}
                             </InputAdornment>
                           )
                         }
