@@ -444,10 +444,11 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                       cursor: testMode ? 'pointer' : 'default',
                       transition: (theme) => theme.transitions.create(['filter', 'opacity']),
                       ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
-                        filter: 'blur(8px)',
+                         filter: 'blur(8px)',
                         opacity: 0.3,
                         userSelect: 'none'
-                      })
+                      }),
+                      whiteSpace: 'pre-wrap'
                     }}
                   >
                     {q.en || 'Untitled Question'}
@@ -501,7 +502,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                           filter: 'blur(6px)',
                           opacity: 0.4,
                           userSelect: 'none'
-                        })
+                        }),
+                        whiteSpace: 'pre-wrap'
                       }}
                     >
                       {q.ko}

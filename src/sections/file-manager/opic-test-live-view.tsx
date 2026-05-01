@@ -174,9 +174,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   // 3. Auto Play Question
   useEffect(() => {
     if (!loadingScript && scriptData && autoPlay) {
-      const questionText = scriptData.questions?.map((q: any) => q.en).filter(Boolean).join('. ');
-      if (questionText) {
-        toggleSpeak(questionText, 'auto-play');
+      // Only play the first question if autoPlay is enabled
+      const firstQuestion = scriptData.questions?.[0]?.en;
+      if (firstQuestion) {
+        toggleSpeak(firstQuestion, 'auto-play');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -440,13 +441,19 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                         </Box>
                         {q.en && (
                           <IconButton
-                            onClick={() => toggleSpeak(q.en, `q-${index}`)}
+                            onClick={() => {
+                              if (index === 0 && speakingIndex === 'auto-play') {
+                                toggleSpeak(q.en, 'auto-play');
+                              } else {
+                                toggleSpeak(q.en, `q-${index}`);
+                              }
+                            }}
                             size="small"
-                            color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
+                            color={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'primary' : 'default'}
                             sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), flexShrink: 0 }}
                           >
                             <Iconify 
-                              icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
+                              icon={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
                               width={20}
                             />
                           </IconButton>
@@ -487,20 +494,27 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           transition: (theme) => theme.transitions.create(['filter', 'opacity']),
                           ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
                             filter: 'blur(8px)',
-                            opacity: 0.3,
-                            userSelect: 'none'
-                          })
-                        }}
-                      >
-                        {q.en || 'Untitled Question'}
+                             opacity: 0.3,
+                             userSelect: 'none'
+                           }),
+                           whiteSpace: 'pre-wrap'
+                         }}
+                       >
+                         {q.en || 'Untitled Question'}
                       </Typography>
                       
                       {/* Desktop Speaker Icon */}
                       {q.en && (
                         <IconButton
-                          onClick={() => toggleSpeak(q.en, `q-${index}`)}
+                          onClick={() => {
+                            if (index === 0 && speakingIndex === 'auto-play') {
+                              toggleSpeak(q.en, 'auto-play');
+                            } else {
+                              toggleSpeak(q.en, `q-${index}`);
+                            }
+                          }}
                           size="small"
-                          color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
+                          color={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'primary' : 'default'}
                           sx={{ 
                             mt: -0.5, 
                             bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
@@ -509,7 +523,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           }}
                         >
                           <Iconify 
-                            icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
+                            icon={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
                             width={24}
                           />
                         </IconButton>
@@ -536,7 +550,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                             color: 'text.secondary', 
                             textAlign: 'justify', 
                             transition: (theme) => theme.transitions.create(['filter', 'opacity']), 
-                            ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }) 
+                            ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }),
+                            whiteSpace: 'pre-wrap'
                           }}
                         >
                           {q.ko}
