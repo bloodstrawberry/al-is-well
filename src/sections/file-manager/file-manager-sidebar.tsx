@@ -1,4 +1,5 @@
 import { memo, useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalStorage } from 'minimal-shared/hooks';
 import { useDroppable } from '@dnd-kit/core';
 
@@ -668,6 +669,7 @@ export function FileManagerSidebar({
       <IconButton
         onClick={onToggle}
         sx={{
+          display: { xs: 'none', md: 'inline-flex' },
           p: 0.5,
           top: 12,
           left: displayCollapsed ? 4 : displayWidth - 16,
@@ -687,6 +689,24 @@ export function FileManagerSidebar({
           width={16}
         />
       </IconButton>
+
+      {isMounted && document.getElementById('file-manager-sidebar-portal') && createPortal(
+        <IconButton
+          onClick={onToggle}
+          sx={{
+            display: { xs: 'inline-flex', md: 'none' },
+            p: 0.5,
+            width: 32,
+            height: 32,
+          }}
+        >
+          <Iconify
+            icon={displayCollapsed ? 'solar:sidebar-minimalistic-bold-duotone' : 'solar:sidebar-minimalistic-outline'}
+            width={24}
+          />
+        </IconButton>,
+        document.getElementById('file-manager-sidebar-portal')!
+      )}
     </Box>
   );
 }
