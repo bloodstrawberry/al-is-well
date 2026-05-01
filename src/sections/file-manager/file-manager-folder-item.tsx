@@ -52,8 +52,6 @@ export const FileManagerFolderItem = memo(({
   onFavorite,
   ...other
  }: Props) => {
-  const confirmDialog = useBoolean();
-
   const checkbox = useBoolean();
   const favorite = useBoolean(folder.isFavorited);
 
@@ -140,10 +138,9 @@ export const FileManagerFolderItem = memo(({
 
         <MenuItem
           onClick={() => {
-            confirmDialog.onTrue();
+            onDelete();
             menuActions.onClose();
           }}
-          disabled={folder.totalFiles ? folder.totalFiles > 0 : false}
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" />
@@ -154,19 +151,7 @@ export const FileManagerFolderItem = memo(({
   );
 
 
-  const renderConfirmDialog = () => (
-    <ConfirmDialog
-      open={confirmDialog.value}
-      onClose={confirmDialog.onFalse}
-      title="Delete"
-      content="Are you sure want to delete?"
-      action={
-        <Button variant="contained" color="error" onClick={onDelete}>
-          Delete
-        </Button>
-      }
-    />
-  );
+
 
 
   return (
@@ -218,9 +203,6 @@ export const FileManagerFolderItem = memo(({
       </FileItem>
 
       {renderMenuActions()}
-
-      {renderConfirmDialog()}
-
     </>
   );
 });

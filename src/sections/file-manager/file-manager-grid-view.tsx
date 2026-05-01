@@ -185,7 +185,6 @@ export function FileManagerGridView({
                 variant="contained"
                 startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
                 onClick={onOpenConfirm}
-                disabled={hasNonEmptyFolder}
                 sx={{ mr: 1 }}
               >
                 Delete

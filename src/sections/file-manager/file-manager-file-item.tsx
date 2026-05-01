@@ -53,7 +53,6 @@ export const FileManagerFileItem = memo(({
   sx,
   ...other
 }: Props) => {
-  const confirmDialog = useBoolean();
   const menuActions = usePopover();
 
   const checkbox = useBoolean();
@@ -134,7 +133,7 @@ export const FileManagerFileItem = memo(({
 
         <MenuItem
           onClick={() => {
-            confirmDialog.onTrue();
+            onDelete();
             menuActions.onClose();
           }}
           sx={{ color: 'error.main' }}
@@ -147,19 +146,7 @@ export const FileManagerFileItem = memo(({
   );
 
 
-  const renderConfirmDialog = () => (
-    <ConfirmDialog
-      open={confirmDialog.value}
-      onClose={confirmDialog.onFalse}
-      title="Delete"
-      content="Are you sure want to delete?"
-      action={
-        <Button variant="contained" color="error" onClick={onDelete}>
-          Delete
-        </Button>
-      }
-    />
-  );
+
 
 
   return (
@@ -203,9 +190,6 @@ export const FileManagerFileItem = memo(({
       </FileItem>
 
       {renderMenuActions()}
-
-      {renderConfirmDialog()}
-
     </>
   );
 });

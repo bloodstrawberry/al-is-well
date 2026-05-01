@@ -100,8 +100,10 @@ export function FileManagerView() {
   const backupConfirm = useBoolean();
   const newFilesDialog = useBoolean();
   const renameDialog = useBoolean();
-
   const [renameItem, setRenameItem] = useState<IFile | null>(null);
+
+  const recursiveDeleteConfirm = useBoolean();
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   const [pendingAction, setPendingAction] = useState<'upload' | 'reset' | null>(null);
   const [pendingUploadData, setPendingUploadData] = useState<any>(null);
@@ -474,54 +476,54 @@ export function FileManagerView() {
     event.target.value = '';
   }, [backupConfirm]);
 
-  const handleDeleteItem = useCallback(
-    (id: string) => {
-      const item = flattenedTree.find((f) => f.id === id);
-
-      if (item?.type === 'folder' && item.children?.length > 0) {
-        toast.error('Cannot delete a folder that is not empty!');
-        return;
-      }
-
+  const executeDelete = useCallback(
+    (ids: string[]) => {
       const deleteFromTree = (nodes: any[]): any[] =>
         nodes
-          .filter((node) => node.id !== id)
+          .filter((node) => !ids.includes(node.id))
           .map((node) => ({
             ...node,
             children: node.children ? deleteFromTree(node.children) : undefined,
           }));
 
       setTreeData((prev) => deleteFromTree(prev));
+      // Clear selection if any of the deleted IDs were selected
+      if (ids.some((id) => table.selected.includes(id))) {
+        table.onSelectAllRows(false, []);
+      }
       toast.success('Delete success!');
     },
-    [flattenedTree]
+    [table]
+  );
+
+  const handleOpenDeleteConfirm = useCallback(
+    (ids: string[]) => {
+      const hasNonEmptyFolder = ids.some((id) => {
+        const item = flattenedTree.find((f) => f.id === id);
+        return item?.type === 'folder' && item.children?.length > 0;
+      });
+
+      setPendingDeleteIds(ids);
+
+      if (hasNonEmptyFolder) {
+        recursiveDeleteConfirm.onTrue();
+      } else {
+        confirmDialog.onTrue();
+      }
+    },
+    [flattenedTree, recursiveDeleteConfirm, confirmDialog]
+  );
+
+  const handleDeleteItem = useCallback(
+    (id: string) => {
+      handleOpenDeleteConfirm([id]);
+    },
+    [handleOpenDeleteConfirm]
   );
 
   const handleDeleteItems = useCallback(() => {
-    const idsToDelete = table.selected;
-
-    const hasNonEmptyFolder = idsToDelete.some((id) => {
-      const item = flattenedTree.find((f) => f.id === id);
-      return item?.type === 'folder' && item.children?.length > 0;
-    });
-
-    if (hasNonEmptyFolder) {
-      toast.error('Some selected folders are not empty!');
-      return;
-    }
-
-    const deleteFromTree = (nodes: any[]): any[] =>
-      nodes
-        .filter((node) => !idsToDelete.includes(node.id))
-        .map((node) => ({
-          ...node,
-          children: node.children ? deleteFromTree(node.children) : undefined,
-        }));
-
-    setTreeData((prev) => deleteFromTree(prev));
-    table.onSelectAllRows(false, []);
-    toast.success('Delete success!');
-  }, [table, flattenedTree]);
+    handleOpenDeleteConfirm(table.selected);
+  }, [table.selected, handleOpenDeleteConfirm]);
 
   const handleFavoriteItem = useCallback(
     (id: string) => {
@@ -695,11 +697,14 @@ export function FileManagerView() {
   const renderConfirmDialog = () => (
     <ConfirmDialog
       open={confirmDialog.value}
-      onClose={confirmDialog.onFalse}
+      onClose={() => {
+        confirmDialog.onFalse();
+        setPendingDeleteIds([]);
+      }}
       title="Delete"
       content={
         <>
-          Are you sure want to delete <strong> {table.selected.length} </strong> items?
+          정말 삭제하시겠습니까?
         </>
       }
       action={
@@ -707,8 +712,9 @@ export function FileManagerView() {
           variant="contained"
           color="error"
           onClick={() => {
-            handleDeleteItems();
+            executeDelete(pendingDeleteIds);
             confirmDialog.onFalse();
+            setPendingDeleteIds([]);
           }}
         >
           Delete
@@ -773,6 +779,52 @@ export function FileManagerView() {
               backupConfirm.onFalse();
               setPendingAction(null);
               setPendingUploadData(null);
+            }}
+          >
+            백업
+          </Button>
+        </>
+      }
+    />
+  );
+
+  const renderRecursiveDeleteConfirmDialog = () => (
+    <ConfirmDialog
+      open={recursiveDeleteConfirm.value}
+      onClose={() => {
+        recursiveDeleteConfirm.onFalse();
+        setPendingDeleteIds([]);
+      }}
+      title="폴더 삭제 경고"
+      content={
+        <>
+          선택한 폴더에 하위 파일이나 폴더가 포함되어 있습니다.
+          <br />
+          <strong>모든 하위 항목이 함께 삭제됩니다.</strong> 계속하시겠습니까?
+        </>
+      }
+      cancelLabel="취소"
+      action={
+        <>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              executeDelete(pendingDeleteIds);
+              recursiveDeleteConfirm.onFalse();
+              setPendingDeleteIds([]);
+            }}
+          >
+            삭제
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={async () => {
+              await handleDownload();
+              executeDelete(pendingDeleteIds);
+              recursiveDeleteConfirm.onFalse();
+              setPendingDeleteIds([]);
             }}
           >
             백업
@@ -946,7 +998,7 @@ export function FileManagerView() {
                     onOpenRename={handleOpenRename}
                     onCopyItem={handleCopyItem}
                     onCreateItem={handleCreateItem}
-                    onOpenConfirm={confirmDialog.onTrue}
+                    onOpenConfirm={handleDeleteItems}
                     onNavigate={handleNavigate}
                     onOpenFile={handleOpenFile}
                     onMoveItem={handleMoveItem}
@@ -990,6 +1042,7 @@ export function FileManagerView() {
       {renderRenameDialog()}
       {renderConfirmDialog()}
       {renderBackupConfirmDialog()}
+      {renderRecursiveDeleteConfirmDialog()}
     </>
   );
 }

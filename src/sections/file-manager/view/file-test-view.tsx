@@ -121,22 +121,22 @@ export function FileTestView({ title, category }: Props) {
     }
   }, [treeData, isLoaded, storageKey]);
 
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
 
-function sanitizeTreeData(nodes: any[]): any[] {
-  const now = new Date().toISOString();
-  return nodes.map((node) => {
-    const updatedNode = {
-      ...node,
-      createdAt: node.createdAt || now,
-      modifiedAt: node.modifiedAt || now,
-    };
-    if (node.children) {
-      updatedNode.children = sanitizeTreeData(node.children);
-    }
-    return updatedNode;
-  });
-}
+  function sanitizeTreeData(nodes: any[]): any[] {
+    const now = new Date().toISOString();
+    return nodes.map((node) => {
+      const updatedNode = {
+        ...node,
+        createdAt: node.createdAt || now,
+        modifiedAt: node.modifiedAt || now,
+      };
+      if (node.children) {
+        updatedNode.children = sanitizeTreeData(node.children);
+      }
+      return updatedNode;
+    });
+  }
 
 
   const filters = useSetState<IFileFilters>({
@@ -348,7 +348,7 @@ function sanitizeTreeData(nodes: any[]): any[] {
                   onOpenRename={handleOpenRename}
                   onCreateItem={handleCreateItem}
                   onOpenConfirm={confirmDialog.onTrue}
-                  onNavigate={() => {}}
+                  onNavigate={() => { }}
                   onOpenFile={handleOpenFile}
                   notFound={notFound}
                   hideFolder
@@ -361,7 +361,7 @@ function sanitizeTreeData(nodes: any[]): any[] {
               fileName={selectedFile.name}
               storageKey={storageKey}
               onBack={() => updateURL({ view: 'list', fileId: null, fileName: null })}
-              onSaveSuccess={() => {}}
+              onSaveSuccess={() => { }}
               onStartTest={() => updateURL({ view: 'live' })}
               onSave={(id) => {
                 const updateModifiedAt = (nodes: any[]): any[] =>
@@ -418,7 +418,7 @@ function sanitizeTreeData(nodes: any[]): any[] {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            정말 삭제 하시겠습니까?
           </>
         }
         action={
