@@ -117,6 +117,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       const currentId = playlist.fileIds[currentIndex];
       setLoadingScript(true);
 
+      // Reset item-specific states when switching scripts
       setRevealedLines({});
       setAllRevealed(false);
       setUserAnswers({});
@@ -165,7 +166,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
     };
     loadCurrentScript();
-  }, [playlist, currentIndex, setRecordedAudios, setUserAnswers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playlist, currentIndex]);
 
   // 3. Auto Play Question
   useEffect(() => {
