@@ -86,9 +86,7 @@ export function useOpicSpeech() {
     accumulatedTranscriptRef.current = '';
     isFirstStartRef.current = true;
     
-    if (typeof window !== 'undefined' && window.speechSynthesis?.speaking) {
-      window.speechSynthesis.cancel();
-    }
+    if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
 
     const recognition = new SpeechRecognitionCtor();
     recognitionRef.current = recognition;
@@ -178,25 +176,18 @@ export function useOpicSpeech() {
   }, [speakingIndex]);
 
   const toggleSpeak = useCallback((text: string, index: number | string) => {
-    if (typeof window === 'undefined') return;
-
     const currentSpeaking = speakingIndexRef.current;
     if (currentSpeaking === index && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
       setSpeakingIndex(null);
       return;
     }
-    
     window.speechSynthesis.cancel();
-    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.85;
-    
-    utterance.onstart = () => setSpeakingIndex(index);
     utterance.onend = () => setSpeakingIndex(null);
-    utterance.onerror = () => setSpeakingIndex(null);
-    
+    setSpeakingIndex(index);
     window.speechSynthesis.speak(utterance);
   }, []);
 

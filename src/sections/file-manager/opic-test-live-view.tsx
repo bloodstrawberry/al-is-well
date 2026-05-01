@@ -284,7 +284,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         spacing={2}
         sx={{ 
           mb: 4, 
-          position: 'sticky', 
+          position: { xs: 'relative', md: 'sticky' }, 
           top: 0, 
           zIndex: 1000, 
           bgcolor: theme.palette.background.default,
