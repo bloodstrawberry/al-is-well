@@ -21,7 +21,7 @@ export const paths = {
   dashboard: {
     root: ROOTS.DASHBOARD,
   },
-  fileManager: `/file-manager`,
+  fileManager: `/opic-drive`,
   opicTest: {
     root: `/opic-test`,
     myTests: `/opic-test/my-tests`,
