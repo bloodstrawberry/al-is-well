@@ -280,15 +280,17 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       {/* Header */}
       <Stack
         direction="row"
-        alignItems="center"
+        alignItems={{ xs: 'flex-start', md: 'center' }}
         spacing={2}
-        sx={{ 
-          mb: 4, 
-          position: { xs: 'relative', md: 'sticky' }, 
-          top: 0, 
-          zIndex: 1000, 
-          bgcolor: theme.palette.background.default,
-          backgroundImage: 'none',
+        sx={{
+          mb: 4,
+          position: 'sticky',
+          top: 0,
+          bgcolor: 'background.default',
+          zIndex: 10,
+          py: 1.5,
+          mx: { xs: -2, md: -8 },
+          px: { xs: 2, md: 8 },
           '&:before': {
             content: '""',
             position: 'absolute',
@@ -296,96 +298,107 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
             left: 0,
             right: 0,
             height: 100,
-            bgcolor: theme.palette.background.default,
-            display: { xs: 'none', md: 'block' },
+            bgcolor: 'background.default',
+            zIndex: -1,
           },
-          py: 1.5,
-          mx: { xs: -2, md: -8 },
-          px: { xs: 2, md: 8 },
         }}
       >
-        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
+        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', mt: { xs: 0.5, md: 0 } }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
 
-        <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
-          <Typography
-            variant="h6"
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={{ xs: 1, md: 2 }}
+          sx={{ flexGrow: 1, overflow: 'hidden' }}
+        >
+          <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {fileName}
+            </Typography>
+
+
+            <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
+              {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
+            </Typography>
+          </Stack>
+
+          <Stack
+            direction="row"
+            spacing={1}
             sx={{
-              fontWeight: 800,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.2,
+              justifyContent: { xs: 'flex-end', md: 'flex-start' },
+              alignItems: 'center',
             }}
           >
-            {fileName}
-          </Typography>
-          <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
-            {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
-          </Typography>
-        </Stack>
+            <Tooltip title="Previous Script">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={currentIndex === 0}
+                  onClick={handlePrev}
+                  sx={{ bgcolor: 'background.neutral' }}
+                >
+                  <Iconify icon="solar:alt-arrow-left-bold" />
+                </IconButton>
+              </span>
+            </Tooltip>
 
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Tooltip title="Previous Script">
-            <span>
+            <Tooltip title="Next Script">
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
+                  onClick={handleNext}
+                  sx={{ bgcolor: 'background.neutral' }}
+                >
+                  <Iconify icon="solar:alt-arrow-right-bold" />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
+
+            <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
               <IconButton
                 size="small"
-                disabled={currentIndex === 0}
-                onClick={handlePrev}
-                sx={{ bgcolor: 'background.neutral' }}
+                color={autoPlay ? 'primary' : 'default'}
+                onClick={() => setAutoPlay(!autoPlay)}
+                sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
               >
-                <Iconify icon="solar:alt-arrow-left-bold" />
+                <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
               </IconButton>
-            </span>
-          </Tooltip>
+            </Tooltip>
 
-          <Tooltip title="Next Script">
-            <span>
+            <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
               <IconButton
                 size="small"
-                disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
-                onClick={handleNext}
-                sx={{ bgcolor: 'background.neutral' }}
+                color={allRevealed ? 'warning' : 'success'}
+                onClick={toggleAll}
+                sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
               >
-                <Iconify icon="solar:alt-arrow-right-bold" />
+                <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
-            </span>
-          </Tooltip>
+            </Tooltip>
 
-          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
-
-          <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
-            <IconButton
-              size="small"
-              color={autoPlay ? 'primary' : 'default'}
-              onClick={() => setAutoPlay(!autoPlay)}
-              sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
-            >
-              <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
-            <IconButton
-              size="small"
-              color={allRevealed ? 'warning' : 'success'}
-              onClick={toggleAll}
-              sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
-            >
-              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Edit Playlist">
-            <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-              <Iconify icon="solar:pen-bold" />
-            </IconButton>
-          </Tooltip>
+            <Tooltip title="Edit Playlist">
+              <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
+                <Iconify icon="solar:pen-bold" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
 
-      <Box sx={{ pt: 4 }}>
+      <Box>
         {loadingScript ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
             <Typography variant="body1" color="text.secondary">Loading script details...</Typography>
@@ -393,7 +406,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         ) : scriptData ? (
           <Stack spacing={4}>
             {/* Question Section */}
-            <Card sx={{ p: { xs: 1, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+            <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
               <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
               <Stack spacing={3}>
@@ -505,5 +518,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         )}
       </Box>
     </Container>
+
   );
 }
