@@ -135,7 +135,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1, md: 3 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
       {/* Sticky Header */}
       <Stack
         direction="row"
@@ -145,11 +145,21 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           mb: 4,
           position: 'sticky',
           top: 0,
-          bgcolor: 'background.default',
-          zIndex: 10,
+          zIndex: 1000,
+          bgcolor: theme.palette.background.default,
+          backgroundImage: 'none',
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: -100,
+            left: 0,
+            right: 0,
+            height: 100,
+            bgcolor: theme.palette.background.default,
+          },
           py: 1.5,
-          mx: { xs: -1, md: -3 },
-          px: { xs: 1, md: 3 },
+          mx: { xs: -2, md: -8 },
+          px: { xs: 2, md: 8 },
         }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>

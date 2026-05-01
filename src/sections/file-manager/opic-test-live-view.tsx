@@ -6,6 +6,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -125,7 +126,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
       try {
         const data = await getFileScript(currentId);
-        const tree = await getTreeData();
+        
+        // Try current section tree first, then main DRIVE tree
+        const treeSection = await getTreeData(storageKey);
+        const treeMain = await getTreeData();
+        
         const findName = (nodes: any[]): string => {
           for (const node of nodes) {
             if (node.id === currentId) return node.label;
@@ -134,9 +139,16 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               if (res) return res;
             }
           }
-          return 'Untitled';
+          return '';
         };
-        setCurrentFileName(findName(tree));
+
+        const nameFromSection = findName(treeSection);
+        if (nameFromSection) {
+          setCurrentFileName(nameFromSection);
+        } else {
+          const nameFromMain = findName(treeMain);
+          setCurrentFileName(nameFromMain || 'Untitled');
+        }
 
         if (data && !data.questions && (data.questionEn || data.question)) {
           data.questions = [{
@@ -264,140 +276,113 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   }
 
   return (
-    <Box sx={{ py: { xs: 2, md: 5 }, px: { xs: 0, md: 3 }, width: 1 }}>
-      {/* Mobile Title Row (Non-sticky) */}
-      <Stack 
-        direction="row" 
-        alignItems="center" 
-        spacing={1} 
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
+      {/* Header */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
         sx={{ 
-          display: { xs: 'flex', md: 'none' }, 
-          mb: 1,
-          px: 1
+          mb: 4, 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 1000, 
+          bgcolor: theme.palette.background.default,
+          backgroundImage: 'none',
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: -100,
+            left: 0,
+            right: 0,
+            height: 100,
+            bgcolor: theme.palette.background.default,
+          },
+          py: 1.5,
+          mx: { xs: -2, md: -8 },
+          px: { xs: 2, md: 8 },
         }}
       >
-        <IconButton onClick={onBack} size="small" sx={{ bgcolor: 'background.neutral' }}>
+        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
           <Iconify icon="eva:arrow-ios-back-fill" />
         </IconButton>
-        <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+
+        <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 800,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2,
+            }}
+          >
             {fileName}
           </Typography>
           <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
             {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
           </Typography>
         </Stack>
-      </Stack>
 
-      {/* Sticky Header */}
-      <Box 
-        sx={{ 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 1100, 
-          bgcolor: 'background.default',
-          // Force opacity 1 and ensure no transparency from theme defaults
-          '&:before': {
-            content: '""',
-            position: 'absolute',
-            top: -100, // Cover any potential top gap
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: -1,
-            bgcolor: 'background.default',
-          },
-          pb: 1.5,
-          pt: { xs: 1, md: 1.5 },
-          mx: { xs: 0, md: -3 },
-          px: { xs: 1, md: 3 },
-        }}
-      >
-        <Stack
-          spacing={{ xs: 1.5, md: 0 }}
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'stretch', md: 'center' }}
-        >
-          <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, minWidth: 0, display: { xs: 'none', md: 'flex' } }}>
-            <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', flexShrink: 0 }}>
-              <Iconify icon="eva:arrow-ios-back-fill" />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Tooltip title="Previous Script">
+            <span>
+              <IconButton
+                size="small"
+                disabled={currentIndex === 0}
+                onClick={handlePrev}
+                sx={{ bgcolor: 'background.neutral' }}
+              >
+                <Iconify icon="solar:alt-arrow-left-bold" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip title="Next Script">
+            <span>
+              <IconButton
+                size="small"
+                disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
+                onClick={handleNext}
+                sx={{ bgcolor: 'background.neutral' }}
+              >
+                <Iconify icon="solar:alt-arrow-right-bold" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
+
+          <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
+            <IconButton
+              size="small"
+              color={autoPlay ? 'primary' : 'default'}
+              onClick={() => setAutoPlay(!autoPlay)}
+              sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
+            >
+              <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
             </IconButton>
+          </Tooltip>
 
-            <Stack spacing={0} sx={{ flexGrow: 1, minWidth: 0 }}>
-              <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                {fileName}
-              </Typography>
-              <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
-                {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
-              </Typography>
-            </Stack>
-          </Stack>
+          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
+            <IconButton
+              size="small"
+              color={allRevealed ? 'warning' : 'success'}
+              onClick={toggleAll}
+              sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
+            >
+              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+            </IconButton>
+          </Tooltip>
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent={{ xs: 'center', md: 'flex-end' }}
-            spacing={{ xs: 0.5, md: 1 }}
-            sx={{ flexShrink: 0 }}
-          >
-            <Tooltip title="Previous Script">
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={currentIndex === 0}
-                  onClick={handlePrev}
-                  sx={{ bgcolor: 'background.neutral' }}
-                >
-                  <Iconify icon="solar:alt-arrow-left-bold" />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            <Tooltip title="Next Script">
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
-                  onClick={handleNext}
-                  sx={{ bgcolor: 'background.neutral' }}
-                >
-                  <Iconify icon="solar:alt-arrow-right-bold" />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.5, md: 1 }, height: 24, alignSelf: 'center' }} />
-
-            <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
-              <IconButton
-                size="small"
-                color={autoPlay ? 'primary' : 'default'}
-                onClick={() => setAutoPlay(!autoPlay)}
-                sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
-              >
-                <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
-              <IconButton
-                size="small"
-                color={allRevealed ? 'warning' : 'success'}
-                onClick={toggleAll}
-                sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
-              >
-                <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Edit Playlist">
-              <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-                <Iconify icon="solar:pen-bold" />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <Tooltip title="Edit Playlist">
+            <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
+              <Iconify icon="solar:pen-bold" />
+            </IconButton>
+          </Tooltip>
         </Stack>
-      </Box>
+      </Stack>
 
       <Box sx={{ pt: 4 }}>
         {loadingScript ? (
@@ -518,6 +503,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           </Box>
         )}
       </Box>
-    </Box>
+    </Container>
   );
 }
