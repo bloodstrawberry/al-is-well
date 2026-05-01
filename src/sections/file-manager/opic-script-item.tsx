@@ -176,20 +176,21 @@ export const OpicScriptItem = memo(({
     >
       <Stack spacing={2}>
         {/* Korean Text */}
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={{ xs: 1.5, md: 2 }} alignItems="flex-start">
           <Box
             sx={{
-              width: 28,
-              height: 28,
+              width: { xs: 24, md: 28 },
+              height: { xs: 24, md: 28 },
               borderRadius: '50%',
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 12,
+              fontSize: { xs: 11, md: 12 },
               fontWeight: 800,
               flexShrink: 0,
+              mt: 0.25
             }}
           >
             {index + 1}
@@ -199,8 +200,9 @@ export const OpicScriptItem = memo(({
             sx={{
               fontWeight: 700,
               color: 'text.primary',
-              lineHeight: 1.5,
-              flexGrow: 1
+              lineHeight: 1.4,
+              flexGrow: 1,
+              fontSize: { xs: '0.9375rem', md: '1rem' }
             }}
           >
             {line.ko}
@@ -331,7 +333,7 @@ export const OpicScriptItem = memo(({
             <Box
               onClick={() => onToggleLine(index)}
               sx={{
-                p: 1.5,
+                p: { xs: 1, md: 1.5 },
                 flexGrow: 1,
                 cursor: 'pointer',
                 borderRadius: 1,
@@ -347,7 +349,8 @@ export const OpicScriptItem = memo(({
                 sx={{
                   fontWeight: 500,
                   color: 'text.primary',
-                  lineHeight: 1.6,
+                  lineHeight: 1.5,
+                  fontSize: { xs: '0.9375rem', md: '1rem' },
                   ...(!isRevealed && {
                     filter: 'blur(8px)',
                     opacity: 0.3,
@@ -364,12 +367,15 @@ export const OpicScriptItem = memo(({
               color={speakingIndex ? 'primary' : 'default'}
               size="small"
               sx={{
-                mt: 1,
+                mt: { xs: 0.5, md: 1 },
                 bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                 '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) },
               }}
             >
-              <Iconify icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
+              <Iconify
+                icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'}
+                width={{ xs: 18, md: 20 }}
+              />
             </IconButton>
           </Stack>
         )}

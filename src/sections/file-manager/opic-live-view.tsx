@@ -229,7 +229,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 2, md: 8 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1.5, md: 8 } }}>
       {/* Header */}
       <Stack
         direction="row"
@@ -366,18 +366,70 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
       <Stack spacing={4}>
         {/* Question Section */}
-        <Card sx={{ p: 3, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+        <Card sx={{ p: { xs: 2, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
           <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
           <Stack spacing={3}>
             {scriptData?.questions?.map((q: any, index: number) => (
               <Stack key={index} spacing={2.5}>
-                <Stack direction="row" alignItems="flex-start" spacing={2}>
-                  <Box sx={{ mt: 0.5, flexShrink: 0 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 900, color: 'text.disabled', bgcolor: 'background.neutral', px: 0.5, py: 0.25, borderRadius: 0.5 }}>
+                <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'flex-start' }} spacing={{ xs: 1.5, md: 2 }}>
+                  {/* Mobile Top Header: Q Index + Speaker */}
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%', display: { xs: 'flex', md: 'none' } }}>
+                    <Box sx={{ flexShrink: 0 }}>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          fontWeight: 900, 
+                          color: 'text.disabled', 
+                          bgcolor: 'background.neutral', 
+                          px: 1, 
+                          py: 0.25, 
+                          borderRadius: 0.5,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: 32
+                        }}
+                      >
+                        Q{index + 1}
+                      </Typography>
+                    </Box>
+                    {q.en && (
+                      <IconButton
+                        onClick={() => toggleSpeak(q.en, `q-${index}`)}
+                        size="small"
+                        color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
+                        sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), flexShrink: 0 }}
+                      >
+                        <Iconify 
+                          icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
+                          width={20}
+                        />
+                      </IconButton>
+                    )}
+                  </Stack>
+
+                  {/* Desktop Q Index */}
+                  <Box sx={{ mt: 0.5, flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        fontWeight: 900, 
+                        color: 'text.disabled', 
+                        bgcolor: 'background.neutral', 
+                        px: 0.75, 
+                        py: 0.25, 
+                        borderRadius: 0.5,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 32
+                      }}
+                    >
                       Q{index + 1}
                     </Typography>
                   </Box>
+
                   <Typography
                     variant="h6"
                     onClick={() => { if (testMode) { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
@@ -386,6 +438,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                       fontWeight: 700,
                       flexGrow: 1,
                       color: 'text.primary',
+                      fontSize: { xs: '1.0625rem', md: '1.125rem' },
                       cursor: testMode ? 'pointer' : 'default',
                       transition: (theme) => theme.transitions.create(['filter', 'opacity']),
                       ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
@@ -397,14 +450,24 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   >
                     {q.en || 'Untitled Question'}
                   </Typography>
+                  
+                  {/* Desktop Speaker Icon */}
                   {q.en && (
                     <IconButton
                       onClick={() => toggleSpeak(q.en, `q-${index}`)}
-                      size="medium"
+                      size="small"
                       color={speakingIndex === `q-${index}` ? 'primary' : 'default'}
-                      sx={{ mt: -0.5, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08) }}
+                      sx={{ 
+                        mt: -0.5, 
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                        flexShrink: 0,
+                        display: { xs: 'none', md: 'inline-flex' }
+                      }}
                     >
-                      <Iconify icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
+                      <Iconify 
+                        icon={speakingIndex === `q-${index}` ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
+                        width={24}
+                      />
                     </IconButton>
                   )}
                 </Stack>
@@ -416,8 +479,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                       setRevealedLines(prev => ({ ...prev, [key]: !prev[key] }));
                     }}
                     sx={{
-                      ml: 4,
-                      p: 2,
+                      ml: { xs: 0, md: 4 },
+                      p: { xs: 1.5, md: 2 },
                       cursor: 'pointer',
                       borderRadius: 1.5,
                       bgcolor: 'background.paper',
