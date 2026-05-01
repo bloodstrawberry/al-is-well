@@ -566,6 +566,7 @@ export function FileManagerSidebar({
             size="small"
             options={flattenedData}
             getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             onChange={handleAutocompleteChange}
             renderInput={(params) => (
               <TextField
@@ -586,7 +587,7 @@ export function FileManagerSidebar({
             renderOption={(props, option) => {
               const { key, ...optionProps } = props as any;
               return (
-                <li key={key} {...optionProps} style={{ ...optionProps.style, overflow: 'hidden' }}>
+                <li key={option.id} {...optionProps} style={{ ...optionProps.style, overflow: 'hidden' }}>
                   <Stack
                     direction="row"
                     alignItems="center"

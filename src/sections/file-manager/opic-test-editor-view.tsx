@@ -39,7 +39,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
   const theme = useTheme();
 
   const [playlist, setPlaylist] = useState<PlaylistData>({ fileIds: [] });
-  const [driveFiles, setDriveFiles] = useState<{ id: string; label: string }[]>([]);
+  const [driveFiles, setDriveFiles] = useState<{ id: string; label: string; path: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const initialPlaylistRef = useRef<any>(null);
 
@@ -48,13 +48,19 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
     const loadDrive = async () => {
       try {
         const tree = await getTreeData(); // Defaults to main DRIVE
-        const files: { id: string; label: string }[] = [];
-        const flatten = (nodes: any[]) => {
+        const files: { id: string; label: string; path: string }[] = [];
+        const seenIds = new Set<string>();
+
+        const flatten = (nodes: any[], parentPath = '') => {
           nodes.forEach((node) => {
+            const currentPath = parentPath ? `${parentPath} / ${node.label}` : node.label;
             if (node.type === 'file') {
-              files.push({ id: node.id, label: node.label });
+              if (!seenIds.has(node.id)) {
+                files.push({ id: node.id, label: node.label, path: parentPath || 'Root' });
+                seenIds.add(node.id);
+              }
             }
-            if (node.children) flatten(node.children);
+            if (node.children) flatten(node.children, currentPath);
           });
         };
         flatten(tree);
@@ -73,8 +79,10 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
       try {
         const data = await getFileScript(fileId, storageKey);
         if (data && data.fileIds) {
-          setPlaylist(data);
-          initialPlaylistRef.current = JSON.stringify(data);
+          const uniqueFileIds = Array.from(new Set(data.fileIds as string[]));
+          const cleanedData = { ...data, fileIds: uniqueFileIds };
+          setPlaylist(cleanedData);
+          initialPlaylistRef.current = JSON.stringify(cleanedData);
         } else {
           initialPlaylistRef.current = JSON.stringify({ fileIds: [] });
         }
@@ -107,17 +115,6 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
     }
   };
 
-  const handleAddFile = (driveFileId: string) => {
-    if (playlist.fileIds.includes(driveFileId)) {
-      toast.warning('Already in playlist');
-      return;
-    }
-    setPlaylist((prev) => ({
-      ...prev,
-      fileIds: [...prev.fileIds, driveFileId],
-    }));
-  };
-
   const handleRemoveFile = (idToRemove: string) => {
     setPlaylist((prev) => ({
       ...prev,
@@ -126,7 +123,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
   };
 
   const selectedFiles = useMemo(() => {
-    return playlist.fileIds.map(id => driveFiles.find(f => f.id === id)).filter(Boolean) as { id: string; label: string }[];
+    return playlist.fileIds.map(id => driveFiles.find(f => f.id === id)).filter(Boolean) as { id: string; label: string; path: string }[];
   }, [playlist.fileIds, driveFiles]);
 
   if (loading) {
@@ -215,13 +212,63 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
             <Typography variant="h6" sx={{ fontWeight: 800 }}>DRIVE에서 스크립트 추가</Typography>
 
             <Autocomplete
+              multiple
               fullWidth
+              disableCloseOnSelect
               options={driveFiles}
+              value={selectedFiles}
               getOptionLabel={(option) => option.label}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderTags={() => null}
+              renderOption={(props, option, { selected }) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <li key={option.id} {...optionProps}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1.5}
+                      sx={{
+                        width: 1,
+                        py: 0.5,
+                        px: 1,
+                        borderRadius: 1,
+                        transition: (theme) => theme.transitions.create('background-color'),
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        },
+                      }}
+                    >
+                      <Stack spacing={0.2} sx={{ flexGrow: 1, minWidth: 0 }}>
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{
+                            color: selected ? 'primary.main' : 'text.primary',
+                            fontWeight: selected ? 800 : 600
+                          }}
+                        >
+                          {option.label}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }} noWrap>
+                          {option.path}
+                        </Typography>
+                      </Stack>
+                      {selected && (
+                        <Iconify
+                          icon="eva:checkmark-circle-2-fill"
+                          sx={{ color: 'primary.main', width: 20, height: 20 }}
+                        />
+                      )}
+                    </Stack>
+                  </li>
+                );
+              }}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  handleAddFile(newValue.id);
-                }
+                setPlaylist((prev) => ({
+                  ...prev,
+                  fileIds: newValue.map((v) => v.id),
+                }));
               }}
               renderInput={(params) => (
                 <TextField
@@ -281,9 +328,14 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                     {index + 1}
                   </Typography>
 
-                  <Typography variant="subtitle1" sx={{ flexGrow: 1, fontWeight: 700 }}>
-                    {file.label}
-                  </Typography>
+                  <Stack spacing={0.5} sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+                      {file.label}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.disabled' }} noWrap>
+                      {file.path}
+                    </Typography>
+                  </Stack>
 
                   <IconButton color="error" onClick={() => handleRemoveFile(file.id)}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
