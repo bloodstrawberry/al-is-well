@@ -64,12 +64,12 @@ export function useOpicSpeech() {
       clearTimeout(silenceTimerRef.current);
     }
     
-    const timeoutDuration = 5000; // 5초
+    const timeoutDuration = 3000; // 3초
 
     silenceTimerRef.current = setTimeout(() => {
       if (isListeningRef.current !== null) {
         stopListening();
-        toast.info('5초간 입력이 없어 종료합니다.');
+        toast.info('3초간 입력이 없어 종료합니다.');
       }
     }, timeoutDuration);
   }, [stopListening]);

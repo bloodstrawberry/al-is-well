@@ -92,6 +92,67 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
 
+  const userAnswersRef = useRef(userAnswers);
+  const lastListeningIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    userAnswersRef.current = userAnswers;
+  }, [userAnswers]);
+
+  const handleCheckAnswer = useCallback((index: number, text?: string) => {
+    if (!scriptData?.lines?.[index]) return;
+    
+    const currentAnswers = userAnswersRef.current;
+    const userAnswer = (text !== undefined ? text : (currentAnswers[index] || '')).trim();
+    const correctAnswer = (scriptData.lines[index].en || '').trim();
+    if (!userAnswer) return;
+
+    const uWords = userAnswer.split(/\s+/);
+    const cWords = correctAnswer.split(/\s+/);
+    const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
+    const uClean = uWords.map(clean);
+    const cClean = cWords.map(clean);
+
+    const dp = Array(uClean.length + 1).fill(0).map(() => Array(cClean.length + 1).fill(0));
+    for (let i = 1; i <= uClean.length; i++) {
+      for (let j = 1; j <= cClean.length; j++) {
+        if (uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") dp[i][j] = dp[i - 1][j - 1] + 1;
+        else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+
+    const results: any[] = [];
+    let i = uClean.length; let j = cClean.length;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") {
+        results.unshift({ uWord: uWords[i - 1], cWord: cWords[j - 1], isCorrect: true, masked: cWords[j - 1] });
+        i--; j--;
+      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+        results.unshift({ uWord: "", cWord: cWords[j - 1], isCorrect: false, masked: cWords[j - 1].replace(/[a-zA-Z0-9]/g, "*") });
+        j--;
+      } else {
+        results.unshift({ uWord: uWords[i - 1], cWord: "", isCorrect: false, masked: "" });
+        i--;
+      }
+    }
+    setTestResults(prev => ({ ...prev, [index]: results }));
+    if (results.every(r => r.isCorrect)) setRevealedAnswers(prev => ({ ...prev, [index]: true }));
+  }, [scriptData?.lines]);
+
+  // Auto-check answer when microphone input ends
+  useEffect(() => {
+    if (isListening !== null) {
+      lastListeningIndexRef.current = isListening;
+    } else if (lastListeningIndexRef.current !== null) {
+      const indexToCheck = lastListeningIndexRef.current;
+      lastListeningIndexRef.current = null;
+      
+      setTimeout(() => {
+        handleCheckAnswer(indexToCheck);
+      }, 300);
+    }
+  }, [isListening, handleCheckAnswer]);
+
   // Pre-load voices
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -540,48 +601,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     setRevealedAnswers(newRevealedAnswers);
   };
 
-  const userAnswersRef = useRef(userAnswers);
-  useEffect(() => {
-    userAnswersRef.current = userAnswers;
-  }, [userAnswers]);
-
-  const handleCheckAnswer = useCallback((index: number, text?: string) => {
-    const currentAnswers = userAnswersRef.current;
-    const userAnswer = (text !== undefined ? text : (currentAnswers[index] || '')).trim();
-    const correctAnswer = (scriptData.lines[index].en || '').trim();
-    if (!userAnswer) return;
-
-    const uWords = userAnswer.split(/\s+/);
-    const cWords = correctAnswer.split(/\s+/);
-    const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
-    const uClean = uWords.map(clean);
-    const cClean = cWords.map(clean);
-
-    const dp = Array(uClean.length + 1).fill(0).map(() => Array(cClean.length + 1).fill(0));
-    for (let i = 1; i <= uClean.length; i++) {
-      for (let j = 1; j <= cClean.length; j++) {
-        if (uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") dp[i][j] = dp[i - 1][j - 1] + 1;
-        else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-      }
-    }
-
-    const results: any[] = [];
-    let i = uClean.length; let j = cClean.length;
-    while (i > 0 || j > 0) {
-      if (i > 0 && j > 0 && uClean[i - 1] === cClean[j - 1] && uClean[i - 1] !== "") {
-        results.unshift({ uWord: uWords[i - 1], cWord: cWords[j - 1], isCorrect: true, masked: cWords[j - 1] });
-        i--; j--;
-      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-        results.unshift({ uWord: "", cWord: cWords[j - 1], isCorrect: false, masked: cWords[j - 1].replace(/[a-zA-Z0-9]/g, "*") });
-        j--;
-      } else {
-        results.unshift({ uWord: uWords[i - 1], cWord: "", isCorrect: false, masked: "" });
-        i--;
-      }
-    }
-    setTestResults(prev => ({ ...prev, [index]: results }));
-    if (results.every(r => r.isCorrect)) setRevealedAnswers(prev => ({ ...prev, [index]: true }));
-  }, [scriptData?.lines]);
 
   const handleChangeAnswer = useCallback((index: number, value: string) => {
     setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
