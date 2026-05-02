@@ -27,8 +27,8 @@ import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
-import { OpicTestEditorView } from '../opic-test-editor-view';
-import { OpicTestLiveView } from '../opic-test-live-view';
+import { OpicTestEditorView } from './opic-test-editor-view';
+import { OpicTestLiveView } from './opic-test-live-view';
 
 // ----------------------------------------------------------------------
 

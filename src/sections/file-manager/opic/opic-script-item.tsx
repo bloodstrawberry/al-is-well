@@ -1,3 +1,5 @@
+'use client';
+
 import { memo, useRef, useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
@@ -35,7 +37,7 @@ type Props = {
   onToggleLine: (index: number) => void;
   onToggleSpeak: (text: string, index: number | string) => void;
   onChangeAnswer: (index: number, value: string) => void;
-  onCheckAnswer: (index: number) => void;
+  onCheckAnswer: (index: number, value: string) => void;
   onStartListening: (index: number) => void;
   onStopListening: () => void;
   onPlayRecordedAudio: (index: number) => void;
@@ -111,7 +113,7 @@ export const OpicScriptItem = memo(({
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     onChangeAnswer(index, localValue);
 
-    if (type === 'check') onCheckAnswer(index);
+    if (type === 'check') onCheckAnswer(index, localValue);
     else if (type === 'listening') (isListening ? onStopListening() : onStartListening(index));
     else if (type === 'audio') onPlayRecordedAudio(index);
   };
@@ -273,6 +275,57 @@ export const OpicScriptItem = memo(({
                   }
                 }}
               >
+                {/* Similarity Score */}
+                {result && result.filter((r: any) => r.cWord).length > 0 && (
+                  <Stack spacing={1} sx={{ mb: 2 }}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 900, opacity: 0.8 }}>
+                        Match Score
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: (theme) => {
+                        const score = (result.filter((r: any) => r.isCorrect).length / result.filter((r: any) => r.cWord).length) * 100;
+                        if (score >= 90) return theme.palette.success.main;
+                        if (score >= 60) return theme.palette.warning.main;
+                        return theme.palette.error.main;
+                      } }}>
+                        {Math.round((result.filter((r: any) => r.isCorrect).length / result.filter((r: any) => r.cWord).length) * 100)}%
+                      </Typography>
+                    </Stack>
+                    <Box
+                      sx={{
+                        height: 8,
+                        borderRadius: 4,
+                        bgcolor: (theme) => alpha(theme.palette.divider, 0.5),
+                        overflow: 'hidden',
+                        position: 'relative',
+                        border: (theme) => `solid 1px ${alpha(theme.palette.divider, 0.8)}`
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: `${Math.round((result.filter((r: any) => r.isCorrect).length / result.filter((r: any) => r.cWord).length) * 100)}%`,
+                          bgcolor: (theme) => {
+                            const score = (result.filter((r: any) => r.isCorrect).length / result.filter((r: any) => r.cWord).length) * 100;
+                            if (score >= 90) return theme.palette.success.main;
+                            if (score >= 60) return theme.palette.warning.main;
+                            return theme.palette.error.main;
+                          },
+                          boxShadow: (theme) => {
+                            const score = (result.filter((r: any) => r.isCorrect).length / result.filter((r: any) => r.cWord).length) * 100;
+                            const color = score >= 90 ? theme.palette.success.main : (score >= 60 ? theme.palette.warning.main : theme.palette.error.main);
+                            return `0 0 8px ${alpha(color, 0.5)}`;
+                          },
+                          transition: (theme) => theme.transitions.create(['width', 'background-color']),
+                        }}
+                      />
+                    </Box>
+                  </Stack>
+                )}
+
                 {/* Your Answer */}
                 {result && (
                   <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
@@ -333,7 +386,7 @@ export const OpicScriptItem = memo(({
                       alignItems: 'center',
                       flexGrow: 1,
                       transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                      ...(!isAnswerRevealed && {
+                      ...((!isAnswerRevealed && !result) && {
                         filter: 'blur(8px)',
                         opacity: 0.4,
                         userSelect: 'none',
@@ -342,8 +395,16 @@ export const OpicScriptItem = memo(({
                   >
                     {result ? (
                       result.map((word: any, wIndex: number) => word.cWord && (
-                        <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700 }}>
-                          {word.cWord}
+                        <Typography
+                          key={wIndex}
+                          variant="body1"
+                          sx={{
+                            fontWeight: 700,
+                            color: (word.isCorrect || isAnswerRevealed) ? 'text.primary' : 'text.disabled',
+                            transition: (theme) => theme.transitions.create(['color', 'filter']),
+                          }}
+                        >
+                          {(word.isCorrect || isAnswerRevealed) ? word.cWord : word.masked}
                         </Typography>
                       ))
                     ) : (

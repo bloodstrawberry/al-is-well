@@ -1,7 +1,9 @@
+'use client';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 import { getIsMobile } from 'src/utils/is-mobile';
-import { useOpicSpeech } from './hooks/use-opic-speech';
+import { useOpicSpeech } from '../hooks/use-opic-speech';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -25,7 +27,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { OpicEditorItem } from './opic-editor-item';
+import { OpicEditorItem } from '../opic';
 
 import { Iconify } from 'src/components/iconify';
 import { getFileScript, saveFileScript } from 'src/api/indexDB';

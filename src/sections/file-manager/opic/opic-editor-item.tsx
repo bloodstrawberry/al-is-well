@@ -1,3 +1,5 @@
+'use client';
+
 import { memo, useState, useEffect, useRef } from 'react';
 
 import Box from '@mui/material/Box';

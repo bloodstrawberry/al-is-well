@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import Box from '@mui/material/Box';
@@ -15,8 +16,8 @@ import { Iconify } from 'src/components/iconify';
 import { getFileScript, getTreeData, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
-import { useOpicSpeech } from './hooks/use-opic-speech';
-import { OpicScriptItem } from './opic-script-item';
+import { useOpicSpeech } from '../hooks/use-opic-speech';
+import { OpicHeader, OpicScriptItem, OpicQuestionSection } from '../opic';
 
 // ----------------------------------------------------------------------
 
@@ -541,9 +542,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     userAnswersRef.current = userAnswers;
   }, [userAnswers]);
 
-  const handleCheckAnswer = useCallback((index: number) => {
+  const handleCheckAnswer = useCallback((index: number, text?: string) => {
     const currentAnswers = userAnswersRef.current;
-    const userAnswer = (currentAnswers[index] || '').trim();
+    const userAnswer = (text !== undefined ? text : (currentAnswers[index] || '')).trim();
     const correctAnswer = (scriptData.lines[index].en || '').trim();
     if (!userAnswer) return;
 
@@ -601,166 +602,33 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   return (
     <Container maxWidth={false} sx={{ py: { xs: 2, md: 5 }, px: { xs: 1.5, md: 8 } }}>
-      {/* Header */}
-      <Stack
-        direction="row"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
-        spacing={2}
-        sx={{
-          mb: 4,
-          position: 'sticky',
-          top: 0,
-          bgcolor: 'background.default',
-          zIndex: 10,
-          py: 1.5,
-          mx: { xs: -2, md: -8 },
-          px: { xs: 2, md: 8 },
-          '&:before': {
-            content: '""',
-            position: 'absolute',
-            top: -100,
-            left: 0,
-            right: 0,
-            height: 100,
-            bgcolor: 'background.default',
-            zIndex: -1,
-          },
+      <OpicHeader
+        fileName={fileName}
+        currentIndex={currentIndex}
+        totalFiles={playlist?.fileIds.length || 0}
+        currentFileName={currentFileName}
+        autoPlay={autoPlay}
+        isAudioPlaying={isAudioPlaying}
+        isContentSequence={sequenceRef.current === 'content'}
+        storageKey={storageKey}
+        randomPlay={playlist?.randomPlay}
+        allRevealed={allRevealed}
+        onBack={onBack}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onToggleRandom={toggleRandomPlay}
+        onToggleAllRevealed={toggleAll}
+        onEdit={onEdit}
+        onToggleAutoPlay={() => {
+          const newAutoPlay = !autoPlay;
+          setAutoPlay(newAutoPlay);
+          if (newAutoPlay && storageKey === 'listening') {
+            if (sequenceRef.current === 'question') playQuestion();
+            else if (sequenceRef.current === 'content') playContent();
+            else (playlist?.playQuestion === false ? playContent() : playQuestion());
+          }
         }}
-      >
-        <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', mt: { xs: 0.5, md: 0 } }}>
-          <Iconify icon="eva:arrow-ios-back-fill" />
-        </IconButton>
-
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 1, md: 2 }}
-          sx={{ flexGrow: 1 }}
-        >
-          <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 800,
-                color: (sequenceRef.current === 'content' && autoPlay && !isAudioPlaying) ? 'error.main' : 'text.primary',
-                transition: (theme) => theme.transitions.create('color'),
-                wordBreak: 'break-all',
-              }}
-            >
-              {fileName}
-            </Typography>
-
-
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, wordBreak: 'break-all' }}>
-              {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
-            </Typography>
-          </Stack>
-
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <Tooltip title="Previous Script">
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={currentIndex === 0}
-                  onClick={handlePrev}
-                  sx={{ bgcolor: 'background.neutral' }}
-                >
-                  <Iconify icon="solar:alt-arrow-left-bold" />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            <Tooltip title="Next Script">
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={!playlist || playlist.fileIds.length <= 1}
-                  onClick={handleNext}
-                  sx={{ bgcolor: 'background.neutral' }}
-                >
-                  <Iconify icon="solar:alt-arrow-right-bold" />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            {storageKey === 'listening' && (
-              <>
-                <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
-                <Tooltip title={playlist?.randomPlay ? "Shuffle: ON" : "Shuffle: OFF"}>
-                  <IconButton
-                    size="small"
-                    color={playlist?.randomPlay ? 'primary' : 'default'}
-                    onClick={toggleRandomPlay}
-                    sx={{ bgcolor: (theme) => (playlist?.randomPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
-                  >
-                    <Iconify icon="solar:shuffle-bold" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-
-            <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
-              <IconButton
-                size="small"
-                color={allRevealed ? 'warning' : 'success'}
-                onClick={toggleAll}
-                sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
-              >
-                <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Edit Playlist">
-              <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-                <Iconify icon="solar:pen-bold" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title={autoPlay ? (storageKey === 'listening' ? "Stop" : "Auto Play: ON") : (storageKey === 'listening' ? "Play" : "Auto Play: OFF")}>
-              <IconButton
-                size="small"
-                color={autoPlay ? 'primary' : 'default'}
-                onClick={() => {
-                  const newAutoPlay = !autoPlay;
-                  setAutoPlay(newAutoPlay);
-                  
-                  // Resume logic when turning ON
-                  if (newAutoPlay && storageKey === 'listening') {
-                    if (sequenceRef.current === 'question') {
-                      playQuestion();
-                    } else if (sequenceRef.current === 'content') {
-                      playContent();
-                    } else {
-                      // Initial start or idle
-                      if (playlist?.playQuestion === false) {
-                        playContent();
-                      } else {
-                        playQuestion();
-                      }
-                    }
-                  }
-                }}
-                sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
-              >
-                <Iconify 
-                  icon={
-                    storageKey === 'listening' 
-                      ? (autoPlay ? "solar:stop-circle-bold" : "solar:play-circle-bold")
-                      : (autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear")
-                  } 
-                />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Stack>
-      </Stack>
+      />
 
       <Box>
         {loadingScript ? (
@@ -769,211 +637,40 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           </Box>
         ) : scriptData ? (
           <Stack spacing={4}>
-            {/* Question Section */}
-            <Card 
-              ref={(speakingIndex === 'auto-question' || (sequenceRef.current === 'question' && autoPlay)) ? playingRef : null}
-              sx={{ 
-                p: { xs: 2, md: 3 }, 
-                border: (theme) => (speakingIndex === 'auto-question' || (sequenceRef.current === 'question' && autoPlay)) 
-                  ? `solid 2px ${theme.vars.palette.error.main}` 
-                  : `solid 1px ${theme.vars.palette.divider}`, 
-                bgcolor: (theme) => (speakingIndex === 'auto-question' || (sequenceRef.current === 'question' && autoPlay))
-                  ? alpha(theme.palette.error.main, 0.04)
-                  : alpha(theme.palette.background.neutral, 0.5),
-                transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+            <OpicQuestionSection
+              questions={scriptData?.questions}
+              speakingIndex={speakingIndex}
+              sequence={sequenceRef.current}
+              autoPlay={autoPlay}
+              testMode={testMode}
+              storageKey={storageKey}
+              revealedLines={revealedLines}
+              onToggleSpeak={toggleSpeak}
+              onToggleReveal={toggleLine}
+              playingRef={playingRef}
+              audioRef={domAudioRef}
+              audioUrl={scriptData?.audioUrl}
+              audioReady={audioReady}
+              onAudioCanPlay={() => setAudioReady(true)}
+              onAudioError={() => {
+                setAudioReady(false);
+                if (sequenceRef.current === 'content') {
+                  setIsAudioPlaying(false);
+                  playLine(0);
+                }
               }}
-            >
-              <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
-
-              <Stack spacing={3}>
-                {scriptData?.questions?.map((q: any, index: number) => (
-                  <Stack key={index} spacing={2.5}>
-                    <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'flex-start' }} spacing={{ xs: 1.5, md: 2 }}>
-                      {/* Mobile Top Header: Q Index + Speaker */}
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%', display: { xs: 'flex', md: 'none' } }}>
-                        <Box sx={{ flexShrink: 0 }}>
-                          <Typography 
-                            variant="caption" 
-                            sx={{ 
-                              fontWeight: 900, 
-                              color: 'text.disabled', 
-                              bgcolor: 'background.neutral', 
-                              px: 1, 
-                              py: 0.25, 
-                              borderRadius: 0.5,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 32
-                            }}
-                          >
-                            Q{index + 1}
-                          </Typography>
-                        </Box>
-                        {q.en && (
-                          <IconButton
-                            onClick={() => {
-                              if (index === 0 && speakingIndex === 'auto-play') {
-                                toggleSpeak(q.en, 'auto-play');
-                              } else {
-                                toggleSpeak(q.en, `q-${index}`);
-                              }
-                            }}
-                            size="small"
-                            color={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'primary' : 'default'}
-                            sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), flexShrink: 0 }}
-                          >
-                            <Iconify 
-                              icon={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
-                              width={20}
-                            />
-                          </IconButton>
-                        )}
-                      </Stack>
-
-                      {/* Desktop Q Index */}
-                      <Box sx={{ mt: 0.5, flexShrink: 0, display: { xs: 'none', md: 'block' } }}>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            fontWeight: 900, 
-                            color: 'text.disabled', 
-                            bgcolor: 'background.neutral', 
-                            px: 0.75, 
-                            py: 0.25, 
-                            borderRadius: 0.5,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minWidth: 32
-                          }}
-                        >
-                          Q{index + 1}
-                        </Typography>
-                      </Box>
-
-                      <Typography
-                        variant="h6"
-                        onClick={() => { if (testMode || storageKey === 'listening') { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); } }}
-                        sx={{
-                          lineHeight: 1.5,
-                          fontWeight: 700,
-                          flexGrow: 1,
-                          color: (speakingIndex === `q-${index}` || (index === 0 && (speakingIndex === 'auto-play' || speakingIndex === 'auto-question'))) ? 'error.main' : 'text.primary',
-                          fontSize: { xs: '1.0625rem', md: '1.125rem' },
-                          cursor: (testMode || storageKey === 'listening') ? 'pointer' : 'default',
-                          transition: (theme) => theme.transitions.create(['filter', 'opacity', 'color']),
-                          ...((testMode || storageKey === 'listening') && !(revealedLines[`q-${index}`]) && {
-                            filter: 'blur(8px)',
-                             opacity: 0.3,
-                             userSelect: 'none'
-                           }),
-                           whiteSpace: 'pre-wrap'
-                         }}
-                       >
-                         {q.en || 'Untitled Question'}
-                      </Typography>
-                      
-                      {/* Desktop Speaker Icon */}
-                      {q.en && (
-                        <IconButton
-                          onClick={() => {
-                            if (index === 0 && speakingIndex === 'auto-play') {
-                              toggleSpeak(q.en, 'auto-play');
-                            } else {
-                              toggleSpeak(q.en, `q-${index}`);
-                            }
-                          }}
-                          size="small"
-                          color={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'primary' : 'default'}
-                          sx={{ 
-                            mt: -0.5, 
-                            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                            flexShrink: 0,
-                            display: { xs: 'none', md: 'inline-flex' }
-                          }}
-                        >
-                          <Iconify 
-                            icon={(speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play')) ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} 
-                            width={24}
-                          />
-                        </IconButton>
-                      )}
-                    </Stack>
-
-                    {q.ko && (
-                      <Box
-                        onClick={() => { const key = `q-${index}`; setRevealedLines(prev => ({ ...prev, [key]: !prev[key] })); }}
-                        sx={{ 
-                          ml: { xs: 0, md: 4 }, 
-                          p: { xs: 1.5, md: 2 }, 
-                          cursor: 'pointer', 
-                          borderRadius: 1.5, 
-                          bgcolor: 'background.paper', 
-                          border: (theme) => `dashed 1px ${theme.vars.palette.divider}`, 
-                          transition: (theme) => theme.transitions.create(['background-color']), 
-                          '&:hover': { bgcolor: 'action.hover' } 
-                        }}
-                      >
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: 'text.secondary', 
-                            textAlign: 'justify', 
-                            transition: (theme) => theme.transitions.create(['filter', 'opacity']), 
-                            ...(!(revealedLines[`q-${index}`]) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }),
-                            whiteSpace: 'pre-wrap'
-                          }}
-                        >
-                          {q.ko}
-                        </Typography>
-                      </Box>
-                    )}
-                    {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
-                  </Stack>
-                ))}
-              </Stack>
-
-              {scriptData?.audioUrl && (
-                <Box sx={{ mt: 3, display: audioReady ? 'block' : 'none' }}>
-                  <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
-                  
-                  <Box sx={{ 
-                    p: 2,
-                    borderRadius: 2,
-                    border: (theme) => `solid 2px ${isAudioPlaying ? theme.vars.palette.error.main : 'transparent'}`,
-                    bgcolor: (theme) => isAudioPlaying ? alpha(theme.palette.error.main, 0.04) : 'transparent',
-                    transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
-                  }}>
-                    <audio 
-                      ref={domAudioRef}
-                      controls 
-                      src={scriptData.audioUrl} 
-                      style={{ width: '100%' }} 
-                      onCanPlay={() => setAudioReady(true)}
-                      onPlay={() => setIsAudioPlaying(true)}
-                      onPause={() => setIsAudioPlaying(false)}
-                      onEnded={() => {
-                        setIsAudioPlaying(false);
-                        if (!isSwitching && sequenceRef.current === 'content' && autoPlay && storageKey === 'listening') {
-                          sequenceRef.current = 'idle';
-                          setTimeout(() => {
-                            handleNextPlaylist();
-                          }, 1000);
-                        }
-                      }}
-                      onError={() => {
-                        setAudioReady(false);
-                        if (sequenceRef.current === 'content') {
-                          setIsAudioPlaying(false);
-                          playLine(0);
-                        }
-                      }}
-                    />
-                  </Box>
-                </Box>
-              )}
-            </Card>
+              onAudioPlay={() => setIsAudioPlaying(true)}
+              onAudioPause={() => setIsAudioPlaying(false)}
+              onAudioEnded={() => {
+                setIsAudioPlaying(false);
+                if (!isSwitching && sequenceRef.current === 'content' && autoPlay && storageKey === 'listening') {
+                  sequenceRef.current = 'idle';
+                  setTimeout(() => {
+                    handleNextPlaylist();
+                  }, 1000);
+                }
+              }}
+            />
 
             {/* Script Lines */}
             <Stack spacing={2.5}>

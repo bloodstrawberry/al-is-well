@@ -35,8 +35,8 @@ import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
 import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
-import { OpicEditorView } from '../opic-editor-view';
-import { OpicLiveView } from '../opic-live-view';
+import { OpicEditorView } from './opic-editor-view';
+import { OpicLiveView } from './opic-live-view';
 
 // ----------------------------------------------------------------------
 
