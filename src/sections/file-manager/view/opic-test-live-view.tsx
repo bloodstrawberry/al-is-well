@@ -64,7 +64,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const [isSwitching, setIsSwitching] = useState(false);
   const [autoPlay, setAutoPlay] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('opic-auto-play');
+      const key = storageKey === 'listening' ? 'opic-auto-play-listening' : 'opic-auto-play';
+      const saved = localStorage.getItem(key);
       return saved !== null ? JSON.parse(saved) : true;
     }
     return true;
@@ -496,8 +497,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   // 4. Persist Auto Play
   useEffect(() => {
-    localStorage.setItem('opic-auto-play', JSON.stringify(autoPlay));
-  }, [autoPlay]);
+    const key = storageKey === 'listening' ? 'opic-auto-play-listening' : 'opic-auto-play';
+    localStorage.setItem(key, JSON.stringify(autoPlay));
+  }, [autoPlay, storageKey]);
 
   const handleNext = useCallback(() => {
     if (playlist && playlist.fileIds.length > 1) {
@@ -530,7 +532,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     if (scriptData?.questions) {
       scriptData.questions.forEach((_: any, index: number) => { 
-        newRevealedLines[`q-${index}`] = newState; 
+        newRevealedLines[`q-en-${index}`] = newState; 
+        newRevealedLines[`q-ko-${index}`] = newState; 
       });
     }
     setRevealedLines(newRevealedLines);

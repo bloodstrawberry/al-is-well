@@ -78,9 +78,11 @@ export function OpicQuestionSection({
 
       <Stack spacing={3}>
         {questions?.map((q, index) => {
-          const qKey = `q-${index}`;
-          const isSpeaking = speakingIndex === qKey || (index === 0 && speakingIndex === 'auto-play');
-          const isRevealed = revealedLines[qKey];
+          const qEnKey = `q-en-${index}`;
+          const qKoKey = `q-ko-${index}`;
+          const isSpeaking = speakingIndex === `q-${index}` || (index === 0 && speakingIndex === 'auto-play');
+          const isEnRevealed = revealedLines[qEnKey];
+          const isKoRevealed = revealedLines[qKoKey];
 
           return (
             <Stack key={index} spacing={2.5}>
@@ -108,7 +110,7 @@ export function OpicQuestionSection({
                   </Box>
                   {q.en && (
                     <IconButton
-                      onClick={() => onToggleSpeak(q.en, index === 0 && speakingIndex === 'auto-play' ? 'auto-play' : qKey)}
+                      onClick={() => onToggleSpeak(q.en, index === 0 && speakingIndex === 'auto-play' ? 'auto-play' : `q-${index}`)}
                       size="small"
                       color={isSpeaking ? 'primary' : 'default'}
                       sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), flexShrink: 0 }}
@@ -144,7 +146,7 @@ export function OpicQuestionSection({
 
                 <Typography
                   variant="h6"
-                  onClick={() => { if (testMode || storageKey === 'listening') onToggleReveal(qKey); }}
+                  onClick={() => { if (testMode || storageKey === 'listening') onToggleReveal(qEnKey); }}
                   sx={{
                     lineHeight: 1.5,
                     fontWeight: 700,
@@ -153,7 +155,7 @@ export function OpicQuestionSection({
                     fontSize: { xs: '1.0625rem', md: '1.125rem' },
                     cursor: (testMode || storageKey === 'listening') ? 'pointer' : 'default',
                     transition: (theme) => theme.transitions.create(['filter', 'opacity', 'color']),
-                    ...((testMode || storageKey === 'listening') && !isRevealed && {
+                    ...((testMode || storageKey === 'listening') && !isEnRevealed && {
                       filter: 'blur(8px)',
                       opacity: 0.3,
                       userSelect: 'none'
@@ -167,7 +169,7 @@ export function OpicQuestionSection({
                 {/* Desktop Speaker Icon */}
                 {q.en && (
                   <IconButton
-                    onClick={() => onToggleSpeak(q.en, index === 0 && speakingIndex === 'auto-play' ? 'auto-play' : qKey)}
+                    onClick={() => onToggleSpeak(q.en, index === 0 && speakingIndex === 'auto-play' ? 'auto-play' : `q-${index}`)}
                     size="small"
                     color={isSpeaking ? 'primary' : 'default'}
                     sx={{
@@ -187,7 +189,7 @@ export function OpicQuestionSection({
 
               {q.ko && (
                 <Box
-                  onClick={() => onToggleReveal(qKey)}
+                  onClick={() => onToggleReveal(qKoKey)}
                   sx={{
                     ml: { xs: 0, md: 4 },
                     p: { xs: 1.5, md: 2 },
@@ -205,7 +207,7 @@ export function OpicQuestionSection({
                       color: 'text.secondary',
                       textAlign: 'justify',
                       transition: (theme) => theme.transitions.create(['filter', 'opacity']),
-                      ...(!isRevealed && {
+                      ...(!isKoRevealed && {
                         filter: 'blur(6px)',
                         opacity: 0.4,
                         userSelect: 'none'

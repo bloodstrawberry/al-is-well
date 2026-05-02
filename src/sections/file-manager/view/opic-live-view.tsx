@@ -128,7 +128,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
     if (scriptData?.questions) {
       scriptData.questions.forEach((_: any, index: number) => {
-        newRevealed[`q-${index}`] = newState;
+        newRevealed[`q-en-${index}`] = newState;
+        newRevealed[`q-ko-${index}`] = newState;
       });
     }
     setRevealedLines(newRevealed);
