@@ -453,35 +453,91 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         </Card>
 
         {storageKey === 'listening' && (
-          <Card sx={{ p: 3 }}>
-            <Stack spacing={2}>
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Listening 설정</Typography>
-              
-              <Stack direction="row" alignItems="center" spacing={3}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>재생 방식:</Typography>
-                  <Stack direction="row" spacing={1} sx={{ bgcolor: 'background.neutral', p: 0.5, borderRadius: 1 }}>
-                    <Tooltip title="Audio URL이 있는 경우에만 재생됩니다.">
-                      <Button
-                        size="small"
-                        variant={playlist.audioUrlPriority ? 'contained' : 'text'}
-                        color={playlist.audioUrlPriority ? 'primary' : 'inherit'}
-                        onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: true }))}
-                        sx={{ px: 2, fontWeight: 700 }}
-                      >
-                        Audio URL 우선
-                      </Button>
-                    </Tooltip>
+          <Card sx={{ 
+            p: 1.5, 
+            px: 2, 
+            bgcolor: (theme) => alpha(theme.palette.info.main, 0.04), 
+            border: (theme) => `dashed 1px ${alpha(theme.palette.info.main, 0.2)}`,
+          }}>
+            <Stack 
+              direction={{ xs: 'column', sm: 'row' }}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              justifyContent="space-between" 
+              spacing={1.5}
+            >
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+                <Iconify icon="solar:tuning-bold-duotone" sx={{ color: 'info.main', width: 20 }} />
+                <Typography 
+                  variant="subtitle2" 
+                  sx={{ 
+                    fontWeight: 800, 
+                    color: 'info.main', 
+                    whiteSpace: 'nowrap',
+                    fontSize: { xs: 14, md: 14 }
+                  }}
+                >
+                  Listening 설정
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' }, justifyContent: 'flex-end' }}>
+                <Stack direction="row" spacing={0.5} sx={{ bgcolor: 'background.neutral', p: 0.4, borderRadius: 1, flexShrink: 0 }}>
+                  <Tooltip title="Audio URL이 있는 경우에만 재생됩니다.">
                     <Button
                       size="small"
-                      variant={!playlist.audioUrlPriority ? 'contained' : 'text'}
-                      color={!playlist.audioUrlPriority ? 'primary' : 'inherit'}
-                      onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: false }))}
-                      sx={{ px: 2, fontWeight: 700 }}
+                      variant={playlist.audioUrlPriority ? 'contained' : 'text'}
+                      color={playlist.audioUrlPriority ? 'primary' : 'inherit'}
+                      onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: true }))}
+                      sx={{ px: { xs: 1.25, md: 2 }, py: 0.5, fontSize: 11.5, fontWeight: 800, height: 30, whiteSpace: 'nowrap' }}
                     >
-                      Web Speech
+                      Audio 우선
                     </Button>
-                  </Stack>
+                  </Tooltip>
+                  <Button
+                    size="small"
+                    variant={!playlist.audioUrlPriority ? 'contained' : 'text'}
+                    color={!playlist.audioUrlPriority ? 'primary' : 'inherit'}
+                    onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: false }))}
+                    sx={{ px: { xs: 1.25, md: 2 }, py: 0.5, fontSize: 11.5, fontWeight: 800, height: 30, whiteSpace: 'nowrap' }}
+                  >
+                    Web Speech
+                  </Button>
+                </Stack>
+                
+                <Divider orientation="vertical" flexItem sx={{ height: 16, alignSelf: 'center', opacity: 0.3, mx: { xs: 0.25, sm: 0.5 } }} />
+
+                <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                  <Tooltip title={playlist.randomPlay ? "랜덤 재생 On" : "랜덤 재생 Off"}>
+                    <IconButton
+                      size="small"
+                      color={playlist.randomPlay ? 'primary' : 'default'}
+                      onClick={() => setPlaylist(prev => ({ ...prev, randomPlay: !prev.randomPlay }))}
+                      sx={{ 
+                        width: 28,
+                        height: 28,
+                        bgcolor: (theme) => playlist.randomPlay ? alpha(theme.palette.primary.main, 0.1) : 'background.neutral',
+                        border: (theme) => `solid 1px ${playlist.randomPlay ? alpha(theme.palette.primary.main, 0.2) : 'transparent'}`
+                      }}
+                    >
+                      <Iconify icon="solar:shuffle-bold" width={16} />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title={playlist.playQuestion ? "질문 재생 On" : "질문 재생 Off"}>
+                    <IconButton
+                      size="small"
+                      color={playlist.playQuestion ? 'info' : 'default'}
+                      onClick={() => setPlaylist(prev => ({ ...prev, playQuestion: !prev.playQuestion }))}
+                      sx={{ 
+                        width: 28,
+                        height: 28,
+                        bgcolor: (theme) => playlist.playQuestion ? alpha(theme.palette.info.main, 0.1) : 'background.neutral',
+                        border: (theme) => `solid 1px ${playlist.playQuestion ? alpha(theme.palette.info.main, 0.2) : 'transparent'}`
+                      }}
+                    >
+                      <Iconify icon="solar:chat-round-call-bold" width={16} />
+                    </IconButton>
+                  </Tooltip>
                 </Stack>
               </Stack>
             </Stack>
@@ -493,38 +549,6 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
             <Typography variant="h6" sx={{ fontWeight: 800 }}>
               테스트 스크립트 목록 ({selectedFiles.length})
             </Typography>
-
-            {storageKey === 'listening' && (
-              <Stack direction="row" spacing={1}>
-                <Tooltip title={playlist.randomPlay ? "랜덤 재생 On" : "랜덤 재생 Off"}>
-                  <IconButton
-                    size="small"
-                    color={playlist.randomPlay ? 'primary' : 'default'}
-                    onClick={() => setPlaylist(prev => ({ ...prev, randomPlay: !prev.randomPlay }))}
-                    sx={{ 
-                      bgcolor: (theme) => playlist.randomPlay ? alpha(theme.palette.primary.main, 0.12) : 'background.neutral',
-                      border: (theme) => `solid 1px ${playlist.randomPlay ? theme.palette.primary.main : 'transparent'}`
-                    }}
-                  >
-                    <Iconify icon="solar:shuffle-bold" />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title={playlist.playQuestion ? "질문 재생 On" : "질문 재생 Off"}>
-                  <IconButton
-                    size="small"
-                    color={playlist.playQuestion ? 'info' : 'default'}
-                    onClick={() => setPlaylist(prev => ({ ...prev, playQuestion: !prev.playQuestion }))}
-                    sx={{ 
-                      bgcolor: (theme) => playlist.playQuestion ? alpha(theme.palette.info.main, 0.12) : 'background.neutral',
-                      border: (theme) => `solid 1px ${playlist.playQuestion ? theme.palette.info.main : 'transparent'}`
-                    }}
-                  >
-                    <Iconify icon="solar:chat-round-call-bold" />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-            )}
           </Stack>
 
           {selectedFiles.length > 0 ? (
