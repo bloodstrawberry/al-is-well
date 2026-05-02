@@ -834,13 +834,13 @@
     }
   },
   "sections": {
-    "speaking": {
+    "practice": {
       "tree": [
         {
           "id": "1777527856590",
           "label": "ssssss",
           "type": "file",
-          "category": "speaking",
+          "category": "practice",
           "createdAt": "2026-04-30T05:44:16.590Z",
           "modifiedAt": "2026-05-01T17:17:47.798Z"
         },
@@ -848,7 +848,7 @@
           "id": "1777532884598",
           "label": "22222",
           "type": "file",
-          "category": "speaking",
+          "category": "practice",
           "createdAt": "2026-04-30T07:08:04.598Z",
           "modifiedAt": "2026-05-01T14:52:34.088Z"
         }
