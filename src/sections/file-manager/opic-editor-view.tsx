@@ -102,6 +102,8 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
   });
 
   const [loading, setLoading] = useState(true);
+  const [audioReady, setAudioReady] = useState(false);
+  const [audioError, setAudioError] = useState(false);
   const [bulkText, setBulkText] = useState('');
   const bulkModal = useBoolean();
 
@@ -158,6 +160,8 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
             comboPositions: data.comboPositions || [],
             lines: data.lines || [{ ko: '', en: '' }],
           });
+          setAudioReady(false);
+          setAudioError(false);
         }
       } catch (error) {
         console.error('Failed to load script', error);
@@ -552,7 +556,11 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
               fullWidth
               label="Audio URL"
               value={scriptData.audioUrl}
-              onChange={(e) => setScriptData({ ...scriptData, audioUrl: e.target.value })}
+              onChange={(e) => {
+                setScriptData({ ...scriptData, audioUrl: e.target.value });
+                setAudioReady(false);
+                setAudioError(false);
+              }}
               placeholder="https://example.com/audio.mp3"
               slotProps={{
                 input: {
@@ -568,7 +576,32 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
             {scriptData.audioUrl && (
               <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: 'background.neutral' }}>
                 <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mb: 1, fontWeight: 800 }}>AUDIO PREVIEW</Typography>
-                <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
+                
+                {audioError && (
+                  <Typography variant="body2" color="error" sx={{ fontWeight: 700, mb: 1 }}>
+                    존재하지 않는 URL입니다
+                  </Typography>
+                )}
+
+                {!audioReady && !audioError && (
+                  <Typography variant="body2" sx={{ color: 'text.disabled', mb: 1 }}>
+                    Checking audio source...
+                  </Typography>
+                )}
+
+                <audio 
+                  controls 
+                  src={scriptData.audioUrl} 
+                  style={{ width: '100%', display: audioReady ? 'block' : 'none' }} 
+                  onCanPlay={() => {
+                    setAudioReady(true);
+                    setAudioError(false);
+                  }}
+                  onError={() => {
+                    setAudioReady(false);
+                    setAudioError(true);
+                  }}
+                />
               </Box>
             )}
           </Stack>

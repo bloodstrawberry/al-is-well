@@ -40,6 +40,7 @@ type Props = {
   onStopListening: () => void;
   onPlayRecordedAudio: (index: number) => void;
   onToggleAnswerReveal: (index: number) => void;
+  hideInput?: boolean;
 };
 
 export const OpicScriptItem = memo(({
@@ -65,6 +66,7 @@ export const OpicScriptItem = memo(({
   onStopListening,
   onPlayRecordedAudio,
   onToggleAnswerReveal,
+  hideInput,
 }: Props) => {
   // Use local state for immediate feedback during typing to avoid stuttering
   const [localValue, setLocalValue] = useState(userAnswer || '');
@@ -181,7 +183,7 @@ export const OpicScriptItem = memo(({
     >
       <Stack spacing={2}>
         {/* Korean Text */}
-        <Stack direction="row" spacing={{ xs: 1.5, md: 2 }} alignItems="flex-start">
+        <Stack direction="row" spacing={{ xs: 1.5, md: 2 }} alignItems="center">
           <Box
             sx={{
               width: { xs: 24, md: 28 },
@@ -195,7 +197,6 @@ export const OpicScriptItem = memo(({
               fontSize: { xs: 11, md: 12 },
               fontWeight: 800,
               flexShrink: 0,
-              mt: 0.25
             }}
           >
             {index + 1}
@@ -219,41 +220,56 @@ export const OpicScriptItem = memo(({
         {/* English Text / Input */}
         {testMode ? (
           <Stack spacing={1.5}>
-            <TextField
-              fullWidth
-              inputRef={(el) => setInputRef(index, el)}
-              placeholder="Listen and type English..."
-              multiline={isMobile}
-              minRows={isMobile ? 3 : 1}
-              value={localValue}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleAction('check');
-                }
-              }}
-              autoComplete="off"
-              slotProps={{
-                input: {
-                  readOnly: isListening,
-                  endAdornment: !isMobile && (
-                    <InputAdornment position="end" sx={{ gap: 0.5 }}>
-                      {renderActionButtons}
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
+            {!hideInput && (
+              <TextField
+                fullWidth
+                inputRef={(el) => setInputRef(index, el)}
+                placeholder="Listen and type English..."
+                multiline={isMobile}
+                minRows={isMobile ? 3 : 1}
+                value={localValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAction('check');
+                  }
+                }}
+                autoComplete="off"
+                slotProps={{
+                  input: {
+                    readOnly: isListening,
+                    endAdornment: !isMobile && (
+                      <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                        {renderActionButtons}
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            )}
 
-            {isMobile && (
+            {isMobile && !hideInput && (
               <Stack direction="row" justifyContent="flex-end" spacing={1}>
                 {renderActionButtons}
               </Stack>
             )}
 
-            {(result || isAnswerRevealed) && (
-              <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8), border: (theme) => `solid 1px ${theme.vars.palette.divider}` }}>
+            {(result || isAnswerRevealed || hideInput) && (
+              <Box
+                onClick={() => onToggleAnswerReveal(index)}
+                sx={{
+                  p: 2,
+                  borderRadius: 1.5,
+                  bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.8),
+                  border: (theme) => `solid 1px ${theme.vars.palette.divider}`,
+                  cursor: !isAnswerRevealed ? 'pointer' : 'default',
+                  transition: (theme) => theme.transitions.create(['background-color']),
+                  '&:hover': {
+                    bgcolor: (theme) => !isAnswerRevealed ? alpha(theme.palette.background.neutral, 1) : alpha(theme.palette.background.neutral, 0.8),
+                  }
+                }}
+              >
                 {/* Your Answer */}
                 {result && (
                   <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', columnGap: 0.8, rowGap: 0.5, alignItems: 'center' }}>
@@ -305,15 +321,34 @@ export const OpicScriptItem = memo(({
                   >
                     정답
                   </Box>
-                  {result ? (
-                    result.map((word: any, wIndex: number) => (word.cWord || (!isAnswerRevealed && word.masked)) && (
-                      <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled', letterSpacing: isAnswerRevealed ? 0 : 1 }}>{isAnswerRevealed ? word.cWord : word.masked}</Typography>
-                    ))
-                  ) : (
-                    <Typography variant="body1" sx={{ fontWeight: 700, color: isAnswerRevealed ? 'text.primary' : 'text.disabled' }}>
-                      {isAnswerRevealed ? line.en : line.en.replace(/[a-zA-Z0-9]/g, '*')}
-                    </Typography>
-                  )}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      columnGap: 0.8,
+                      rowGap: 0.5,
+                      alignItems: 'center',
+                      flexGrow: 1,
+                      transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                      ...(!isAnswerRevealed && {
+                        filter: 'blur(8px)',
+                        opacity: 0.4,
+                        userSelect: 'none',
+                      }),
+                    }}
+                  >
+                    {result ? (
+                      result.map((word: any, wIndex: number) => word.cWord && (
+                        <Typography key={wIndex} variant="body1" sx={{ fontWeight: 700 }}>
+                          {word.cWord}
+                        </Typography>
+                      ))
+                    ) : (
+                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                        {line.en}
+                      </Typography>
+                    )}
+                  </Box>
                   <IconButton
                     size="small"
                     onClick={() => onToggleAnswerReveal(index)}

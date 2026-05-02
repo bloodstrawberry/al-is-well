@@ -49,6 +49,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
   const [loading, setLoading] = useState(true);
   const [revealedLines, setRevealedLines] = useState<Record<string, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
   const [showKoQuestion, setShowKoQuestion] = useState(false);
   const [testMode, setTestMode] = useState(false);
 
@@ -97,7 +98,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             ko: data.questionKo || ''
           }];
         }
-        setScriptData(data);
+        if (data) {
+          setScriptData(data);
+          setAudioReady(false);
+        }
       } catch (error) {
         console.error('Failed to load script', error);
       } finally {
@@ -337,7 +341,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
                   bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
                 }}
               >
-                <Iconify icon="solar:pen-new-square-bold" />
+                <Iconify icon="solar:clipboard-check-bold" />
               </IconButton>
             </Tooltip>
 
@@ -516,9 +520,18 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           </Stack>
 
           {scriptData?.audioUrl && (
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ 
+              mt: 3,
+              display: audioReady ? 'block' : 'none'
+            }}>
               <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
-              <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
+              <audio 
+                controls 
+                src={scriptData.audioUrl} 
+                style={{ width: '100%' }} 
+                onCanPlay={() => setAudioReady(true)}
+                onError={() => setAudioReady(false)}
+              />
             </Box>
           )}
         </Card>

@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
-import { getFileScript, getTreeData } from 'src/api/indexDB';
+import { getFileScript, getTreeData, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
 import { useOpicSpeech } from './hooks/use-opic-speech';
@@ -57,8 +57,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const [revealedLines, setRevealedLines] = useState<Record<string, boolean>>({});
   const [allRevealed, setAllRevealed] = useState(false);
-
   const [testMode, setTestMode] = useState(true);
+  const [playOrder, setPlayOrder] = useState<number[]>([]);
+  const [audioReady, setAudioReady] = useState(false);
   const [autoPlay, setAutoPlay] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('opic-auto-play');
@@ -83,6 +84,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     toggleSpeak,
   } = useOpicSpeech();
 
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
 
@@ -103,23 +106,32 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       setLoading(true);
       try {
         const data = await getFileScript(fileId, storageKey);
-        if (data && data.fileIds) {
-          const playlistWithDefaults = {
-            ...data,
-            audioUrlPriority: data.audioUrlPriority ?? true,
-            randomPlay: data.randomPlay ?? false,
-            playQuestion: data.playQuestion ?? true,
-          };
-          setPlaylist(playlistWithDefaults);
-          setCurrentIndex(0);
-        } else {
-          setPlaylist({ 
-            fileIds: [fileId],
-            audioUrlPriority: true,
-            randomPlay: false,
-            playQuestion: true,
-          });
+        const playlistWithDefaults = data && data.fileIds ? {
+          ...data,
+          audioUrlPriority: data.audioUrlPriority ?? true,
+          randomPlay: data.randomPlay ?? false,
+          playQuestion: data.playQuestion ?? true,
+        } : { 
+          fileIds: [fileId],
+          audioUrlPriority: true,
+          randomPlay: false,
+          playQuestion: true,
+        };
+
+        const ids = playlistWithDefaults.fileIds;
+        let order = Array.from({ length: ids.length }, (_, i) => i);
+        
+        if (playlistWithDefaults.randomPlay && ids.length > 1) {
+          // Fisher-Yates Shuffle
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+          }
         }
+
+        setPlayOrder(order);
+        setPlaylist(playlistWithDefaults);
+        setCurrentIndex(0);
       } catch (error) {
         console.error('Failed to load playlist', error);
       } finally {
@@ -132,11 +144,13 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   // 2. Load Current Script
   useEffect(() => {
     const loadCurrentScript = async () => {
-      if (!playlist || playlist.fileIds.length === 0) return;
+      if (!playlist || playlist.fileIds.length === 0 || playOrder.length === 0) return;
 
-      const currentId = playlist.fileIds[currentIndex];
+      const currentFileIdx = playOrder[currentIndex];
+      const currentId = playlist.fileIds[currentFileIdx];
       setLoadingScript(true);
-
+      setAudioReady(false);
+      
       // Reset item-specific states when switching scripts
       setRevealedLines({});
       setAllRevealed(false);
@@ -187,7 +201,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     };
     loadCurrentScript();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlist, currentIndex]);
+  }, [playlist, currentIndex, playOrder]);
 
   const [currentLineIndex, setCurrentLineIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -209,26 +223,46 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     const currentPlaylist = playlistRef.current;
     if (!currentPlaylist) return;
     
-    const { fileIds, randomPlay } = currentPlaylist;
-    const currentIdx = currentIndexRef.current;
-    
+    const { fileIds } = currentPlaylist;
     if (fileIds.length <= 1) return;
 
-    console.log('Moving to next script. Current Index:', currentIdx, 'Random Play:', randomPlay);
-
     setCurrentLineIndex(null); // Reset line index
-    if (randomPlay) {
-      // Pick a random index that is not the current one
-      const remainingIndices = fileIds.map((_, i) => i).filter(i => i !== currentIdx);
-      const nextIndex = remainingIndices[Math.floor(Math.random() * remainingIndices.length)];
-      console.log('Randomly picked next index:', nextIndex);
-      setCurrentIndex(nextIndex);
-    } else {
-      const nextIndex = (currentIdx + 1) % fileIds.length;
-      console.log('Sequentially picked next index:', nextIndex);
-      setCurrentIndex(nextIndex);
-    }
+    setCurrentIndex((prev) => (prev + 1) % fileIds.length);
   }, []);
+
+  const toggleRandomPlay = async () => {
+    if (!playlist) return;
+    const newRandomPlay = !playlist.randomPlay;
+    
+    // Update order
+    let newOrder = Array.from({ length: playlist.fileIds.length }, (_, i) => i);
+    const currentFileIdx = playOrder[currentIndex];
+
+    if (newRandomPlay) {
+      // Shuffle
+      for (let i = newOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newOrder[i], newOrder[j]] = [newOrder[j], newOrder[i]];
+      }
+      // Move current file to current position if possible to avoid jump
+      const pos = newOrder.indexOf(currentFileIdx);
+      if (pos !== -1) {
+        [newOrder[currentIndex], newOrder[pos]] = [newOrder[pos], newOrder[currentIndex]];
+      }
+    } else {
+      // Restore sequential, but set currentIndex to where the current file is
+      setCurrentIndex(currentFileIdx);
+    }
+
+    setPlayOrder(newOrder);
+    const newPlaylist = { ...playlist, randomPlay: newRandomPlay };
+    setPlaylist(newPlaylist);
+    try {
+      await saveFileScript(fileId, newPlaylist, storageKey);
+    } catch (error) {
+      console.error('Failed to save random play state', error);
+    }
+  };
 
   const playLine = useCallback((index: number) => {
     if (!scriptData || !scriptData.lines || index >= scriptData.lines.length) {
@@ -249,35 +283,51 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       audioRef.current.pause();
       audioRef.current = null;
     }
+    setIsAudioPlaying(false);
 
     sequenceRef.current = 'content';
 
     const useAudioUrl = playlist?.audioUrlPriority && scriptData.audioUrl;
 
     if (useAudioUrl) {
-      const audio = new Audio(scriptData.audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        audioRef.current = null;
-        sequenceRef.current = 'idle';
-        if (storageKey === 'listening' && autoPlay) {
-          setTimeout(() => {
-            handleNextPlaylist();
-          }, 1000);
+      try {
+        const audio = new Audio(scriptData.audioUrl);
+        audioRef.current = audio;
+        setIsAudioPlaying(true);
+        
+        audio.onended = () => {
+          audioRef.current = null;
+          setIsAudioPlaying(false);
+          sequenceRef.current = 'idle';
+          if (storageKey === 'listening' && autoPlay) {
+            setTimeout(() => {
+              handleNextPlaylist();
+            }, 1000);
+          }
+        };
+
+        audio.onerror = (e) => {
+          console.warn('Audio play failed, falling back to speech', e);
+          audioRef.current = null;
+          setIsAudioPlaying(false);
+          playLine(0);
+        };
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+             console.warn("Audio play prevented or failed", error);
+             // Trigger onerror manually if play fails immediately
+             if (audioRef.current === audio) {
+               audio.onerror?.(error as any);
+             }
+          });
         }
-      };
-
-      audio.onerror = () => {
-        console.error('Audio play failed, falling back to speech');
-        audioRef.current = null;
+      } catch (err) {
+        console.warn("Audio creation failed", err);
+        setIsAudioPlaying(false);
         playLine(0);
-      };
-
-      audio.play().catch(e => {
-        console.error('Audio play catch', e);
-        audio.onerror?.(e as any);
-      });
+      }
     } else {
       playLine(0);
     }
@@ -305,11 +355,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   // Effect to start sequence when script changes
   useEffect(() => {
     if (!loadingScript && scriptData && autoPlay && storageKey === 'listening') {
-      if (playlist?.playQuestion) {
-        playQuestion();
-      } else {
-        playContent();
-      }
+      // Always play question first in listening mode
+      playQuestion();
     } else if (!loadingScript && scriptData && autoPlay) {
       // Legacy autoPlay behavior for other modes
       const firstQuestion = scriptData.questions?.[0]?.en;
@@ -373,6 +420,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+        setIsAudioPlaying(false);
       }
       sequenceRef.current = 'idle';
       setCurrentLineIndex(null);
@@ -395,17 +443,17 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     localStorage.setItem('opic-auto-play', JSON.stringify(autoPlay));
   }, [autoPlay]);
 
-  const handleNext = () => {
-    if (playlist && currentIndex < playlist.fileIds.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+  const handleNext = useCallback(() => {
+    if (playlist && playlist.fileIds.length > 1) {
+      setCurrentIndex((prev) => (prev + 1) % playlist.fileIds.length);
     }
-  };
+  }, [playlist]);
 
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+  const handlePrev = useCallback(() => {
+    if (playlist && playlist.fileIds.length > 1) {
+      setCurrentIndex((prev) => (prev - 1 + playlist.fileIds.length) % playlist.fileIds.length);
     }
-  };
+  }, [playlist]);
 
   const toggleLine = useCallback((index: number) => {
     setRevealedLines((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -414,14 +462,23 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const toggleAll = () => {
     const newState = !allRevealed;
     setAllRevealed(newState);
-    const newRevealed: Record<string, boolean> = {};
+    
+    const newRevealedLines: Record<string, boolean> = {};
+    const newRevealedAnswers: Record<number, boolean> = {};
+
     if (scriptData?.lines) {
-      scriptData.lines.forEach((_: any, index: number) => { newRevealed[index.toString()] = newState; });
+      scriptData.lines.forEach((_: any, index: number) => { 
+        newRevealedLines[index.toString()] = newState;
+        newRevealedAnswers[index] = newState;
+      });
     }
     if (scriptData?.questions) {
-      scriptData.questions.forEach((_: any, index: number) => { newRevealed[`q-${index}`] = newState; });
+      scriptData.questions.forEach((_: any, index: number) => { 
+        newRevealedLines[`q-${index}`] = newState; 
+      });
     }
-    setRevealedLines(newRevealed);
+    setRevealedLines(newRevealedLines);
+    setRevealedAnswers(newRevealedAnswers);
   };
 
   const userAnswersRef = useRef(userAnswers);
@@ -522,25 +579,23 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={{ xs: 1, md: 2 }}
-          sx={{ flexGrow: 1, overflow: 'hidden' }}
+          sx={{ flexGrow: 1 }}
         >
-          <Stack spacing={0.5} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 800,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                color: (sequenceRef.current === 'content' && autoPlay) ? 'error.main' : 'text.primary',
+                color: (sequenceRef.current === 'content' && autoPlay && !isAudioPlaying) ? 'error.main' : 'text.primary',
                 transition: (theme) => theme.transitions.create('color'),
+                wordBreak: 'break-all',
               }}
             >
               {fileName}
             </Typography>
 
 
-            <Typography variant="caption" noWrap sx={{ color: 'text.secondary', fontWeight: 700 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, wordBreak: 'break-all' }}>
               {currentIndex + 1}/{playlist?.fileIds.length || 0} • {currentFileName}
             </Typography>
           </Stack>
@@ -570,7 +625,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               <span>
                 <IconButton
                   size="small"
-                  disabled={!playlist || currentIndex === playlist.fileIds.length - 1}
+                  disabled={!playlist || playlist.fileIds.length <= 1}
                   onClick={handleNext}
                   sx={{ bgcolor: 'background.neutral' }}
                 >
@@ -579,7 +634,21 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               </span>
             </Tooltip>
 
-            <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
+            {storageKey === 'listening' && (
+              <>
+                <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
+                <Tooltip title={playlist?.randomPlay ? "Shuffle: ON" : "Shuffle: OFF"}>
+                  <IconButton
+                    size="small"
+                    color={playlist?.randomPlay ? 'primary' : 'default'}
+                    onClick={toggleRandomPlay}
+                    sx={{ bgcolor: (theme) => (playlist?.randomPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
+                  >
+                    <Iconify icon="solar:shuffle-bold" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
 
             <Tooltip title={autoPlay ? (storageKey === 'listening' ? "Stop" : "Auto Play: ON") : (storageKey === 'listening' ? "Play" : "Auto Play: OFF")}>
               <IconButton
@@ -718,7 +787,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           fontSize: { xs: '1.0625rem', md: '1.125rem' },
                           cursor: testMode ? 'pointer' : 'default',
                           transition: (theme) => theme.transitions.create(['filter', 'opacity', 'color']),
-                          ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
+                          ...(testMode && !(revealedLines[`q-${index}`]) && {
                             filter: 'blur(8px)',
                              opacity: 0.3,
                              userSelect: 'none'
@@ -776,7 +845,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                             color: 'text.secondary', 
                             textAlign: 'justify', 
                             transition: (theme) => theme.transitions.create(['filter', 'opacity']), 
-                            ...(!(revealedLines[`q-${index}`] ?? allRevealed) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }),
+                            ...(!(revealedLines[`q-${index}`]) && { filter: 'blur(6px)', opacity: 0.4, userSelect: 'none' }),
                             whiteSpace: 'pre-wrap'
                           }}
                         >
@@ -790,9 +859,18 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               </Stack>
 
               {scriptData?.audioUrl && (
-                <Box sx={{ mt: 3 }}>
+                <Box sx={{ 
+                  mt: 3,
+                  display: audioReady ? 'block' : 'none'
+                }}>
                   <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
-                  <audio controls src={scriptData.audioUrl} style={{ width: '100%' }} />
+                  <audio 
+                    controls 
+                    src={scriptData.audioUrl} 
+                    style={{ width: '100%' }} 
+                    onCanPlay={() => setAudioReady(true)}
+                    onError={() => setAudioReady(false)}
+                  />
                 </Box>
               )}
             </Card>
@@ -812,14 +890,14 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                   index={index}
                   line={line}
                   testMode={testMode}
-                  isRevealed={revealedLines[index] ?? allRevealed}
+                  isRevealed={revealedLines[index]}
                   userAnswer={userAnswers[index]}
                   result={testResults[index]}
-                  isAnswerRevealed={revealedAnswers[index] || allRevealed}
+                  isAnswerRevealed={revealedAnswers[index]}
                   isListening={isListening === index}
                   isPreparing={isPreparing}
                   playingIndex={playingIndex === index}
-                  speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}` || (currentLineIndex === index && (speakingIndex === `auto-content-line-${index}` || speakingIndex === 'auto-content'))}
+                  speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}` || (currentLineIndex === index && !isAudioPlaying && (speakingIndex === `auto-content-line-${index}` || speakingIndex === 'auto-content'))}
                   isMobile={isMobile}
                   recordedAudio={recordedAudios[index]}
                   setInputRef={setInputRef}
@@ -831,6 +909,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                   onStopListening={stopListening}
                   onPlayRecordedAudio={playRecordedAudio}
                   onToggleAnswerReveal={handleToggleAnswerReveal}
+                  hideInput={storageKey === 'listening'}
                 />
               ))}
             </Stack>
