@@ -47,9 +47,8 @@ const ICONS = {
   pattern: icon('ic-ecommerce'),
   analytics: icon('ic-analytics'),
   dashboard: icon('ic-dashboard'),
-  speaking: iconify('solar:microphone-bold'),
+  practice: iconify('solar:clipboard-list-bold'),
   listening: iconify('solar:headphones-round-bold'),
-  writing: iconify('solar:pen-bold'),
   faq: iconify('solar:question-circle-bold'),
 };
 
@@ -80,12 +79,12 @@ export const navData: NavSectionProps['data'] = [
       { title: 'Home', path: paths.dashboard.root, icon: ICONS.dashboard },
       { title: 'Drive', path: paths.fileManager, icon: ICONS.folder },
       {
-        title: 'Speaking',
-        path: paths.opicTest.root,
-        icon: ICONS.speaking,
+        title: 'Practice',
+        path: paths.practice.root,
+        icon: ICONS.practice,
         children: [
-          { title: '내 모의고사', path: paths.opicTest.myTests },
-          { title: '랜덤 모의고사', path: paths.opicTest.randomTest },
+          { title: '내 모의고사', path: paths.practice.myTests },
+          { title: '랜덤 모의고사', path: paths.practice.randomTest },
         ],
       },
       {
@@ -95,15 +94,6 @@ export const navData: NavSectionProps['data'] = [
         children: [
           { title: 'Playlist', path: paths.listening.playlist },
           { title: '랜덤 듣기', path: paths.listening.random },
-        ],
-      },
-      {
-        title: 'Writing',
-        path: paths.writing.root,
-        icon: ICONS.writing,
-        children: [
-          { title: '내 받아쓰기', path: paths.writing.dictation },
-          { title: '랜덤 받아쓰기', path: paths.writing.random },
         ],
       },
       { title: 'FAQ', path: paths.faq, icon: ICONS.faq },
@@ -121,15 +111,15 @@ export const mainNavData: NavMainProps['data'] = [
     icon: <Iconify width={22} icon="solar:folder-2-bold-duotone" />,
   },
   {
-    title: 'Speaking',
-    path: paths.opicTest.root,
-    icon: <Iconify width={22} icon="solar:microphone-bold-duotone" />,
+    title: 'Practice',
+    path: paths.practice.root,
+    icon: <Iconify width={22} icon="solar:clipboard-list-bold-duotone" />,
     children: [
       {
-        subheader: 'Speaking',
+        subheader: 'Practice',
         items: [
-          { title: '내 모의고사', path: paths.opicTest.myTests },
-          { title: '랜덤 모의고사', path: paths.opicTest.randomTest },
+          { title: '내 모의고사', path: paths.practice.myTests },
+          { title: '랜덤 모의고사', path: paths.practice.randomTest },
         ],
       },
     ],
@@ -144,20 +134,6 @@ export const mainNavData: NavMainProps['data'] = [
         items: [
           { title: 'Playlist', path: paths.listening.playlist },
           { title: '랜덤 듣기', path: paths.listening.random },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'Writing',
-    path: paths.writing.root,
-    icon: <Iconify width={22} icon="solar:pen-bold-duotone" />,
-    children: [
-      {
-        subheader: 'Writing',
-        items: [
-          { title: '내 받아쓰기', path: paths.writing.dictation },
-          { title: '랜덤 받아쓰기', path: paths.writing.random },
         ],
       },
     ],

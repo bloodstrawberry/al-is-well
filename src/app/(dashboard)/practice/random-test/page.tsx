@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { CONFIG } from 'src/global-config';
 
-import { RandomOpicTestView } from 'src/sections/opic-test/view';
+import { RandomOpicTestView } from 'src/sections/practice/view';
 
 // ----------------------------------------------------------------------
 

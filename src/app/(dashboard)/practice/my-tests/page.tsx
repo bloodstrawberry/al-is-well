@@ -6,8 +6,8 @@ import { FileTestView } from 'src/sections/file-manager/view/file-test-view';
 
 // ----------------------------------------------------------------------
 
-export const metadata: Metadata = { title: `내 받아쓰기 | Dashboard - ${CONFIG.appName}` };
+export const metadata: Metadata = { title: `내 모의고사 | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <FileTestView title="내 받아쓰기" category="writing" />;
+  return <FileTestView title="내 모의고사" category="practice" />;
 }

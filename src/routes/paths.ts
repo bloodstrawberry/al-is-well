@@ -22,20 +22,15 @@ export const paths = {
     root: ROOTS.DASHBOARD,
   },
   fileManager: `/opic-drive`,
-  opicTest: {
-    root: `/opic-test`,
-    myTests: `/opic-test/my-tests`,
-    randomTest: `/opic-test/random-test`,
+  practice: {
+    root: `/practice`,
+    myTests: `/practice/my-tests`,
+    randomTest: `/practice/random-test`,
   },
   listening: {
     root: `/listening`,
     playlist: `/listening/playlist`,
     random: `/listening/random`,
-  },
-  writing: {
-    root: `/writing`,
-    dictation: `/writing/dictation`,
-    random: `/writing/random`,
   },
   faq: `/faq`,
 };

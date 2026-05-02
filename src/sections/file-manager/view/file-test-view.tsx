@@ -34,7 +34,7 @@ import { OpicTestLiveView } from '../opic-test-live-view';
 
 type Props = {
   title: string;
-  category: 'speaking' | 'listening' | 'writing';
+  category: 'practice' | 'listening';
 };
 
 export function FileTestView({ title, category }: Props) {
