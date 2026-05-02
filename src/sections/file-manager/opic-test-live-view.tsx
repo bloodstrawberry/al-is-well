@@ -60,6 +60,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const [testMode, setTestMode] = useState(true);
   const [playOrder, setPlayOrder] = useState<number[]>([]);
   const [audioReady, setAudioReady] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const [autoPlay, setAutoPlay] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('opic-auto-play');
@@ -150,6 +151,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       const currentId = playlist.fileIds[currentFileIdx];
       setLoadingScript(true);
       setAudioReady(false);
+      setIsSwitching(true);
+      sequenceRef.current = 'idle';
       
       // Reset item-specific states when switching scripts
       setRevealedLines({});
@@ -197,6 +200,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         toast.error('스크립트를 불러오는데 실패했습니다.');
       } finally {
         setLoadingScript(false);
+        // Delay clearing switching flag slightly to ensure UI and effects settle
+        setTimeout(() => {
+          setIsSwitching(false);
+        }, 300);
       }
     };
     loadCurrentScript();
@@ -205,6 +212,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const [currentLineIndex, setCurrentLineIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const domAudioRef = useRef<HTMLAudioElement | null>(null);
   const sequenceRef = useRef<'idle' | 'question' | 'content'>('idle');
 
   // Use refs to avoid stale closures in callbacks
@@ -287,46 +295,66 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
     sequenceRef.current = 'content';
 
-    const useAudioUrl = playlist?.audioUrlPriority && scriptData.audioUrl;
+    const useAudioUrl = !!(playlist?.audioUrlPriority && scriptData.audioUrl);
 
     if (useAudioUrl) {
-      try {
-        const audio = new Audio(scriptData.audioUrl);
-        audioRef.current = audio;
-        setIsAudioPlaying(true);
-        
-        audio.onended = () => {
-          audioRef.current = null;
-          setIsAudioPlaying(false);
-          sequenceRef.current = 'idle';
-          if (storageKey === 'listening' && autoPlay) {
-            setTimeout(() => {
-              handleNextPlaylist();
-            }, 1000);
+      // Use the actual DOM audio element if available
+      const audio = domAudioRef.current;
+      if (audio) {
+        try {
+          // If already playing or paused in the middle, just play (resume)
+          // audio.currentTime will stay at its current position if we don't reset it
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+               console.warn("Audio play prevented or failed", error);
+               // If play fails (e.g. source error), fallback to speech
+               playLine(0);
+            });
           }
-        };
+        } catch (err) {
+          console.warn("Audio playback failed", err);
+          playLine(0);
+        }
+      } else {
+        // Fallback to legacy behavior if DOM element is not yet available
+        try {
+          const fallbackAudio = new Audio(scriptData.audioUrl);
+          audioRef.current = fallbackAudio;
+          setIsAudioPlaying(true);
+          
+          fallbackAudio.onended = () => {
+            audioRef.current = null;
+            setIsAudioPlaying(false);
+            sequenceRef.current = 'idle';
+            if (storageKey === 'listening' && autoPlay) {
+              setTimeout(() => {
+                handleNextPlaylist();
+              }, 1000);
+            }
+          };
 
-        audio.onerror = (e) => {
-          console.warn('Audio play failed, falling back to speech', e);
-          audioRef.current = null;
+          fallbackAudio.onerror = (e) => {
+            console.warn('Audio play failed, falling back to speech', e);
+            audioRef.current = null;
+            setIsAudioPlaying(false);
+            playLine(0);
+          };
+
+          const playPromise = fallbackAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+               console.warn("Audio play prevented or failed", error);
+               if (audioRef.current === fallbackAudio) {
+                 fallbackAudio.onerror?.(error as any);
+               }
+            });
+          }
+        } catch (err) {
+          console.warn("Audio creation failed", err);
           setIsAudioPlaying(false);
           playLine(0);
-        };
-
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-             console.warn("Audio play prevented or failed", error);
-             // Trigger onerror manually if play fails immediately
-             if (audioRef.current === audio) {
-               audio.onerror?.(error as any);
-             }
-          });
         }
-      } catch (err) {
-        console.warn("Audio creation failed", err);
-        setIsAudioPlaying(false);
-        playLine(0);
       }
     } else {
       playLine(0);
@@ -343,7 +371,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
 
     const questionText = scriptData.questions?.[0]?.en;
-    if (!questionText) {
+    if (!questionText || playlist?.playQuestion === false) {
       playContent();
       return;
     }
@@ -354,10 +382,12 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   // Effect to start sequence when script changes
   useEffect(() => {
-    if (!loadingScript && scriptData && autoPlay && storageKey === 'listening') {
-      // Always play question first in listening mode
-      playQuestion();
-    } else if (!loadingScript && scriptData && autoPlay) {
+    if (!loadingScript && scriptData && autoPlay && storageKey === 'listening' && !isSwitching) {
+      // If we were already in a sequence (from a manual pause/resume), don't reset to question
+      if (sequenceRef.current === 'idle') {
+        playQuestion();
+      }
+    } else if (!loadingScript && scriptData && autoPlay && !isSwitching) {
       // Legacy autoPlay behavior for other modes
       const firstQuestion = scriptData.questions?.[0]?.en;
       if (firstQuestion) {
@@ -365,7 +395,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scriptData, loadingScript, autoPlay, storageKey]);
+  }, [scriptData, loadingScript, autoPlay, storageKey, isSwitching]);
 
   // Effect to monitor speech end for sequence transitions
   useEffect(() => {
@@ -411,6 +441,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       audioRef.current.pause();
       audioRef.current = null;
     }
+    if (domAudioRef.current) {
+      domAudioRef.current.pause();
+    }
   }, [currentIndex]);
 
   // Stop playback when autoPlay is turned off
@@ -420,6 +453,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+        setIsAudioPlaying(false);
+      }
+      if (domAudioRef.current) {
+        domAudioRef.current.pause();
         setIsAudioPlaying(false);
       }
       sequenceRef.current = 'idle';
@@ -434,6 +471,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+      }
+      if (domAudioRef.current) {
+        domAudioRef.current.pause();
       }
     };
   }, []);
@@ -654,7 +694,26 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
               <IconButton
                 size="small"
                 color={autoPlay ? 'primary' : 'default'}
-                onClick={() => setAutoPlay(!autoPlay)}
+                onClick={() => {
+                  const newAutoPlay = !autoPlay;
+                  setAutoPlay(newAutoPlay);
+                  
+                  // Resume logic when turning ON
+                  if (newAutoPlay && storageKey === 'listening') {
+                    if (sequenceRef.current === 'question') {
+                      playQuestion();
+                    } else if (sequenceRef.current === 'content') {
+                      playContent();
+                    } else {
+                      // Initial start or idle
+                      if (playlist?.playQuestion === false) {
+                        playContent();
+                      } else {
+                        playQuestion();
+                      }
+                    }
+                  }
+                }}
                 sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
               >
                 <Iconify 
@@ -865,11 +924,32 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                 }}>
                   <Divider sx={{ mb: 2, borderStyle: 'dashed' }} />
                   <audio 
+                    ref={domAudioRef}
                     controls 
                     src={scriptData.audioUrl} 
                     style={{ width: '100%' }} 
                     onCanPlay={() => setAudioReady(true)}
-                    onError={() => setAudioReady(false)}
+                    onPlay={() => setIsAudioPlaying(true)}
+                    onPause={() => setIsAudioPlaying(false)}
+                    onEnded={() => {
+                      setIsAudioPlaying(false);
+                      // Only skip to next if we were actually playing the content 
+                      // AND it finished naturally. If we swap src while paused, 
+                      // some browsers might fire ended incorrectly.
+                      if (!isSwitching && sequenceRef.current === 'content' && autoPlay && storageKey === 'listening') {
+                        sequenceRef.current = 'idle';
+                        setTimeout(() => {
+                          handleNextPlaylist();
+                        }, 1000);
+                      }
+                    }}
+                    onError={() => {
+                      setAudioReady(false);
+                      if (sequenceRef.current === 'content') {
+                        setIsAudioPlaying(false);
+                        playLine(0);
+                      }
+                    }}
                   />
                 </Box>
               )}
