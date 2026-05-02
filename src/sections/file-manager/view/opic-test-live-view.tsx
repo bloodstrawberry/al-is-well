@@ -513,7 +513,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   }, [playlist]);
 
-  const toggleLine = useCallback((index: number) => {
+  const toggleLine = useCallback((index: string | number) => {
     setRevealedLines((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
 

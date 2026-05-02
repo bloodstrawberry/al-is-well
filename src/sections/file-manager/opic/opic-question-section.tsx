@@ -26,7 +26,7 @@ type Props = {
   storageKey?: string;
   revealedLines: Record<string, boolean>;
   onToggleSpeak: (text: string, index: string) => void;
-  onToggleReveal: (key: string) => void;
+  onToggleReveal: (key: string | number) => void;
   playingRef?: React.Ref<HTMLDivElement>;
   audioRef?: React.RefObject<HTMLAudioElement | null>;
   audioUrl?: string;

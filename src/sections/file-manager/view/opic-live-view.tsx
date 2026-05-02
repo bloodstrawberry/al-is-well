@@ -109,7 +109,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     loadScript();
   }, [fileId]);
 
-  const toggleLine = useCallback((index: number) => {
+  const toggleLine = useCallback((index: string | number) => {
     setRevealedLines((prev) => ({
       ...prev,
       [index]: !prev[index],
