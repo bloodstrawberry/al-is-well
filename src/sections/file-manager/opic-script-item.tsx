@@ -41,6 +41,7 @@ type Props = {
   onPlayRecordedAudio: (index: number) => void;
   onToggleAnswerReveal: (index: number) => void;
   hideInput?: boolean;
+  itemRef?: React.RefObject<HTMLDivElement | null> | null;
 };
 
 export const OpicScriptItem = memo(({
@@ -67,6 +68,7 @@ export const OpicScriptItem = memo(({
   onPlayRecordedAudio,
   onToggleAnswerReveal,
   hideInput,
+  itemRef,
 }: Props) => {
   // Use local state for immediate feedback during typing to avoid stuttering
   const [localValue, setLocalValue] = useState(userAnswer || '');
@@ -167,6 +169,7 @@ export const OpicScriptItem = memo(({
 
   return (
     <Card
+      ref={itemRef}
       sx={{
         p: { xs: 2, md: 2.5 },
         border: (theme) => {
@@ -349,13 +352,16 @@ export const OpicScriptItem = memo(({
                       </Typography>
                     )}
                   </Box>
-                  <IconButton
-                    size="small"
-                    onClick={() => onToggleAnswerReveal(index)}
-                    sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
-                  >
-                    <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
-                  </IconButton>
+                  <Box sx={{ flexGrow: 1 }} />
+                  {!hideInput && (
+                    <IconButton
+                      size="small"
+                      onClick={() => onToggleAnswerReveal(index)}
+                      sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
+                    >
+                      <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
+                    </IconButton>
+                  )}
 
                   <IconButton
                     size="small"

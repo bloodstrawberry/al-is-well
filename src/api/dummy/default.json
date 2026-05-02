@@ -69,28 +69,35 @@
               "label": "01. 사물 묘사 - 좋아하는 가구",
               "type": "file",
               "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-05-01T12:27:17.361Z"
+              "modifiedAt": "2026-05-02T12:47:26.889Z"
             },
             {
               "id": "1777545125920-931f56v20",
               "label": "02. 활동 묘사 - 가구 사용",
               "type": "file",
               "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-04-30T10:32:05.920Z"
+              "modifiedAt": "2026-05-02T12:48:15.252Z"
             },
             {
               "id": "1777545125920-3orik5vgn",
               "label": "03. 비교 - 과거 가구",
               "type": "file",
               "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-04-30T10:32:05.920Z"
+              "modifiedAt": "2026-05-02T12:48:43.443Z"
             },
             {
               "id": "1777545125920-uec40qpgu",
               "label": "04. 특별한 경험 - 가구 문제",
               "type": "file",
               "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-04-30T10:32:05.920Z"
+              "modifiedAt": "2026-05-02T12:49:44.150Z"
+            },
+            {
+              "id": "1777729026405",
+              "label": "TEST",
+              "type": "file",
+              "createdAt": "2026-05-02T13:37:06.405Z",
+              "modifiedAt": "2026-05-02T13:37:06.405Z"
             }
           ],
           "createdAt": "2026-04-30T10:32:05.920Z",
@@ -664,7 +671,7 @@
           "ko": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?"
         }
       ],
-      "audioUrl": "https://blog.kakaocdn.net/dna/C5ggF/dJMcahKE0zM/AAAAAAAAAAAAAAAAAAAAAAUKx8zSREKa5NsBI9erjT99MgZgkwjKNv347JFmzXhq/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PWScYTCoiH4XMls1Qe9mlmyDlWE%3D&attach=1&knm=tfile.mp3",
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3",
       "category": "콤보 세트",
       "subCategory": "사물 묘사",
       "comboPositions": [
@@ -710,9 +717,13 @@
       ]
     },
     "1777545125920-931f56v20": {
-      "questionEn": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
-      "questionKo": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?",
-      "audioUrl": "https://blog.kakaocdn.net/dna/eBsH2o/dJMcadakx9i/AAAAAAAAAAAAAAAAAAAAAENst0TT5jeNEsPG4upbdzWBF4_0_AcCZo53FlTRdpi7/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=QuJLhkRViMbLv02%2BPgVIdJcMPCI%3D&attach=1&knm=tfile.mp3",
+      "questions": [
+        {
+          "en": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
+          "ko": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?"
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3",
       "category": "콤보 세트",
       "subCategory": "활동 묘사",
       "comboPositions": [
@@ -746,9 +757,13 @@
       ]
     },
     "1777545125920-3orik5vgn": {
-      "questionEn": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
-      "questionKo": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요.",
-      "audioUrl": "https://blog.kakaocdn.net/dna/oQVIo/dJMcahKJv3P/AAAAAAAAAAAAAAAAAAAAAOyNpGesOwNNXBW6MaBVUJDU0q0Lmfpng6PVq2indFS1/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=YJpdiWO6%2BvRQdO8KEJTBvzyesmU%3D&attach=1&knm=tfile.mp3",
+      "questions": [
+        {
+          "en": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
+          "ko": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요."
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3",
       "category": "콤보 세트",
       "subCategory": "비교",
       "comboPositions": [
@@ -783,9 +798,13 @@
       ]
     },
     "1777545125920-uec40qpgu": {
-      "questionEn": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
-      "questionKo": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요.",
-      "audioUrl": "https://blog.kakaocdn.net/dna/bxMXe1/dJMcaipkHeg/AAAAAAAAAAAAAAAAAAAAAFeUrUVvanD0XTemE3MdLq6BIvJhhxSMOxHlI_42lBFN/tfile.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=HnkLEexl8Yq%2Bb3ExTk8daSR%2BX3M%3D",
+      "questions": [
+        {
+          "en": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
+          "ko": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요."
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-04%20%ED%8A%B9%EB%B3%84%ED%95%9C%20%EA%B2%BD%ED%97%98-%EA%B0%80%EA%B5%AC,%20%EC%A7%91.mp3",
       "category": "콤보 세트",
       "subCategory": "특별한 경험",
       "comboPositions": [],
@@ -842,7 +861,7 @@
           "type": "file",
           "category": "practice",
           "createdAt": "2026-04-30T05:44:16.590Z",
-          "modifiedAt": "2026-05-01T17:17:47.798Z"
+          "modifiedAt": "2026-05-02T13:30:04.894Z"
         },
         {
           "id": "1777532884598",
@@ -850,7 +869,7 @@
           "type": "file",
           "category": "practice",
           "createdAt": "2026-04-30T07:08:04.598Z",
-          "modifiedAt": "2026-05-01T14:52:34.088Z"
+          "modifiedAt": "2026-05-02T13:26:30.011Z"
         }
       ],
       "scripts": {
@@ -867,27 +886,60 @@
             "1777545125920-o78wwl1a7",
             "1777466897961",
             "1777466877999"
-          ]
+          ],
+          "audioUrlPriority": true,
+          "randomPlay": false,
+          "playQuestion": true
         },
         "1777532884598": {
           "fileIds": [
             "1777448409942"
-          ]
+          ],
+          "audioUrlPriority": true,
+          "randomPlay": false,
+          "playQuestion": true
         }
       }
     },
     "listening": {
       "tree": [
         {
-          "id": "1777527864910",
-          "label": "lllllll",
+          "id": "1777725597619",
+          "label": "ㅅㄷㄴㅅ",
           "type": "file",
           "category": "listening",
-          "createdAt": "2026-04-30T05:44:24.910Z",
-          "modifiedAt": "2026-04-30T05:44:24.910Z"
+          "createdAt": "2026-05-02T12:39:57.619Z",
+          "modifiedAt": "2026-05-02T13:46:14.749Z"
         }
       ],
-      "scripts": {}
+      "scripts": {
+        "1777527864910": {
+          "fileIds": [
+            "1777545125920-uec40qpgu",
+            "1777469283917",
+            "1777545011627-f8kb1bn95",
+            "1777469297342",
+            "1777469303563",
+            "1777469289420"
+          ],
+          "audioUrlPriority": true,
+          "randomPlay": false,
+          "playQuestion": true
+        },
+        "1777725597619": {
+          "fileIds": [
+            "1777545125920-931f56v20",
+            "1777443579253",
+            "1777448409942",
+            "1777466877999",
+            "1777466897961",
+            "1777545125920-o78wwl1a7"
+          ],
+          "audioUrlPriority": true,
+          "randomPlay": false,
+          "playQuestion": true
+        }
+      }
     }
   }
 }
