@@ -927,10 +927,12 @@ export function FileManagerView() {
                 <Box
                   sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'flex-start', sm: 'center' },
                     justifyContent: 'space-between',
                     p: 3,
                     pb: 0,
+                    gap: 2,
                     pl: isCollapsed ? 6 : 3,
                     transition: (theme) => theme.transitions.create(['padding-left']),
                   }}
@@ -941,7 +943,8 @@ export function FileManagerView() {
                     </Typography>
                     {renderBreadcrumbs()}
                   </Box>
-                  <Stack direction="row" spacing={1}>
+
+                  <Stack direction="row" spacing={1} sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}>
                     <IconButton
                       color="error"
                       onClick={() => {

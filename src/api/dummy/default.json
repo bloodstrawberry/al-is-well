@@ -69,7 +69,7 @@
               "label": "01. 사물 묘사 - 좋아하는 가구",
               "type": "file",
               "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-04-30T10:32:05.920Z"
+              "modifiedAt": "2026-05-01T12:27:17.361Z"
             },
             {
               "id": "1777545125920-931f56v20",
@@ -155,7 +155,42 @@
           "type": "folder",
           "createdAt": "2026-04-30T10:32:18.693Z",
           "modifiedAt": "2026-04-30T10:33:03.357Z",
-          "children": [],
+          "children": [
+            {
+              "id": "1777712314186",
+              "label": "ㅁㄴㅇㄹ",
+              "type": "folder",
+              "createdAt": "2026-05-02T08:58:34.186Z",
+              "modifiedAt": "2026-05-02T08:58:34.186Z",
+              "children": [
+                {
+                  "id": "1777712318890",
+                  "label": "ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇ",
+                  "type": "folder",
+                  "createdAt": "2026-05-02T08:58:38.890Z",
+                  "modifiedAt": "2026-05-02T08:58:38.890Z",
+                  "children": [
+                    {
+                      "id": "1777712326614",
+                      "label": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄹ",
+                      "type": "folder",
+                      "createdAt": "2026-05-02T08:58:46.614Z",
+                      "modifiedAt": "2026-05-02T08:58:46.614Z",
+                      "children": []
+                    },
+                    {
+                      "id": "1777712333029",
+                      "label": "ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇ",
+                      "type": "folder",
+                      "createdAt": "2026-05-02T08:58:53.029Z",
+                      "modifiedAt": "2026-05-02T08:58:53.029Z",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
           "isFavorited": true
         },
         {
@@ -623,8 +658,12 @@
       ]
     },
     "1777545125920-o78wwl1a7": {
-      "questionEn": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
-      "questionKo": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?",
+      "questions": [
+        {
+          "en": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
+          "ko": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?"
+        }
+      ],
       "audioUrl": "https://blog.kakaocdn.net/dna/C5ggF/dJMcahKE0zM/AAAAAAAAAAAAAAAAAAAAAAUKx8zSREKa5NsBI9erjT99MgZgkwjKNv347JFmzXhq/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PWScYTCoiH4XMls1Qe9mlmyDlWE%3D&attach=1&knm=tfile.mp3",
       "category": "콤보 세트",
       "subCategory": "사물 묘사",
@@ -637,7 +676,7 @@
           "en": "Let's talk about my bookshelf, where I keep my entire comic book collection."
         },
         {
-          "ko": "내가 집에서 가장 좋아하는 가구지.",
+          "ko": "내가 집에서 가장 좋아하는 가구야.",
           "en": "It is actually my favorite piece of furniture in my home."
         },
         {
@@ -803,7 +842,7 @@
           "type": "file",
           "category": "speaking",
           "createdAt": "2026-04-30T05:44:16.590Z",
-          "modifiedAt": "2026-04-30T10:26:49.081Z"
+          "modifiedAt": "2026-05-01T17:17:47.798Z"
         },
         {
           "id": "1777532884598",
@@ -811,21 +850,29 @@
           "type": "file",
           "category": "speaking",
           "createdAt": "2026-04-30T07:08:04.598Z",
-          "modifiedAt": "2026-04-30T10:21:47.288Z"
+          "modifiedAt": "2026-05-01T14:52:34.088Z"
         }
       ],
       "scripts": {
         "1777527856590": {
           "fileIds": [
-            "1777443579253",
-            "1777466877999",
-            "1777466897961",
+            "1777545125920-3orik5vgn",
+            "1777545125920-uec40qpgu",
+            "1777469283917",
+            "1777545011627-f8kb1bn95",
+            "1777469297342",
             "1777469303563",
-            "1777448409942"
+            "1777469289420",
+            "1777545125920-931f56v20",
+            "1777545125920-o78wwl1a7",
+            "1777466897961",
+            "1777466877999"
           ]
         },
         "1777532884598": {
-          "fileIds": []
+          "fileIds": [
+            "1777448409942"
+          ]
         }
       }
     },
