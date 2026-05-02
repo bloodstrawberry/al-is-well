@@ -167,11 +167,16 @@ export const OpicScriptItem = memo(({
     <Card
       sx={{
         p: { xs: 2, md: 2.5 },
-        border: (theme) => `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider
-          }`,
-        bgcolor: (theme) => !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
-        boxShadow: (theme) => theme.customShadows?.z1,
-        transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+        border: (theme) => {
+          if (speakingIndex) return `solid 2px ${theme.vars.palette.error.main}`;
+          return `solid 1px ${!testMode && isRevealed ? theme.vars.palette.primary.main : theme.vars.palette.divider}`;
+        },
+        bgcolor: (theme) => {
+          if (speakingIndex) return alpha(theme.palette.error.main, 0.04);
+          return !testMode && isRevealed ? alpha(theme.palette.primary.main, 0.02) : 'background.paper';
+        },
+        boxShadow: (theme) => speakingIndex ? theme.customShadows?.error : theme.customShadows?.z1,
+        transition: (theme) => theme.transitions.create(['border-color', 'background-color', 'color']),
       }}
     >
       <Stack spacing={2}>
@@ -199,7 +204,7 @@ export const OpicScriptItem = memo(({
             variant="subtitle1"
             sx={{
               fontWeight: 700,
-              color: 'text.primary',
+              color: speakingIndex ? 'error.main' : 'text.primary',
               lineHeight: 1.4,
               flexGrow: 1,
               fontSize: { xs: '0.9375rem', md: '1rem' }
@@ -348,7 +353,7 @@ export const OpicScriptItem = memo(({
                 variant="body1"
                 sx={{
                   fontWeight: 500,
-                  color: 'text.primary',
+                  color: speakingIndex ? 'error.main' : 'text.primary',
                   lineHeight: 1.5,
                   fontSize: { xs: '0.9375rem', md: '1rem' },
                   ...(!isRevealed && {

@@ -27,6 +27,13 @@ declare global {
   }
 }
 
+type PlaylistData = {
+  fileIds: string[];
+  audioUrlPriority?: boolean;
+  randomPlay?: boolean;
+  playQuestion?: boolean;
+};
+
 type Props = {
   fileId: string;
   fileName: string;
@@ -40,7 +47,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const isMobile = getIsMobile();
 
-  const [playlist, setPlaylist] = useState<{ fileIds: string[] } | null>(null);
+  const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scriptData, setScriptData] = useState<any>(null);
   const [currentFileName, setCurrentFileName] = useState('');
@@ -97,10 +104,21 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       try {
         const data = await getFileScript(fileId, storageKey);
         if (data && data.fileIds) {
-          setPlaylist(data);
+          const playlistWithDefaults = {
+            ...data,
+            audioUrlPriority: data.audioUrlPriority ?? true,
+            randomPlay: data.randomPlay ?? false,
+            playQuestion: data.playQuestion ?? true,
+          };
+          setPlaylist(playlistWithDefaults);
           setCurrentIndex(0);
         } else {
-          setPlaylist({ fileIds: [fileId] });
+          setPlaylist({ 
+            fileIds: [fileId],
+            audioUrlPriority: true,
+            randomPlay: false,
+            playQuestion: true,
+          });
         }
       } catch (error) {
         console.error('Failed to load playlist', error);
@@ -171,17 +189,206 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlist, currentIndex]);
 
-  // 3. Auto Play Question
+  const [currentLineIndex, setCurrentLineIndex] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const sequenceRef = useRef<'idle' | 'question' | 'content'>('idle');
+
+  // Use refs to avoid stale closures in callbacks
+  const playlistRef = useRef<PlaylistData | null>(null);
+  const currentIndexRef = useRef(currentIndex);
+
   useEffect(() => {
-    if (!loadingScript && scriptData && autoPlay) {
-      // Only play the first question if autoPlay is enabled
+    playlistRef.current = playlist;
+  }, [playlist]);
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  const handleNextPlaylist = useCallback(() => {
+    const currentPlaylist = playlistRef.current;
+    if (!currentPlaylist) return;
+    
+    const { fileIds, randomPlay } = currentPlaylist;
+    const currentIdx = currentIndexRef.current;
+    
+    if (fileIds.length <= 1) return;
+
+    console.log('Moving to next script. Current Index:', currentIdx, 'Random Play:', randomPlay);
+
+    setCurrentLineIndex(null); // Reset line index
+    if (randomPlay) {
+      // Pick a random index that is not the current one
+      const remainingIndices = fileIds.map((_, i) => i).filter(i => i !== currentIdx);
+      const nextIndex = remainingIndices[Math.floor(Math.random() * remainingIndices.length)];
+      console.log('Randomly picked next index:', nextIndex);
+      setCurrentIndex(nextIndex);
+    } else {
+      const nextIndex = (currentIdx + 1) % fileIds.length;
+      console.log('Sequentially picked next index:', nextIndex);
+      setCurrentIndex(nextIndex);
+    }
+  }, []);
+
+  const playLine = useCallback((index: number) => {
+    if (!scriptData || !scriptData.lines || index >= scriptData.lines.length) {
+      return;
+    }
+
+    setCurrentLineIndex(index);
+    const line = scriptData.lines[index];
+    toggleSpeak(line.en, `auto-content-line-${index}`);
+  }, [scriptData, toggleSpeak]);
+
+  const playContent = useCallback(() => {
+    if (!scriptData) return;
+    
+    // Stop any existing speech/audio before starting
+    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    sequenceRef.current = 'content';
+
+    const useAudioUrl = playlist?.audioUrlPriority && scriptData.audioUrl;
+
+    if (useAudioUrl) {
+      const audio = new Audio(scriptData.audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        audioRef.current = null;
+        sequenceRef.current = 'idle';
+        if (storageKey === 'listening' && autoPlay) {
+          setTimeout(() => {
+            handleNextPlaylist();
+          }, 1000);
+        }
+      };
+
+      audio.onerror = () => {
+        console.error('Audio play failed, falling back to speech');
+        audioRef.current = null;
+        playLine(0);
+      };
+
+      audio.play().catch(e => {
+        console.error('Audio play catch', e);
+        audio.onerror?.(e as any);
+      });
+    } else {
+      playLine(0);
+    }
+  }, [scriptData, playlist, autoPlay, storageKey, handleNextPlaylist, playLine]);
+
+  const playQuestion = useCallback(() => {
+    if (!scriptData) return;
+    
+    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    const questionText = scriptData.questions?.[0]?.en;
+    if (!questionText) {
+      playContent();
+      return;
+    }
+
+    sequenceRef.current = 'question';
+    toggleSpeak(questionText, 'auto-question');
+  }, [scriptData, playContent, toggleSpeak]);
+
+  // Effect to start sequence when script changes
+  useEffect(() => {
+    if (!loadingScript && scriptData && autoPlay && storageKey === 'listening') {
+      if (playlist?.playQuestion) {
+        playQuestion();
+      } else {
+        playContent();
+      }
+    } else if (!loadingScript && scriptData && autoPlay) {
+      // Legacy autoPlay behavior for other modes
       const firstQuestion = scriptData.questions?.[0]?.en;
       if (firstQuestion) {
         toggleSpeak(firstQuestion, 'auto-play');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scriptData, loadingScript, autoPlay]);
+  }, [scriptData, loadingScript, autoPlay, storageKey]);
+
+  // Effect to monitor speech end for sequence transitions
+  useEffect(() => {
+    // Only trigger when speakingIndex becomes null (speech ended)
+    if (speakingIndex === null && storageKey === 'listening' && autoPlay) {
+      if (sequenceRef.current === 'question') {
+        // Transition Question -> Content
+        sequenceRef.current = 'idle';
+        setTimeout(() => {
+          playContent();
+        }, 800);
+      } else if (sequenceRef.current === 'content' && !audioRef.current) {
+        // Handle next line for Web Speech
+        // Use the current state value, but since this effect is triggered by speakingIndex,
+        // it will only fire when a speech ends.
+        if (currentLineIndex !== null) {
+          const nextLineIndex = currentLineIndex + 1;
+          // Important: Reset currentLineIndex to null if we've reached the end
+          // to prevent the "idle" state from being confused.
+          if (scriptData?.lines && nextLineIndex >= scriptData.lines.length) {
+            sequenceRef.current = 'idle';
+            setCurrentLineIndex(null);
+            setTimeout(() => {
+              handleNextPlaylist();
+            }, 1200);
+          } else {
+            setTimeout(() => {
+              playLine(nextLineIndex);
+            }, 500);
+          }
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speakingIndex, storageKey, autoPlay]); // Removed currentLineIndex and other deps that cause re-triggers
+
+  // Reset sequence when index changes manually
+  useEffect(() => {
+    sequenceRef.current = 'idle';
+    setCurrentLineIndex(null);
+    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  }, [currentIndex]);
+
+  // Stop playback when autoPlay is turned off
+  useEffect(() => {
+    if (!autoPlay && storageKey === 'listening') {
+      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      sequenceRef.current = 'idle';
+      setCurrentLineIndex(null);
+    }
+  }, [autoPlay, storageKey]);
+
+  // Cleanup audio and speech on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // 4. Persist Auto Play
   useEffect(() => {
@@ -325,6 +532,8 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
+                color: (sequenceRef.current === 'content' && autoPlay) ? 'error.main' : 'text.primary',
+                transition: (theme) => theme.transitions.create('color'),
               }}
             >
               {fileName}
@@ -372,14 +581,20 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 24, alignSelf: 'center' }} />
 
-            <Tooltip title={autoPlay ? "Auto Play: ON" : "Auto Play: OFF"}>
+            <Tooltip title={autoPlay ? (storageKey === 'listening' ? "Stop" : "Auto Play: ON") : (storageKey === 'listening' ? "Play" : "Auto Play: OFF")}>
               <IconButton
                 size="small"
                 color={autoPlay ? 'primary' : 'default'}
                 onClick={() => setAutoPlay(!autoPlay)}
                 sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
               >
-                <Iconify icon={autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear"} />
+                <Iconify 
+                  icon={
+                    storageKey === 'listening' 
+                      ? (autoPlay ? "solar:stop-circle-bold" : "solar:play-circle-bold")
+                      : (autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear")
+                  } 
+                />
               </IconButton>
             </Tooltip>
 
@@ -411,7 +626,18 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         ) : scriptData ? (
           <Stack spacing={4}>
             {/* Question Section */}
-            <Card sx={{ p: { xs: 2, md: 3 }, border: (theme) => `solid 1px ${theme.vars.palette.divider}`, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.5) }}>
+            <Card 
+              sx={{ 
+                p: { xs: 2, md: 3 }, 
+                border: (theme) => (speakingIndex === 'auto-question' || (sequenceRef.current === 'question' && autoPlay)) 
+                  ? `solid 2px ${theme.vars.palette.error.main}` 
+                  : `solid 1px ${theme.vars.palette.divider}`, 
+                bgcolor: (theme) => (speakingIndex === 'auto-question' || (sequenceRef.current === 'question' && autoPlay))
+                  ? alpha(theme.palette.error.main, 0.04)
+                  : alpha(theme.palette.background.neutral, 0.5),
+                transition: (theme) => theme.transitions.create(['border-color', 'background-color']),
+              }}
+            >
               <Typography variant="overline" sx={{ color: 'text.disabled', mb: 2, display: 'block' }}>Question</Typography>
 
               <Stack spacing={3}>
@@ -488,10 +714,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                           lineHeight: 1.5,
                           fontWeight: 700,
                           flexGrow: 1,
-                          color: 'text.primary',
+                          color: (speakingIndex === `q-${index}` || (index === 0 && (speakingIndex === 'auto-play' || speakingIndex === 'auto-question'))) ? 'error.main' : 'text.primary',
                           fontSize: { xs: '1.0625rem', md: '1.125rem' },
                           cursor: testMode ? 'pointer' : 'default',
-                          transition: (theme) => theme.transitions.create(['filter', 'opacity']),
+                          transition: (theme) => theme.transitions.create(['filter', 'opacity', 'color']),
                           ...(testMode && !(revealedLines[`q-${index}`] ?? allRevealed) && {
                             filter: 'blur(8px)',
                              opacity: 0.3,
@@ -593,7 +819,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                   isListening={isListening === index}
                   isPreparing={isPreparing}
                   playingIndex={playingIndex === index}
-                  speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}`}
+                  speakingIndex={speakingIndex === `line-${index}` || speakingIndex === `line-result-${index}` || speakingIndex === `line-view-${index}` || (currentLineIndex === index && (speakingIndex === `auto-content-line-${index}` || speakingIndex === 'auto-content'))}
                   isMobile={isMobile}
                   recordedAudio={recordedAudios[index]}
                   setInputRef={setInputRef}

@@ -14,6 +14,23 @@ import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { Iconify } from 'src/components/iconify';
 import { getTreeData, getFileScript, saveFileScript } from 'src/api/indexDB';
@@ -23,6 +40,9 @@ import { toast } from 'src/components/snackbar';
 
 type PlaylistData = {
   fileIds: string[];
+  audioUrlPriority?: boolean;
+  randomPlay?: boolean;
+  playQuestion?: boolean;
 };
 
 type Props = {
@@ -35,13 +55,130 @@ type Props = {
   storageKey?: string;
 };
 
+// ----------------------------------------------------------------------
+
+type SortableScriptItemProps = {
+  file: { id: string; label: string; path: string };
+  index: number;
+  onRemove: (id: string) => void;
+};
+
+function SortableScriptItem({ file, index, onRemove }: SortableScriptItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: file.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1100 : 'auto',
+    opacity: isDragging ? 0.6 : 1,
+    position: 'relative' as const,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      sx={{
+        p: 2,
+        display: 'flex',
+        alignItems: 'center',
+        border: (theme) => `solid 1px ${theme.vars.palette.divider}`,
+        bgcolor: (theme) => isDragging ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.background.neutral, 0.4),
+        cursor: 'grab',
+        '&:active': { cursor: 'grabbing' },
+        touchAction: 'none', // Prevents scrolling while dragging on touch devices
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 800,
+          mr: 2,
+          flexShrink: 0
+        }}
+      >
+        {index + 1}
+      </Typography>
+
+      <Stack spacing={0.5} sx={{ flexGrow: 1, minWidth: 0 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+          {file.label}
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'text.disabled' }} noWrap>
+          {file.path}
+        </Typography>
+      </Stack>
+
+      <IconButton 
+        color="error" 
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent drag start when clicking delete
+          onRemove(file.id);
+        }}
+        onPointerDown={(e) => e.stopPropagation()} // Important for dnd-kit with buttons
+      >
+        <Iconify icon="solar:trash-bin-trash-bold" />
+      </IconButton>
+    </Card>
+  );
+}
+
 export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, onStartTest, onSave, storageKey }: Props) {
   const theme = useTheme();
 
-  const [playlist, setPlaylist] = useState<PlaylistData>({ fileIds: [] });
+  const [playlist, setPlaylist] = useState<PlaylistData>({ 
+    fileIds: [],
+    audioUrlPriority: true,
+    randomPlay: false,
+    playQuestion: true,
+  });
   const [driveFiles, setDriveFiles] = useState<{ id: string; label: string; path: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const initialPlaylistRef = useRef<any>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px move required to start dragging
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setPlaylist((prev) => {
+        const oldIndex = prev.fileIds.indexOf(active.id as string);
+        const newIndex = prev.fileIds.indexOf(over.id as string);
+
+        return {
+          ...prev,
+          fileIds: arrayMove(prev.fileIds, oldIndex, newIndex),
+        };
+      });
+    }
+  };
 
   // Load drive files for autocomplete
   useEffect(() => {
@@ -80,11 +217,24 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         const data = await getFileScript(fileId, storageKey);
         if (data && data.fileIds) {
           const uniqueFileIds = Array.from(new Set(data.fileIds as string[]));
-          const cleanedData = { ...data, fileIds: uniqueFileIds };
+          const cleanedData = { 
+            ...data, 
+            fileIds: uniqueFileIds,
+            audioUrlPriority: data.audioUrlPriority ?? true,
+            randomPlay: data.randomPlay ?? false,
+            playQuestion: data.playQuestion ?? true,
+          };
           setPlaylist(cleanedData);
           initialPlaylistRef.current = JSON.stringify(cleanedData);
         } else {
-          initialPlaylistRef.current = JSON.stringify({ fileIds: [] });
+          const defaultPlaylist = { 
+            fileIds: [],
+            audioUrlPriority: true,
+            randomPlay: false,
+            playQuestion: true,
+          };
+          setPlaylist(defaultPlaylist);
+          initialPlaylistRef.current = JSON.stringify(defaultPlaylist);
         }
       } catch (error) {
         console.error('Failed to load playlist', error);
@@ -302,58 +452,103 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           </Stack>
         </Card>
 
-        <Stack spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            테스트 스크립트 목록 ({selectedFiles.length})
-          </Typography>
+        {storageKey === 'listening' && (
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>Listening 설정</Typography>
+              
+              <Stack direction="row" alignItems="center" spacing={3}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>재생 방식:</Typography>
+                  <Stack direction="row" spacing={1} sx={{ bgcolor: 'background.neutral', p: 0.5, borderRadius: 1 }}>
+                    <Tooltip title="Audio URL이 있는 경우에만 재생됩니다.">
+                      <Button
+                        size="small"
+                        variant={playlist.audioUrlPriority ? 'contained' : 'text'}
+                        color={playlist.audioUrlPriority ? 'primary' : 'inherit'}
+                        onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: true }))}
+                        sx={{ px: 2, fontWeight: 700 }}
+                      >
+                        Audio URL 우선
+                      </Button>
+                    </Tooltip>
+                    <Button
+                      size="small"
+                      variant={!playlist.audioUrlPriority ? 'contained' : 'text'}
+                      color={!playlist.audioUrlPriority ? 'primary' : 'inherit'}
+                      onClick={() => setPlaylist(prev => ({ ...prev, audioUrlPriority: false }))}
+                      sx={{ px: 2, fontWeight: 700 }}
+                    >
+                      Web Speech
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Stack>
+          </Card>
+        )}
 
-          {selectedFiles.length > 0 ? (
-            <Stack spacing={1.5} sx={{ userSelect: { xs: 'none', md: 'auto' } }}>
-              {selectedFiles.map((file, index) => (
-                <Card
-                  key={file.id}
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    border: (theme) => `solid 1px ${theme.vars.palette.divider}`,
-                    bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4),
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      bgcolor: 'primary.main',
-                      color: 'primary.contrastText',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      mr: 2,
-                      flexShrink: 0
+        <Stack spacing={2}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              테스트 스크립트 목록 ({selectedFiles.length})
+            </Typography>
+
+            {storageKey === 'listening' && (
+              <Stack direction="row" spacing={1}>
+                <Tooltip title={playlist.randomPlay ? "랜덤 재생 On" : "랜덤 재생 Off"}>
+                  <IconButton
+                    size="small"
+                    color={playlist.randomPlay ? 'primary' : 'default'}
+                    onClick={() => setPlaylist(prev => ({ ...prev, randomPlay: !prev.randomPlay }))}
+                    sx={{ 
+                      bgcolor: (theme) => playlist.randomPlay ? alpha(theme.palette.primary.main, 0.12) : 'background.neutral',
+                      border: (theme) => `solid 1px ${playlist.randomPlay ? theme.palette.primary.main : 'transparent'}`
                     }}
                   >
-                    {index + 1}
-                  </Typography>
-
-                  <Stack spacing={0.5} sx={{ flexGrow: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
-                      {file.label}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.disabled' }} noWrap>
-                      {file.path}
-                    </Typography>
-                  </Stack>
-
-                  <IconButton color="error" onClick={() => handleRemoveFile(file.id)}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
+                    <Iconify icon="solar:shuffle-bold" />
                   </IconButton>
-                </Card>
-              ))}
-            </Stack>
+                </Tooltip>
+
+                <Tooltip title={playlist.playQuestion ? "질문 재생 On" : "질문 재생 Off"}>
+                  <IconButton
+                    size="small"
+                    color={playlist.playQuestion ? 'info' : 'default'}
+                    onClick={() => setPlaylist(prev => ({ ...prev, playQuestion: !prev.playQuestion }))}
+                    sx={{ 
+                      bgcolor: (theme) => playlist.playQuestion ? alpha(theme.palette.info.main, 0.12) : 'background.neutral',
+                      border: (theme) => `solid 1px ${playlist.playQuestion ? theme.palette.info.main : 'transparent'}`
+                    }}
+                  >
+                    <Iconify icon="solar:chat-round-call-bold" />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            )}
+          </Stack>
+
+          {selectedFiles.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={playlist.fileIds}
+                strategy={verticalListSortingStrategy}
+              >
+                <Stack spacing={1.5} sx={{ userSelect: { xs: 'none', md: 'auto' } }}>
+                  {selectedFiles.map((file, index) => (
+                    <SortableScriptItem
+                      key={file.id}
+                      file={file}
+                      index={index}
+                      onRemove={handleRemoveFile}
+                    />
+                  ))}
+                </Stack>
+              </SortableContext>
+            </DndContext>
           ) : (
             <Box
               sx={{
