@@ -22,7 +22,7 @@ export function NavList({ data, sx, ...other }: NavListProps) {
   const pathname = usePathname();
   const navItemRef = useRef<HTMLButtonElement>(null);
 
-  const isNotRootOrDocs = !['/', paths.docs].includes(pathname);
+  const isNotRootOrDocs = !['/'].includes(pathname);
   const isOpenPath = !!data.children && isNotRootOrDocs;
 
   const isActive = isActiveLink(pathname, data.path, data.deepMatch ?? !!data.children);
