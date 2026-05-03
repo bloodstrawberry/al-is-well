@@ -23,7 +23,7 @@ const LINKS = [
   {
     headline: 'Minimal',
     children: [
-      { name: 'FAQs', href: paths.faqs },
+      { name: 'FAQs', href: paths.faq },
     ],
   },
   {
