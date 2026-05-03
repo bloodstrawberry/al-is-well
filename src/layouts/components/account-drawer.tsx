@@ -76,8 +76,8 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
       ]}
     >
       {data.map((option) => {
-        const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
-        const rootHref = pathname.includes('/dashboard') ? '/' : paths.home;
+        const rootLabel = 'Home';
+        const rootHref = paths.home;
 
         return (
           <MenuItem key={option.label}>
