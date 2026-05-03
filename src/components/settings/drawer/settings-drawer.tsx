@@ -22,7 +22,6 @@ import { Iconify } from '../../iconify';
 import { Scrollbar } from '../../scrollbar';
 import { SmallBlock, LargeBlock } from './styles';
 import { PresetsOptions } from './presets-options';
-import { FullScreenButton } from './fullscreen-button';
 import { FontSizeOptions, FontFamilyOptions } from './font-options';
 import { useSettingsContext } from '../context/use-settings-context';
 
@@ -34,9 +33,9 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
 
   // Visible options by default settings
   const visibility = {
-    fontSize: hasKeys(defaultSettings, ['fontSize']),    
+    fontSize: hasKeys(defaultSettings, ['fontSize']),
     fontFamily: hasKeys(defaultSettings, ['fontFamily']),
-    primaryColor: hasKeys(defaultSettings, ['primaryColor']),    
+    primaryColor: hasKeys(defaultSettings, ['primaryColor']),
   };
 
   useEffect(() => {
@@ -63,8 +62,6 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Settings
       </Typography>
-
-      <FullScreenButton />
 
       <Tooltip title="Reset all">
         <IconButton onClick={handleReset}>

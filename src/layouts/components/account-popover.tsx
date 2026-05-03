@@ -16,8 +16,6 @@ import { RouterLink } from 'src/routes/components';
 import { Label } from 'src/components/label';
 import { CustomPopover } from 'src/components/custom-popover';
 
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-
 import { AccountButton } from './account-button';
 
 // ----------------------------------------------------------------------
@@ -36,7 +34,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const { open, anchorEl, onClose, onOpen } = usePopover();
 
-  const { user } = useMockedUser();
+  const user = null;
 
   const renderMenuActions = () => (
     <CustomPopover

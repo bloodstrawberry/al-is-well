@@ -64,14 +64,14 @@ const GRID_DENSITY_OPTIONS: {
   value: GridSettingsState['density'];
   icon: React.ReactNode;
 }[] = [
-  { label: 'Compact density', value: 'compact', icon: <DensityCompactIcon /> },
-  { label: 'Standard density', value: 'standard', icon: <DensityStandardIcon /> },
-  {
-    label: 'Comfortable density',
-    value: 'comfortable',
-    icon: <DensityComfortableIcon />,
-  },
-];
+    { label: 'Compact density', value: 'compact', icon: <DensityCompactIcon /> },
+    { label: 'Standard density', value: 'standard', icon: <DensityStandardIcon /> },
+    {
+      label: 'Comfortable density',
+      value: 'comfortable',
+      icon: <DensityComfortableIcon />,
+    },
+  ];
 
 export function CustomToolbarSettingsButton({
   settings,
