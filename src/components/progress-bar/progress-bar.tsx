@@ -71,15 +71,22 @@ function useProgressBar() {
 
     // Patches a history method to intercept client-side navigations.
     const patchHistoryMethod = (method: 'pushState' | 'replaceState') => {
-      const originalMethod = window.history[method];
+      const history = window.history as any;
+      if (history[method].__isProxy) return;
 
-      window.history[method] = new Proxy(originalMethod, {
+      const originalMethod = history[method];
+
+      history[method] = new Proxy(originalMethod, {
         apply: (target, thisArg, args: [data: any, unused: string, url?: string | URL | null]) => {
           const newUrl = args[2];
           if (typeof newUrl === 'string') {
             handleNavigation(new URL(newUrl, window.location.origin).href);
           }
           return target.apply(thisArg, args);
+        },
+        get: (target, prop, receiver) => {
+          if (prop === '__isProxy') return true;
+          return Reflect.get(target, prop, receiver);
         },
       });
     };
