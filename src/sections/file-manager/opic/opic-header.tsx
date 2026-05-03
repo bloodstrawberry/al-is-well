@@ -171,7 +171,7 @@ export function OpicHeader({
           }}
         >
           {onPrev && (
-            <Tooltip title="Previous Script">
+            <Tooltip title="Previous Script (Ctrl + Shift + Enter)">
               <span>
                 <IconButton
                   size="small"
@@ -186,7 +186,7 @@ export function OpicHeader({
           )}
 
           {onNext && (
-            <Tooltip title="Next Script">
+            <Tooltip title="Next Script (Ctrl + Enter)">
               <span>
                 <IconButton
                   size="small"

@@ -137,7 +137,17 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     setTestResults(prev => ({ ...prev, [index]: results }));
     if (results.every(r => r.isCorrect)) setRevealedAnswers(prev => ({ ...prev, [index]: true }));
-  }, [scriptData?.lines]);
+
+    // Scroll into view if it's the last script to ensure results are visible
+    if (index === (scriptData?.lines?.length || 0) - 1) {
+      setTimeout(() => {
+        const input = inputRefs.current[index];
+        if (input) {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [scriptData?.lines, inputRefs]);
 
   // Auto-check answer when microphone input ends
   useEffect(() => {
@@ -574,6 +584,22 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   }, [playlist]);
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'Enter') {
+        if (event.shiftKey) {
+          handlePrev();
+        } else {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev]);
+
   const toggleLine = useCallback((index: string | number) => {
     setRevealedLines((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
@@ -612,6 +638,15 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const setInputRef = useCallback((index: number, el: any) => {
     inputRefs.current[index] = el;
+  }, [inputRefs]);
+
+  const handleFocusNextInput = useCallback((index: number, direction: 'next' | 'prev') => {
+    const nextIndex = direction === 'next' ? index + 1 : index - 1;
+    const nextInput = inputRefs.current[nextIndex];
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, [inputRefs]);
 
   if (loading) {
@@ -729,6 +764,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
                   onStopListening={stopListening}
                   onPlayRecordedAudio={playRecordedAudio}
                   onToggleAnswerReveal={handleToggleAnswerReveal}
+                  onFocusNext={handleFocusNextInput}
                   hideInput={storageKey === 'listening'}
                 />
               ))}

@@ -42,6 +42,7 @@ type Props = {
   onStopListening: () => void;
   onPlayRecordedAudio: (index: number) => void;
   onToggleAnswerReveal: (index: number) => void;
+  onFocusNext?: (index: number, direction: 'next' | 'prev') => void;
   hideInput?: boolean;
   itemRef?: React.RefObject<HTMLDivElement | null> | null;
 };
@@ -69,6 +70,7 @@ export const OpicScriptItem = memo(({
   onStopListening,
   onPlayRecordedAudio,
   onToggleAnswerReveal,
+  onFocusNext,
   hideInput,
   itemRef,
 }: Props) => {
@@ -238,6 +240,10 @@ export const OpicScriptItem = memo(({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     handleAction('check');
+                  }
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    onFocusNext?.(index, e.shiftKey ? 'prev' : 'next');
                   }
                 }}
                 autoComplete="off"
