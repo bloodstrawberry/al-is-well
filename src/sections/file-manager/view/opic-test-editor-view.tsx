@@ -551,6 +551,28 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
             <Typography variant="h6" sx={{ fontWeight: 800 }}>
               테스트 스크립트 목록 ({selectedFiles.length})
             </Typography>
+
+            {storageKey !== 'listening' && (
+              <Tooltip title={playlist.randomPlay ? "랜덤 셔플 On" : "랜덤 셔플 Off"}>
+                <IconButton
+                  size="small"
+                  color={playlist.randomPlay ? 'primary' : 'default'}
+                  onClick={() => setPlaylist(prev => ({ ...prev, randomPlay: !prev.randomPlay }))}
+                  sx={{ 
+                    width: 32,
+                    height: 32,
+                    bgcolor: (theme) => playlist.randomPlay ? alpha(theme.palette.primary.main, 0.1) : 'background.neutral',
+                    border: (theme) => `solid 1px ${playlist.randomPlay ? alpha(theme.palette.primary.main, 0.2) : 'transparent'}`,
+                    transition: (theme) => theme.transitions.create(['background-color', 'border-color']),
+                    '&:hover': {
+                      bgcolor: (theme) => playlist.randomPlay ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.action.hover, 0.1),
+                    }
+                  }}
+                >
+                  <Iconify icon="solar:shuffle-bold" width={20} />
+                </IconButton>
+              </Tooltip>
+            )}
           </Stack>
 
           {selectedFiles.length > 0 ? (

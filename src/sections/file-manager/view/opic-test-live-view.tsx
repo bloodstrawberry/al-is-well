@@ -326,39 +326,6 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     setCurrentIndex((prev) => (prev + 1) % fileIds.length);
   }, []);
 
-  const toggleRandomPlay = async () => {
-    if (!playlist) return;
-    const newRandomPlay = !playlist.randomPlay;
-    
-    // Update order
-    let newOrder = Array.from({ length: playlist.fileIds.length }, (_, i) => i);
-    const currentFileIdx = playOrder[currentIndex];
-
-    if (newRandomPlay) {
-      // Shuffle
-      for (let i = newOrder.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newOrder[i], newOrder[j]] = [newOrder[j], newOrder[i]];
-      }
-      // Move current file to current position if possible to avoid jump
-      const pos = newOrder.indexOf(currentFileIdx);
-      if (pos !== -1) {
-        [newOrder[currentIndex], newOrder[pos]] = [newOrder[pos], newOrder[currentIndex]];
-      }
-    } else {
-      // Restore sequential, but set currentIndex to where the current file is
-      setCurrentIndex(currentFileIdx);
-    }
-
-    setPlayOrder(newOrder);
-    const newPlaylist = { ...playlist, randomPlay: newRandomPlay };
-    setPlaylist(newPlaylist);
-    try {
-      await saveFileScript(fileId, newPlaylist, storageKey);
-    } catch (error) {
-      console.error('Failed to save random play state', error);
-    }
-  };
 
   const playLine = useCallback((index: number) => {
     if (!scriptData || !scriptData.lines || index >= scriptData.lines.length) {
@@ -668,12 +635,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         isAudioPlaying={isAudioPlaying}
         isContentSequence={sequenceRef.current === 'content'}
         storageKey={storageKey}
-        randomPlay={playlist?.randomPlay}
         allRevealed={allRevealed}
         onBack={onBack}
         onPrev={handlePrev}
         onNext={handleNext}
-        onToggleRandom={toggleRandomPlay}
         onToggleAllRevealed={toggleAll}
         onEdit={onEdit}
         onToggleAutoPlay={() => {
