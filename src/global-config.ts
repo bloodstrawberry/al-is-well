@@ -45,7 +45,7 @@ export const CONFIG: ConfigValue = {
   auth: {
     method: 'jwt',
     skip: true,
-    redirectPath: paths.dashboard.root,
+    redirectPath: paths.home,
   },
   /**
    * Mapbox

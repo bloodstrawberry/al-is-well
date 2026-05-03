@@ -1,11 +1,8 @@
-import type { Metadata } from 'next';
-
-import { OverviewAppView } from 'src/sections/overview/app/view';
+import { redirect } from 'next/navigation';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
-export const metadata: Metadata = { title: `AL is well | Home` };
-
 export default function Page() {
-  return <OverviewAppView />;
+  redirect(paths.home);
 }

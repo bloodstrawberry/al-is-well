@@ -76,7 +76,7 @@ export const navData: NavSectionProps['data'] = [
   {
     subheader: 'Overview',
     items: [
-      { title: 'Home', path: paths.dashboard.root, icon: ICONS.dashboard },
+      { title: 'Home', path: paths.home, icon: ICONS.dashboard },
       { title: 'Drive', path: paths.fileManager, icon: ICONS.folder },
       {
         title: 'Practice',
