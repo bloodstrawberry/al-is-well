@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import { CONFIG } from 'src/global-config';
-import { DashboardHomeView } from 'src/sections/overview/home/view';
+import { DashboardHomeView } from 'src/sections/overview/home/home-view';
 
 // ----------------------------------------------------------------------
 
