@@ -34,7 +34,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const { open, anchorEl, onClose, onOpen } = usePopover();
 
-  const user = null;
+  const user: {
+    photoURL: string;
+    displayName: string;
+    email: string;
+  } | null = null;
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -107,8 +111,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     <>
       <AccountButton
         onClick={onOpen}
-        photoURL={user?.photoURL}
-        displayName={user?.displayName}
+        photoURL={user?.photoURL ?? ''}
+        displayName={user?.displayName ?? ''}
         sx={sx}
         {...other}
       />

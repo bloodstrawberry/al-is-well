@@ -41,7 +41,11 @@ export type AccountDrawerProps = IconButtonProps & {
 export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const pathname = usePathname();
 
-  const user = null;
+  const user: {
+    photoURL: string;
+    displayName: string;
+    email: string;
+  } | null = null;
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
@@ -116,8 +120,8 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
     <>
       <AccountButton
         onClick={onOpen}
-        photoURL={user?.photoURL}
-        displayName={user?.displayName}
+        photoURL={user?.photoURL ?? ''}
+        displayName={user?.displayName ?? ''}
         sx={sx}
         {...other}
       />
