@@ -130,6 +130,25 @@ export const OpicEditorItem = memo(({
     }
   };
 
+  const hasKoreanInEn = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(localEn);
+
+  const handleSwap = () => {
+    const tempKo = localKo;
+    const tempEn = localEn;
+    
+    setLocalKo(tempEn);
+    setLocalEn(tempKo);
+    
+    lastKoRef.current = tempEn;
+    lastEnRef.current = tempKo;
+    
+    if (koTimerRef.current) clearTimeout(koTimerRef.current);
+    if (enTimerRef.current) clearTimeout(enTimerRef.current);
+    
+    onChangeLine(index, 'ko', tempEn);
+    onChangeLine(index, 'en', tempKo);
+  };
+
   return (
     <Card
       sx={{
@@ -159,7 +178,6 @@ export const OpicEditorItem = memo(({
         >
           {index + 1}
         </Box>
-
         <Stack spacing={2.5} sx={{ flexGrow: 1 }}>
           <TextField
             fullWidth
@@ -187,9 +205,22 @@ export const OpicEditorItem = memo(({
             placeholder="English translation..."
             slotProps={{
               input: { 
-                sx: { color: 'primary.main', fontWeight: 500 },
+                sx: { 
+                  color: hasKoreanInEn ? 'error.main' : 'primary.main', 
+                  fontWeight: 500 
+                },
                 endAdornment: (
                   <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                    {hasKoreanInEn && (
+                      <IconButton
+                        size="small"
+                        color="warning"
+                        onClick={handleSwap}
+                        title="Swap Korean and English"
+                      >
+                        <Iconify icon="solar:transfer-vertical-bold" />
+                      </IconButton>
+                    )}
                     <IconButton
                       size="small"
                       color={speakingIndex ? 'primary' : 'default'}

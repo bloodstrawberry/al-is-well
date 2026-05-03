@@ -241,6 +241,13 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     }
   };
 
+  const handleSwapQuestion = (index: number) => {
+    const newQuestions = [...scriptData.questions];
+    const q = newQuestions[index];
+    newQuestions[index] = { en: q.ko, ko: q.en };
+    setScriptData({ ...scriptData, questions: newQuestions });
+  };
+
 
 
   if (loading) {
@@ -495,8 +502,25 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                           setScriptData({ ...scriptData, questions: newQuestions });
                         }}
                         multiline
-                        rows={2}
+                        minRows={2}
                         placeholder="Type the English question here..."
+                        slotProps={{
+                          input: {
+                            sx: { color: /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(q.en) ? 'error.main' : 'inherit' },
+                            endAdornment: /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(q.en) && (
+                              <InputAdornment position="end">
+                                <IconButton 
+                                  size="small" 
+                                  color="warning" 
+                                  onClick={() => handleSwapQuestion(index)}
+                                  title="Swap Korean and English"
+                                >
+                                  <Iconify icon="solar:transfer-vertical-bold" />
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }
+                        }}
                       />
                       <TextField
                         fullWidth
@@ -508,7 +532,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                           setScriptData({ ...scriptData, questions: newQuestions });
                         }}
                         multiline
-                        rows={2}
+                        minRows={2}
                         placeholder="Type the Korean translation here..."
                       />
                     </Stack>
