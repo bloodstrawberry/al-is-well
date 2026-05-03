@@ -32,77 +32,32 @@
               "label": "01. 사물 묘사 - 좋아하는 가구",
               "type": "file",
               "createdAt": "2026-04-29T12:53:05.952Z",
-              "modifiedAt": "2026-04-29T12:57:00.960Z"
+              "modifiedAt": "2026-05-03T14:25:13.103Z"
             },
             {
               "id": "1777448409942",
               "label": "02. 활동 묘사 - 가구 사용",
               "type": "file",
               "createdAt": "2026-04-29T12:53:05.952Z",
-              "modifiedAt": "2026-04-29T13:07:47.175Z"
+              "modifiedAt": "2026-05-03T14:24:58.971Z"
             },
             {
               "id": "1777466877999",
               "label": "03. 비교 - 과거 가구",
               "type": "file",
               "createdAt": "2026-04-29T12:53:05.952Z",
-              "modifiedAt": "2026-04-29T13:06:47.368Z"
+              "modifiedAt": "2026-05-03T14:24:26.791Z"
             },
             {
               "id": "1777466897961",
               "label": "04. 특별한 경험 - 가구 문제",
               "type": "file",
               "createdAt": "2026-04-29T12:53:05.952Z",
-              "modifiedAt": "2026-04-29T13:13:51.547Z"
+              "modifiedAt": "2026-05-03T14:24:11.725Z"
             }
           ],
           "createdAt": "2026-04-29T12:53:05.952Z",
           "modifiedAt": "2026-04-29T16:11:09.639Z"
-        },
-        {
-          "id": "1777545125920-xzyz5n9lp",
-          "label": "01. 공통 - 가구, Furniture - Copy",
-          "type": "folder",
-          "children": [
-            {
-              "id": "1777545125920-o78wwl1a7",
-              "label": "01. 사물 묘사 - 좋아하는 가구",
-              "type": "file",
-              "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-05-02T12:47:26.889Z"
-            },
-            {
-              "id": "1777545125920-931f56v20",
-              "label": "02. 활동 묘사 - 가구 사용",
-              "type": "file",
-              "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-05-02T12:48:15.252Z"
-            },
-            {
-              "id": "1777545125920-3orik5vgn",
-              "label": "03. 비교 - 과거 가구",
-              "type": "file",
-              "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-05-02T12:48:43.443Z"
-            },
-            {
-              "id": "1777545125920-uec40qpgu",
-              "label": "04. 특별한 경험 - 가구 문제",
-              "type": "file",
-              "createdAt": "2026-04-30T10:32:05.920Z",
-              "modifiedAt": "2026-05-02T12:49:44.150Z"
-            },
-            {
-              "id": "1777729026405",
-              "label": "TEST",
-              "type": "file",
-              "createdAt": "2026-05-02T13:37:06.405Z",
-              "modifiedAt": "2026-05-02T13:37:06.405Z"
-            }
-          ],
-          "createdAt": "2026-04-30T10:32:05.920Z",
-          "modifiedAt": "2026-04-30T10:32:14.645Z",
-          "isFavorited": true
         },
         {
           "id": "1777469277167",
@@ -116,35 +71,28 @@
               "label": "01. 활동 묘사 - 재활용",
               "type": "file",
               "createdAt": "2026-04-29T13:28:03.917Z",
-              "modifiedAt": "2026-04-29T13:28:03.917Z"
-            },
-            {
-              "id": "1777545011627-f8kb1bn95",
-              "label": "01. 활동 묘사 - 재활용 - Copy",
-              "type": "file",
-              "createdAt": "2026-04-30T10:30:11.627Z",
-              "modifiedAt": "2026-04-30T10:30:11.628Z"
+              "modifiedAt": "2026-05-03T14:19:50.637Z"
             },
             {
               "id": "1777469297342",
               "label": "03. 비교 - 재활용 과거, 현재",
               "type": "file",
               "createdAt": "2026-04-29T13:28:17.342Z",
-              "modifiedAt": "2026-04-29T13:28:17.342Z"
+              "modifiedAt": "2026-05-03T14:22:39.985Z"
             },
             {
               "id": "1777469303563",
               "label": "04, 05. 특별한 경험 - 재활용 기억, 과거 경험",
               "type": "file",
               "createdAt": "2026-04-29T13:28:23.563Z",
-              "modifiedAt": "2026-04-29T13:35:05.847Z"
+              "modifiedAt": "2026-05-03T14:23:08.246Z"
             },
             {
               "id": "1777469289420",
               "label": "02. 준비물 - 재활용",
               "type": "file",
               "createdAt": "2026-04-29T13:28:09.420Z",
-              "modifiedAt": "2026-04-29T13:28:09.420Z"
+              "modifiedAt": "2026-05-03T14:20:57.420Z"
             }
           ]
         },
@@ -155,50 +103,6 @@
           "createdAt": "2026-04-29T15:32:28.642Z",
           "modifiedAt": "2026-04-29T16:05:55.624Z",
           "children": []
-        },
-        {
-          "id": "1777545138693-ar4t74ip4",
-          "label": "00. 선택 - 집, Housing - Copy",
-          "type": "folder",
-          "createdAt": "2026-04-30T10:32:18.693Z",
-          "modifiedAt": "2026-04-30T10:33:03.357Z",
-          "children": [
-            {
-              "id": "1777712314186",
-              "label": "ㅁㄴㅇㄹ",
-              "type": "folder",
-              "createdAt": "2026-05-02T08:58:34.186Z",
-              "modifiedAt": "2026-05-02T08:58:34.186Z",
-              "children": [
-                {
-                  "id": "1777712318890",
-                  "label": "ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇ",
-                  "type": "folder",
-                  "createdAt": "2026-05-02T08:58:38.890Z",
-                  "modifiedAt": "2026-05-02T08:58:38.890Z",
-                  "children": [
-                    {
-                      "id": "1777712326614",
-                      "label": "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄹ",
-                      "type": "folder",
-                      "createdAt": "2026-05-02T08:58:46.614Z",
-                      "modifiedAt": "2026-05-02T08:58:46.614Z",
-                      "children": []
-                    },
-                    {
-                      "id": "1777712333029",
-                      "label": "ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇㄻㄴㅇ",
-                      "type": "folder",
-                      "createdAt": "2026-05-02T08:58:53.029Z",
-                      "modifiedAt": "2026-05-02T08:58:53.029Z",
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            }
-          ],
-          "isFavorited": true
         },
         {
           "id": "1777476759153",
@@ -442,9 +346,13 @@
       ]
     },
     "1777443579253": {
-      "questionEn": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
-      "questionKo": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?",
-      "audioUrl": "https://blog.kakaocdn.net/dna/C5ggF/dJMcahKE0zM/AAAAAAAAAAAAAAAAAAAAAAUKx8zSREKa5NsBI9erjT99MgZgkwjKNv347JFmzXhq/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PWScYTCoiH4XMls1Qe9mlmyDlWE%3D&attach=1&knm=tfile.mp3",
+      "questions": [
+        {
+          "en": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
+          "ko": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?"
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3",
       "category": "콤보 세트",
       "subCategory": "사물 묘사",
       "comboPositions": [
@@ -490,9 +398,13 @@
       ]
     },
     "1777448409942": {
-      "questionEn": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
-      "questionKo": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?",
-      "audioUrl": "https://blog.kakaocdn.net/dna/eBsH2o/dJMcadakx9i/AAAAAAAAAAAAAAAAAAAAAENst0TT5jeNEsPG4upbdzWBF4_0_AcCZo53FlTRdpi7/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=QuJLhkRViMbLv02%2BPgVIdJcMPCI%3D&attach=1&knm=tfile.mp3",
+      "questions": [
+        {
+          "en": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
+          "ko": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?"
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3",
       "category": "콤보 세트",
       "subCategory": "활동 묘사",
       "comboPositions": [
@@ -526,9 +438,13 @@
       ]
     },
     "1777466877999": {
-      "questionEn": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
-      "questionKo": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요.",
-      "audioUrl": "https://blog.kakaocdn.net/dna/oQVIo/dJMcahKJv3P/AAAAAAAAAAAAAAAAAAAAAOyNpGesOwNNXBW6MaBVUJDU0q0Lmfpng6PVq2indFS1/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=YJpdiWO6%2BvRQdO8KEJTBvzyesmU%3D&attach=1&knm=tfile.mp3",
+      "questions": [
+        {
+          "en": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
+          "ko": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요."
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3",
       "category": "콤보 세트",
       "subCategory": "비교",
       "comboPositions": [
@@ -563,12 +479,18 @@
       ]
     },
     "1777466897961": {
-      "questionEn": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
-      "questionKo": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요.",
-      "audioUrl": "https://blog.kakaocdn.net/dna/bxMXe1/dJMcaipkHeg/AAAAAAAAAAAAAAAAAAAAAFeUrUVvanD0XTemE3MdLq6BIvJhhxSMOxHlI_42lBFN/tfile.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=HnkLEexl8Yq%2Bb3ExTk8daSR%2BX3M%3D",
+      "questions": [
+        {
+          "en": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
+          "ko": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요."
+        }
+      ],
+      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-04%20%ED%8A%B9%EB%B3%84%ED%95%9C%20%EA%B2%BD%ED%97%98-%EA%B0%80%EA%B5%AC,%20%EC%A7%91.mp3",
       "category": "콤보 세트",
       "subCategory": "특별한 경험",
-      "comboPositions": [],
+      "comboPositions": [
+        3
+      ],
       "lines": [
         {
           "ko": "내가 작년에 산 테이블에 대해 이야기해볼게.",
@@ -616,14 +538,14 @@
       "questions": [
         {
           "en": "Can you tell me about a story or an experience you had related to recycling?\nMaybe something went wrong with recycling, \nor you might have had a discussion with a friend who disagrees with recycling.\nDescribe your experience in detail.",
-          "ko": "재활용과 관련이 있는 여러분의 이야기나 경험에 대해 말해 주세요.\n재활용에 뭔가 문제가 생겼거나, \n재활용에 반대하는 친구와 무슨 이야기를 했을 수도 있겠죠.\n이러한 자신의 경험을 자세히 설명해 주세요.\n\n"
+          "ko": "재활용과 관련이 있는 여러분의 이야기나 경험에 대해 말해 주세요.\n재활용에 뭔가 문제가 생겼거나, \n재활용에 반대하는 친구와 무슨 이야기를 했을 수도 있겠죠.\n이러한 자신의 경험을 자세히 설명해 주세요."
         },
         {
           "en": "Problems sometimes occur while recycling.\nPerhaps, the pick-up service did not come as planned.\nOr, the items were too big for the containers.\nOr, the container turned over and spilled the items.\nTell me about something memorable that happened to you or your family.",
           "ko": "재활용을 하다가 보면 문제가 가끔 발생합니다.\n어쩌면, 재활용 수거가 예정대로 되지 않았거나\n아니면, 재활용품이 너무 커서 수거통에 안 들어 갔을 수도 있습니다.\n혹은, 수거통이 쓰러져서 안에 내용물이 쏟아졌을 수도 있죠.\n당신이나 당신 가족에게 발생했던 기억에 남는 경험에 대해서 알려 주세요."
         }
       ],
-      "audioUrl": "https://blog.kakaocdn.net/dna/b8asll/dJMcagSuTqz/AAAAAAAAAAAAAAAAAAAAAIq7eloUx-OFdAaVoQwJJ-hcfVkPnTwpQ6GAkp5p1SDd/02-04%20%ED%8A%B9%EB%B3%84%ED%95%9C%20%EA%B2%BD%ED%97%98-%EC%9E%AC%ED%99%9C%EC%9A%A9.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=PR4C6nAndvHADt2iyAji1tCF%2BzQ%3D&attach=1&knm=tfile.mp3",
+      "audioUrl": "",
       "category": "콤보 세트",
       "subCategory": "특별한 경험",
       "comboPositions": [
@@ -850,6 +772,116 @@
           "en": "No more bruises since then, and the best part? just one buck."
         }
       ]
+    },
+    "1777469283917": {
+      "questions": [
+        {
+          "en": "I'd like to know about how recycling is practiced in your country.\nWhat do people specifically do?\nTell me how things are recycled.",
+          "ko": "당신의 국가에서 재활용이 어떻게 시행되고 있는지에 대해서 알고 싶습니다.\n사람들이 구체적으로 무엇을 하나요?\n물건들이 어떻게 재활용되는지 설명해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "활동 묘사",
+      "comboPositions": [
+        1
+      ],
+      "lines": [
+        {
+          "ko": "우리나라는 세계에서 가장 재활용을 잘하는 나라야",
+          "en": "I think Korea is actually a world leader when it comes to recycling."
+        },
+        {
+          "ko": "거의 모든 국민들이 일주일에 한번 재활용을 하러 나가",
+          "en": "Almost everyone does it once a week. It’s like a national routine!"
+        },
+        {
+          "ko": "플라스틱은 플라스틱대로 구분하고, 여기에 또 하얀 생수통 같은건 따로 분리해야 돼",
+          "en": "We separate everything. I mean, we even separate clear water bottles."
+        },
+        {
+          "ko": "왜냐면 플라스틱이라고 다 같은 플라스틱이 아니거든",
+          "en": "Because, you know, plastic isn't just plastic!"
+        },
+        {
+          "ko": "우리나라가 환경을 많이 생각하는 나라라서 저는 자랑스러워",
+          "en": "I’m proud we care for nature. It feels good."
+        }
+      ]
+    },
+    "1777469289420": {
+      "questions": [
+        {
+          "en": "Recycling is a common practice.\nTell me about all the different kinds of things that you recycle.",
+          "ko": "재활용은 매우 흔한 관행입니다.\n당신이 재활용하는 여러 종류의 물건들에 대해 다 설명해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "준비물",
+      "comboPositions": [
+        1,
+        2
+      ],
+      "lines": [
+        {
+          "ko": "내가 재활용하는 물건들은 다음과 같아.",
+          "en": "Okay, so here’s what I usually recycle."
+        },
+        {
+          "ko": "유리, 캔, 종이, 그리고 플라스틱",
+          "en": "I sort out glass, cans, and of course, plastic."
+        },
+        {
+          "ko": "그리고 플라스틱이라고 다 같은 플라스틱이 아냐.",
+          "en": "But here’s the thing. Plastic isn't just plastic."
+        },
+        {
+          "ko": "한국에서는 생수통과 같은 하얀색 플라스틱은 따로 구분해야 돼, 심지어 페트병의 뚜껑과 페트병도 다른 플라스틱이라서 따로 구분해야 되고",
+          "en": "In Korea, we have to separate clear water bottles from other plastics and even the caps."
+        },
+        {
+          "ko": "환경을 지키는 건 참 어려운거 같아.",
+          "en": "I think it's such a headache!"
+        }
+      ]
+    },
+    "1777469297342": {
+      "questions": [
+        {
+          "en": "Tell me what recycling was like when you were a child.\nDid you family recycle?\nWas there a particular place to bring the recyclables?\nDid you have special containers?\nDescribe what it was like and what you did in detail.",
+          "ko": "당신이 어렸을 때 재활용이 어떠했는지 말해 주세요.\n가족들이 재활용을 했나요?\n재활용품을 수거하는 특정한 장소가 따로 있었나요?\n특별한 수거통이 있었나요?\n당시 재활용이 어떠했고, 당신이 어떻게 했는지 자세히 설명해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "비교",
+      "comboPositions": [
+        2,
+        3
+      ],
+      "lines": [
+        {
+          "ko": "내 생각에 요즘 재활용은 과거보다 더 많이 까다로워 진거 같아.",
+          "en": "I think recycling has become such a pain these days."
+        },
+        {
+          "ko": "내가 어렸을 때는 플라스틱은 그냥 모두 한 곳에 모아서 버렸었어.",
+          "en": "When I was a kid, we just threw all the plastics into one bin. It was so simple!"
+        },
+        {
+          "ko": "지금은 생수통 같은 하얀색 플라스틱은 따로 모아서 버려야 돼",
+          "en": "But now? We even separate clear bottles and caps."
+        },
+        {
+          "ko": "심지어 플라스틱 뚜껑도 다른 플라스틱이라서 따로 분리해야 하지만 아이러니하게도 법적으로 아직 그런 것은 아니래",
+          "en": "The funny thing is, the law is still messy."
+        },
+        {
+          "ko": "시간이 지날수록 재활용이 더 까다로워지는 것 같아.",
+          "en": "It feels like recycling is getting more and more complicated as time goes by."
+        }
+      ]
     }
   },
   "sections": {
@@ -861,7 +893,7 @@
           "type": "file",
           "category": "practice",
           "createdAt": "2026-04-30T05:44:16.590Z",
-          "modifiedAt": "2026-05-02T13:30:04.894Z"
+          "modifiedAt": "2026-05-03T03:44:26.810Z"
         },
         {
           "id": "1777532884598",
