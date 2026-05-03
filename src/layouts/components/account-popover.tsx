@@ -34,11 +34,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const { open, anchorEl, onClose, onOpen } = usePopover();
 
-  const user: {
-    photoURL: string;
-    displayName: string;
-    email: string;
-  } | null = null;
+  const user = {
+    photoURL: '',
+    displayName: 'Jaydon Frankie',
+    email: 'demo@minimals.cc',
+  };
 
   const renderMenuActions = () => (
     <CustomPopover

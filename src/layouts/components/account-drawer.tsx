@@ -41,11 +41,11 @@ export type AccountDrawerProps = IconButtonProps & {
 export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const pathname = usePathname();
 
-  const user: {
-    photoURL: string;
-    displayName: string;
-    email: string;
-  } | null = null;
+  const user = {
+    photoURL: '',
+    displayName: 'Jaydon Frankie',
+    email: 'demo@minimals.cc',
+  };
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
