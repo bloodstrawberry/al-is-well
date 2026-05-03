@@ -175,6 +175,22 @@ export function useOpicSpeech() {
     speakingIndexRef.current = speakingIndex;
   }, [speakingIndex]);
 
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.onend = null;
+          recognitionRef.current.onresult = null;
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   const toggleSpeak = useCallback((text: string, index: number | string) => {
     const currentSpeaking = speakingIndexRef.current;
     if (currentSpeaking === index && window.speechSynthesis.speaking) {
@@ -191,10 +207,21 @@ export function useOpicSpeech() {
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const stopAll = useCallback(() => {
+    stopListening();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setSpeakingIndex(null);
+  }, [stopListening]);
+
   const resetStates = useCallback(() => {
     setUserAnswers({});
     setIsListening(null);
     setSpeakingIndex(null);
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
   }, []);
 
   return {
@@ -211,6 +238,7 @@ export function useOpicSpeech() {
     stopListening,
     playRecordedAudio: (index: number) => {},
     toggleSpeak,
+    stopAll,
     resetStates,
   };
 }

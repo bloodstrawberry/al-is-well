@@ -65,7 +65,10 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     stopListening,
     playRecordedAudio,
     toggleSpeak,
+    stopAll,
   } = useOpicSpeech();
+
+  const questionAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [testResults, setTestResults] = useState<Record<number, { uWord: string; cWord: string; isCorrect: boolean; masked: string }[]>>({});
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
@@ -108,6 +111,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     };
     loadScript();
   }, [fileId]);
+
+  // Stop audio when page changes or component unmounts
+  useEffect(() => {
+    return () => {
+      stopAll();
+      if (questionAudioRef.current) {
+        questionAudioRef.current.pause();
+      }
+    };
+  }, [fileId, stopAll]);
 
   const toggleLine = useCallback((index: string | number) => {
     setRevealedLines((prev) => ({
@@ -273,6 +286,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
           onToggleSpeak={toggleSpeak}
           onToggleReveal={toggleLine}
           audioUrl={scriptData?.audioUrl}
+          audioRef={questionAudioRef}
           audioReady={audioReady}
           onAudioCanPlay={() => setAudioReady(true)}
           onAudioError={() => setAudioReady(false)}

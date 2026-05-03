@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useOpicSpeech as usePC } from './use-opic-speech-pc';
 import { useOpicSpeech as useMobile } from './use-opic-speech-mobile';
 
@@ -16,6 +16,7 @@ export function useOpicSpeech() {
   const pc = usePC();
   const mobile = useMobile();
 
-  const result = isMobile ? mobile : pc;
+  const result = useMemo(() => (isMobile ? mobile : pc), [isMobile, mobile, pc]);
+  
   return { ...result, isMobile };
 }

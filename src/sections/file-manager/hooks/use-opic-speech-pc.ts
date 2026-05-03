@@ -235,6 +235,9 @@ export function useOpicSpeech() {
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
       }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       Object.values(recordedAudiosRef.current).forEach(url => {
         try { URL.revokeObjectURL(url); } catch (e) {}
       });
@@ -310,6 +313,19 @@ export function useOpicSpeech() {
     }, 50);
   }, []);
 
+  const stopAll = useCallback(() => {
+    stopListening();
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setPlayingIndex(null);
+    setSpeakingIndex(null);
+  }, [stopListening]);
+
   const resetStates = useCallback(() => {
     setUserAnswers({});
     setRecordedAudios((prev) => {
@@ -322,6 +338,9 @@ export function useOpicSpeech() {
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
   }, []);
 
@@ -339,6 +358,7 @@ export function useOpicSpeech() {
     stopListening,
     playRecordedAudio,
     toggleSpeak,
+    stopAll,
     resetStates,
   };
 }
