@@ -2,7 +2,7 @@
 
 import type { SettingsState, SettingsDrawerProps } from '../types';
 
-import { useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { hasKeys, varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
