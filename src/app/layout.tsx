@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'AL is well',
   description: 'AL is well PWA Application',
-  manifest: '/manifest.json',
+  manifest: `${CONFIG.assetsDir}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     },
     {
       rel: 'apple-touch-icon',
-      url: '/logo/logo-single.png',
+      url: `${CONFIG.assetsDir}/logo/logo-single.png`,
     },
   ],
 };
