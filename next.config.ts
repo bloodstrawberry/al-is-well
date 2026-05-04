@@ -1,11 +1,4 @@
 import type { NextConfig } from 'next';
-import withPWAInit from '@ducanh2912/next-pwa';
-
-const withPWA = withPWAInit({
-  dest: 'public',
-  disable: true, // PWA를 완전히 비활성화하여 OOM 원인인지 테스트합니다.
-  register: false,
-});
 
 const isStaticExport = true;
 
@@ -20,9 +13,6 @@ const nextConfig: any = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   env: {
     BUILD_STATIC_EXPORT: JSON.stringify(isStaticExport),
@@ -45,4 +35,4 @@ const nextConfig: any = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;
