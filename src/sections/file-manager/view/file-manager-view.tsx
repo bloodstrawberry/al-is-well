@@ -29,7 +29,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 import TREE_DATA from 'src/api/dummy/default.json';
-import { getTreeData, saveTreeData, getFileScript, clearAllScripts, getFullData, saveFullData } from 'src/api/indexDB';
+import { getTreeData, saveTreeData, getFileScript, clearAllScripts, getFullData, saveFullData, deleteFileScripts, deleteTreeItems } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
 import { FileManagerGridView } from '../file-manager-grid-view';
@@ -477,21 +477,25 @@ export function FileManagerView() {
   }, [backupConfirm]);
 
   const executeDelete = useCallback(
-    (ids: string[]) => {
-      const deleteFromTree = (nodes: any[]): any[] =>
-        nodes
-          .filter((node) => !ids.includes(node.id))
-          .map((node) => ({
-            ...node,
-            children: node.children ? deleteFromTree(node.children) : undefined,
-          }));
+    async (ids: string[]) => {
+      try {
+        // Atomic deletion in IndexedDB (both tree and scripts)
+        await deleteTreeItems(ids);
 
-      setTreeData((prev) => deleteFromTree(prev));
-      // Clear selection if any of the deleted IDs were selected
-      if (ids.some((id) => table.selected.includes(id))) {
-        table.onSelectAllRows(false, []);
+        // Update local state to reflect changes
+        const data = await getTreeData();
+        const sanitizedData = sanitizeTreeData(data);
+        setTreeData(sanitizedData);
+
+        // Clear selection if any of the deleted IDs were selected
+        if (ids.some((id) => table.selected.includes(id))) {
+          table.onSelectAllRows(false, []);
+        }
+        toast.success('Delete success!');
+      } catch (error) {
+        console.error('Delete failed', error);
+        toast.error('Delete failed');
       }
-      toast.success('Delete success!');
     },
     [table]
   );
@@ -711,8 +715,8 @@ export function FileManagerView() {
         <Button
           variant="contained"
           color="error"
-          onClick={() => {
-            executeDelete(pendingDeleteIds);
+          onClick={async () => {
+            await executeDelete(pendingDeleteIds);
             confirmDialog.onFalse();
             setPendingDeleteIds([]);
           }}
@@ -809,8 +813,8 @@ export function FileManagerView() {
           <Button
             variant="contained"
             color="error"
-            onClick={() => {
-              executeDelete(pendingDeleteIds);
+            onClick={async () => {
+              await executeDelete(pendingDeleteIds);
               recursiveDeleteConfirm.onFalse();
               setPendingDeleteIds([]);
             }}
@@ -822,7 +826,7 @@ export function FileManagerView() {
             color="success"
             onClick={async () => {
               await handleDownload();
-              executeDelete(pendingDeleteIds);
+              await executeDelete(pendingDeleteIds);
               recursiveDeleteConfirm.onFalse();
               setPendingDeleteIds([]);
             }}

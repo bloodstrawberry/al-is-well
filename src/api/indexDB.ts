@@ -110,6 +110,94 @@ export async function saveFileScript(fileId: string, script: any, section?: stri
   await saveAppData(data);
 }
 
+export async function deleteFileScripts(fileIds: string[], section?: string): Promise<void> {
+  const data = await getAppData();
+  if (!section || section === 'main') {
+    fileIds.forEach((id) => {
+      delete data.scripts[id];
+    });
+  } else if (data.sections?.[section]) {
+    fileIds.forEach((id) => {
+      delete data.sections![section].scripts[id];
+    });
+  }
+  await saveAppData(data);
+}
+
+export async function deleteTreeItems(ids: string[], section?: string): Promise<void> {
+  const data = await getAppData();
+  
+  const getDescendantIds = (tree: any[], targetIds: string[]): string[] => {
+    const descendantIds: string[] = [];
+    const traverse = (nodes: any[], isDescendant = false) => {
+      nodes.forEach((node) => {
+        const shouldDelete = isDescendant || targetIds.includes(node.id);
+        if (shouldDelete) {
+          descendantIds.push(node.id);
+        }
+        if (node.children) {
+          traverse(node.children, shouldDelete);
+        }
+      });
+    };
+    traverse(tree);
+    return descendantIds;
+  };
+
+  const deleteFromTree = (nodes: any[]): any[] =>
+    nodes
+      .filter((node) => !ids.includes(node.id))
+      .map((node) => ({
+        ...node,
+        children: node.children ? deleteFromTree(node.children) : undefined,
+      }));
+
+  const getAllTreeIds = (tree: any[]): string[] => {
+    const allIds: string[] = [];
+    const traverse = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        allIds.push(node.id);
+        if (node.children) traverse(node.children);
+      });
+    };
+    traverse(tree);
+    return allIds;
+  };
+
+  if (!section || section === 'main') {
+    const allIdsToDelete = getDescendantIds(data.tree, ids);
+    allIdsToDelete.forEach((id) => {
+      delete data.scripts[id];
+    });
+    data.tree = deleteFromTree(data.tree);
+
+    // Garbage collection: remove any scripts that are not in the tree
+    // (This cleans up orphaned scripts from previous bugs)
+    const validIds = new Set(getAllTreeIds(data.tree));
+    Object.keys(data.scripts).forEach((scriptId) => {
+      if (!validIds.has(scriptId)) {
+        delete data.scripts[scriptId];
+      }
+    });
+
+  } else if (data.sections?.[section]) {
+    const allIdsToDelete = getDescendantIds(data.sections[section].tree, ids);
+    allIdsToDelete.forEach((id) => {
+      delete data.sections![section].scripts[id];
+    });
+    data.sections[section].tree = deleteFromTree(data.sections[section].tree);
+
+    const validIds = new Set(getAllTreeIds(data.sections[section].tree));
+    Object.keys(data.sections[section].scripts).forEach((scriptId) => {
+      if (!validIds.has(scriptId)) {
+        delete data.sections![section].scripts[scriptId];
+      }
+    });
+  }
+
+  await saveAppData(data);
+}
+
 export async function clearAllScripts(section?: string): Promise<void> {
   const data = await getAppData();
   if (!section || section === 'main') {
