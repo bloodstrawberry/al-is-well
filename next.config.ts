@@ -5,6 +5,19 @@ const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
+  workboxOptions: {
+    disableDevLogs: true,
+    exclude: [
+      // Exclude large Next.js chunks and source maps from precaching
+      // This prevents Out of Memory errors on the initial load caused by downloading too many chunks
+      /middleware-manifest\.json$/,
+      /_buildManifest\.js$/,
+      /_ssgManifest\.js$/,
+      /\.map$/,
+      /^.*\/chunks\/.*\.js$/, // Do not precache JS chunks at install time
+    ],
+    maximumFileSizeToCacheInBytes: 5000000, // Limit maximum file size to cache (5MB)
+  },
 });
 
 const isStaticExport = true;
