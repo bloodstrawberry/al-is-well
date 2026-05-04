@@ -3,27 +3,18 @@ import type { NavMainProps } from './main/nav/types';
 
 import { paths } from 'src/routes/paths';
 
-import { CONFIG } from 'src/global-config';
-
-import { Iconify } from 'src/components/iconify';
-import { SvgColor } from 'src/components/svg-color';
-
-// ----------------------------------------------------------------------
-
-const icon = (name: string) => (
-  <SvgColor src={`${CONFIG.assetsDir}/assets/icons/navbar/${name}.svg`} />
-);
-
-const iconify = (name: string) => (
-  <Iconify icon={name} />
-);
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
+import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import HeadphonesRoundedIcon from '@mui/icons-material/HeadphonesRounded';
 
 const ICONS = {
-  folder: icon('ic-folder'),
-  dashboard: icon('ic-dashboard'),
-  practice: iconify('solar:clipboard-list-bold'),
-  listening: iconify('solar:headphones-round-bold'),
-  faq: iconify('solar:question-circle-bold'),
+  folder: <FolderRoundedIcon fontSize="small" />,
+  practice: <AssignmentRoundedIcon fontSize="small" />,
+  listening: <HeadphonesRoundedIcon fontSize="small" />,
+  faq: <HelpRoundedIcon fontSize="small" />,
+  home: <HomeRoundedIcon fontSize="small" />,
 };
 
 // ----------------------------------------------------------------------
@@ -50,7 +41,7 @@ export const navData: NavSectionProps['data'] = [
   {
     subheader: 'Overview',
     items: [
-      { title: 'Home', path: paths.home, icon: ICONS.dashboard },
+      { title: 'Home', path: paths.home, icon: ICONS.home },
       { title: 'Drive', path: paths.fileManager, icon: ICONS.folder },
       {
         title: 'Practice',
@@ -78,16 +69,16 @@ export const navData: NavSectionProps['data'] = [
 // ----------------------------------------------------------------------
 
 export const mainNavData: NavMainProps['data'] = [
-  { title: 'Home', path: '/', icon: <Iconify width={22} icon="solar:home-angle-bold-duotone" /> },
+  { title: 'Home', path: '/', icon: <HomeRoundedIcon sx={{ width: 22, height: 22 }} /> },
   {
     title: 'Drive',
     path: paths.fileManager,
-    icon: <Iconify width={22} icon="solar:folder-2-bold-duotone" />,
+    icon: <FolderRoundedIcon sx={{ width: 22, height: 22 }} />,
   },
   {
     title: 'Practice',
     path: paths.practice.root,
-    icon: <Iconify width={22} icon="solar:clipboard-list-bold-duotone" />,
+    icon: <AssignmentRoundedIcon sx={{ width: 22, height: 22 }} />,
     children: [
       {
         subheader: 'Practice',
@@ -101,7 +92,7 @@ export const mainNavData: NavMainProps['data'] = [
   {
     title: 'Listening',
     path: paths.listening.root,
-    icon: <Iconify width={22} icon="solar:headphones-round-bold-duotone" />,
+    icon: <HeadphonesRoundedIcon sx={{ width: 22, height: 22 }} />,
     children: [
       {
         subheader: 'Listening',
@@ -115,6 +106,6 @@ export const mainNavData: NavMainProps['data'] = [
   {
     title: 'FAQ',
     path: paths.faq,
-    icon: <Iconify width={22} icon="solar:question-circle-bold-duotone" />,
+    icon: <HelpRoundedIcon sx={{ width: 22, height: 22 }} />,
   },
 ];
