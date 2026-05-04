@@ -12,6 +12,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import FolderIcon from '@mui/icons-material/Folder';
 
 import { CONFIG } from 'src/global-config';
 
@@ -81,11 +82,7 @@ export function FileItemIcon({
     fileType ? (
       <FileThumbnail file={fileType} sx={{ width: 1, height: 1 }} />
     ) : (
-      <Box
-        component="img"
-        src={`${CONFIG.assetsDir}/assets/icons/files/ic-folder.svg`}
-        sx={{ width: 1, height: 1 }}
-      />
+      <FolderIcon sx={{ width: 1, height: 1, color: 'warning.main' }} />
     );
 
   return (

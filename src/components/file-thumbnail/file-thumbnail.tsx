@@ -4,11 +4,23 @@ import type { FileThumbnailProps } from './types';
 
 import { mergeClasses } from 'minimal-shared/utils';
 
+import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 
+import DescriptionIcon from '@mui/icons-material/Description';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import FolderZipIcon from '@mui/icons-material/FolderZip';
+import AudioFileIcon from '@mui/icons-material/AudioFile';
+import VideoFileIcon from '@mui/icons-material/VideoFile';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import SlideshowIcon from '@mui/icons-material/Slideshow';
+import ImageIcon from '@mui/icons-material/Image';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import FolderIcon from '@mui/icons-material/Folder';
+
 import { fileThumbnailClasses } from './classes';
-import { fileData, fileThumb, fileFormat } from './utils';
+import { fileData, fileFormat } from './utils';
 import { RemoveButton, DownloadButton } from './action-buttons';
 
 // ----------------------------------------------------------------------
@@ -37,7 +49,9 @@ export function FileThumbnail({
       {format === 'image' && imageView ? (
         <ItemImg src={previewUrl} className={fileThumbnailClasses.img} {...slotProps?.img} />
       ) : (
-        <ItemIcon src={fileThumb(format)} className={fileThumbnailClasses.icon} {...icon} />
+        <ItemIcon className={fileThumbnailClasses.icon} {...icon}>
+          {renderIcon(format)}
+        </ItemIcon>
       )}
 
       {onRemove && (
@@ -87,6 +101,34 @@ export function FileThumbnail({
 
 // ----------------------------------------------------------------------
 
+function renderIcon(format: string) {
+  switch (format) {
+    case 'pdf':
+      return <PictureAsPdfIcon sx={{ color: 'error.main' }} />;
+    case 'txt':
+    case 'word':
+      return <DescriptionIcon sx={{ color: 'primary.main' }} />;
+    case 'excel':
+      return <TableChartIcon sx={{ color: 'success.main' }} />;
+    case 'powerpoint':
+      return <SlideshowIcon sx={{ color: 'warning.main' }} />;
+    case 'zip':
+      return <FolderZipIcon sx={{ color: 'text.secondary' }} />;
+    case 'audio':
+      return <AudioFileIcon sx={{ color: 'info.main' }} />;
+    case 'video':
+      return <VideoFileIcon sx={{ color: 'secondary.main' }} />;
+    case 'image':
+      return <ImageIcon sx={{ color: 'info.main' }} />;
+    case 'folder':
+      return <FolderIcon sx={{ color: 'warning.main' }} />;
+    default:
+      return <InsertDriveFileIcon sx={{ color: 'text.disabled' }} />;
+  }
+}
+
+// ----------------------------------------------------------------------
+
 const ItemRoot = styled('span')(({ theme }) => ({
   width: 36,
   height: 36,
@@ -98,9 +140,16 @@ const ItemRoot = styled('span')(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 1.25,
 }));
 
-const ItemIcon = styled('img')(() => ({
+const ItemIcon = styled(Box)(() => ({
   width: '100%',
   height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '& > svg': {
+    width: '100%',
+    height: '100%',
+  },
 }));
 
 const ItemImg = styled('img')(() => ({
