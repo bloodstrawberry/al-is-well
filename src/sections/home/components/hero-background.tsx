@@ -1,6 +1,6 @@
 import type { BoxProps } from '@mui/material/Box';
 
-import { m } from 'framer-motion';
+
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { CONFIG } from 'src/global-config';
 
-import { MotionContainer } from 'src/components/animate';
+
 
 import { Dots, Lines, Texts, Circles, PlusIcon } from './hero-svg';
 
@@ -19,14 +19,12 @@ export function HeroBackground({ sx, ...other }: BoxProps) {
 
   const renderSvg = () => (
     <Box
-      component={m.svg}
+      component="svg"
       xmlns="http://www.w3.org/2000/svg"
       width="1440"
       height="1080"
       fill="none"
       viewBox="0 0 1440 1080"
-      initial="hidden"
-      animate="visible"
       sx={[{ width: 1, height: 1 }]}
     >
       <defs>
@@ -57,9 +55,6 @@ export function HeroBackground({ sx, ...other }: BoxProps) {
 
   const renderBackground = () => (
     <Box
-      component={m.div}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       sx={[
         (theme) => ({
           ...theme.mixins.bgGradient({
@@ -89,7 +84,6 @@ export function HeroBackground({ sx, ...other }: BoxProps) {
   );
 
   return (
-    <MotionContainer>
       <Box
         sx={[
           (theme) => ({
@@ -130,6 +124,5 @@ export function HeroBackground({ sx, ...other }: BoxProps) {
         {renderSvg()}
         {renderBackground()}
       </Box>
-    </MotionContainer>
   );
 }

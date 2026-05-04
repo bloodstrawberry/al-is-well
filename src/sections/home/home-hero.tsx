@@ -11,7 +11,6 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
-import { varFade, varContainer } from 'src/components/animate';
 
 import { HeroBackground } from './components/hero-background';
 
@@ -32,7 +31,7 @@ export function HomeHero() {
   const renderTitle = () => (
     <Stack spacing={2} alignItems="center">
       {/* Top badge */}
-      <m.div variants={varFade('inDown')}>
+      <Box>
         <Box
           sx={{
             px: 2.5,
@@ -66,10 +65,10 @@ export function HomeHero() {
             OPIc Script Trainer
           </Typography>
         </Box>
-      </m.div>
+      </Box>
 
       {/* Main Title */}
-      <m.div variants={varFade('inUp')}>
+      <Box>
         <Typography
           variant="h1"
           sx={{
@@ -115,10 +114,10 @@ export function HomeHero() {
             WELL
           </Box>
         </Typography>
-      </m.div>
+      </Box>
 
       {/* Subtitle */}
-      <m.div variants={varFade('inUp')}>
+      <Box>
         <Stack
           direction="row"
           alignItems="center"
@@ -152,12 +151,12 @@ export function HomeHero() {
             }}
           />
         </Stack>
-      </m.div>
+      </Box>
     </Stack>
   );
 
   const renderFeatures = () => (
-    <m.div variants={varFade('inUp')}>
+    <Box>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={{ xs: 2, sm: 3 }}
@@ -209,11 +208,11 @@ export function HomeHero() {
           </Box>
         ))}
       </Stack>
-    </m.div>
+    </Box>
   );
 
   const renderCTA = () => (
-    <m.div variants={varFade('inUp')}>
+    <Box>
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
         <Button
           variant="contained"
@@ -252,7 +251,7 @@ export function HomeHero() {
           드라이브로 이동
         </Button>
       </Stack>
-    </m.div>
+    </Box>
   );
 
   return (
@@ -271,10 +270,6 @@ export function HomeHero() {
 
       <Container sx={{ position: 'relative', zIndex: 9 }}>
         <Stack
-          component={m.div}
-          initial="initial"
-          animate="animate"
-          variants={varContainer()}
           spacing={{ xs: 3, md: 4 }}
           alignItems="center"
           sx={{ textAlign: 'center' }}
