@@ -11,7 +11,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
-import { varFade, varContainer, MotionViewport } from 'src/components/animate';
+import { varFade, varContainer } from 'src/components/animate';
 
 import { HeroBackground } from './components/hero-background';
 
@@ -269,9 +269,11 @@ export function HomeHero() {
     >
       <HeroBackground />
 
-      <Container component={MotionViewport} sx={{ position: 'relative', zIndex: 9 }}>
+      <Container sx={{ position: 'relative', zIndex: 9 }}>
         <Stack
           component={m.div}
+          initial="initial"
+          animate="animate"
           variants={varContainer()}
           spacing={{ xs: 3, md: 4 }}
           alignItems="center"
