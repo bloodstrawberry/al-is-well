@@ -31,7 +31,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'AL is well',
   description: 'AL is well PWA Application',
-  manifest: `${CONFIG.assetsDir}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -103,6 +102,15 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   e.preventDefault();
                 }
               });
+
+              // 모바일 환경에서만 manifest를 로드하여 PC(크롬) 주소창의 설치 버튼을 원천 차단합니다.
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              if (isMobile) {
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = '${CONFIG.assetsDir}/manifest.json';
+                document.head.appendChild(link);
+              }
             `,
           }}
         />
