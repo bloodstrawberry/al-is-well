@@ -85,6 +85,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <html lang={appConfig.lang} dir={appConfig.dir} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+        {/* Force unregister any existing service workers to fix OOM issues from previous next-pwa installs */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body>
         <InitColorSchemeScript
