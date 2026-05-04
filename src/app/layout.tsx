@@ -96,6 +96,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   }
                 });
               }
+
+              window.addEventListener('beforeinstallprompt', (e) => {
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (!isMobile) {
+                  e.preventDefault();
+                }
+              });
             `,
           }}
         />
