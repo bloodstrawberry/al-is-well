@@ -230,7 +230,7 @@ export function OpicHeader({
             </Tooltip>
           )}
 
-          <Tooltip title={allRevealed ? "Hide All" : "Reveal All"}>
+          <Tooltip title={allRevealed ? "Hide All (Ctrl + R)" : "Reveal All (Ctrl + R)"}>
             <IconButton
               size="small"
               color={allRevealed ? 'warning' : 'success'}
@@ -241,7 +241,7 @@ export function OpicHeader({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Edit">
+          <Tooltip title="Edit (Ctrl + E)">
             <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>

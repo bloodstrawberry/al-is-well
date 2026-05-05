@@ -14,6 +14,7 @@ import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
@@ -176,7 +177,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     loadScript();
   }, [fileId, resetStates]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       await saveFileScript(fileId, scriptData);
       onSave?.(fileId);
@@ -186,7 +187,20 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
       console.error('Failed to save script', error);
       toast.error('Failed to save script');
     }
-  };
+  }, [fileId, scriptData, onSave, onSaveSuccess]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
 
   const handleAddLine = useCallback(() => {
     setScriptData((prev) => ({
@@ -295,15 +309,17 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
           Edit: {fileName}
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          startIcon={<Iconify icon="solar:diskette-bold" />}
-          sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
-        >
-          Save
-        </Button>
+        <Tooltip title="Save (Ctrl + S)">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            startIcon={<Iconify icon="solar:diskette-bold" />}
+            sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
+          >
+            Save
+          </Button>
+        </Tooltip>
       </Stack>
 
       <Stack spacing={4}>
@@ -707,20 +723,22 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
 
       {/* Footer Save Button for Mobile */}
       <Box sx={{ mt: 8, pb: 10, display: 'flex', justifyContent: 'center' }}>
-        <Button
-          variant="contained"
-          size="large"
-          color="primary"
-          onClick={handleSave}
-          sx={{
-            px: 8,
-            height: 56,
-            borderRadius: 2,
-            boxShadow: (theme) => theme.customShadows?.primary
-          }}
-        >
-          Save Script
-        </Button>
+        <Tooltip title="Save Script (Ctrl + S)">
+          <Button
+            variant="contained"
+            size="large"
+            color="primary"
+            onClick={handleSave}
+            sx={{
+              px: 8,
+              height: 56,
+              borderRadius: 2,
+              boxShadow: (theme) => theme.customShadows?.primary
+            }}
+          >
+            Save Script
+          </Button>
+        </Tooltip>
       </Box>
 
       <Dialog open={bulkModal.value} onClose={bulkModal.onFalse} fullWidth maxWidth="lg">

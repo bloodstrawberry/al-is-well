@@ -135,7 +135,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }));
   }, []);
 
-  const toggleAll = () => {
+  const toggleAll = useCallback(() => {
     const newState = !allRevealed;
     setAllRevealed(newState);
     setShowKoQuestion(newState);
@@ -152,7 +152,24 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       });
     }
     setRevealedLines(newRevealed);
-  };
+  }, [allRevealed, scriptData]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        toggleAll();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === 'e') {
+        event.preventDefault();
+        onEdit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onEdit, toggleAll]);
 
   const userAnswersRef = useRef(userAnswers);
   useEffect(() => {

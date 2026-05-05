@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
@@ -247,7 +247,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
     loadPlaylist();
   }, [fileId, storageKey]);
 
-  const handleSave = async (silent = false) => {
+  const handleSave = useCallback(async (silent = false) => {
     try {
       const currentDataStr = JSON.stringify(playlist);
       const hasChanged = currentDataStr !== initialPlaylistRef.current;
@@ -265,7 +265,20 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
       console.error('Failed to save playlist', error);
       toast.error('Failed to save playlist');
     }
-  };
+  }, [fileId, playlist, storageKey, onSave, onSaveSuccess]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
 
   const handleRemoveFile = (idToRemove: string) => {
     setPlaylist((prev) => ({
@@ -332,7 +345,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         </Typography>
 
         <Stack direction="row" spacing={1}>
-          <Tooltip title="저장">
+          <Tooltip title="저장 (Ctrl + S)">
             <IconButton
               color="primary"
               onClick={() => handleSave(false)}

@@ -551,27 +551,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
   }, [playlist]);
 
-  // Keyboard Shortcuts
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'Enter') {
-        if (event.shiftKey) {
-          handlePrev();
-        } else {
-          handleNext();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrev]);
-
   const toggleLine = useCallback((index: string | number) => {
     setRevealedLines((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
 
-  const toggleAll = () => {
+  const toggleAll = useCallback(() => {
     const newState = !allRevealed;
     setAllRevealed(newState);
     
@@ -592,7 +576,31 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     }
     setRevealedLines(newRevealedLines);
     setRevealedAnswers(newRevealedAnswers);
-  };
+  }, [allRevealed, scriptData]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'Enter') {
+        if (event.shiftKey) {
+          handlePrev();
+        } else {
+          handleNext();
+        }
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        toggleAll();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === 'e') {
+        event.preventDefault();
+        onEdit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev, onEdit, toggleAll]);
 
 
   const handleChangeAnswer = useCallback((index: number, value: string) => {
