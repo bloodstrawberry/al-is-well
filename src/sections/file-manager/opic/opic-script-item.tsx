@@ -239,7 +239,12 @@ export const OpicScriptItem = memo(({
                 onBlur={handleBlur}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleAction('check');
+                    if (e.ctrlKey) {
+                      e.preventDefault();
+                      onToggleAnswerReveal(index);
+                    } else {
+                      handleAction('check');
+                    }
                   }
                   if (e.key === 'Tab') {
                     e.preventDefault();

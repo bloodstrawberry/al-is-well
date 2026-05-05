@@ -278,6 +278,15 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     inputRefs.current[index] = el;
   }, [inputRefs]);
 
+  const handleFocusNextInput = useCallback((index: number, direction: 'next' | 'prev') => {
+    const nextIndex = direction === 'next' ? index + 1 : index - 1;
+    const nextInput = inputRefs.current[nextIndex];
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [inputRefs]);
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -358,6 +367,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
               onStopListening={stopListening}
               onPlayRecordedAudio={playRecordedAudio}
               onToggleAnswerReveal={handleToggleAnswerReveal}
+              onFocusNext={handleFocusNextInput}
             />
           )) || (
               <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
