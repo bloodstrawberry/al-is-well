@@ -217,7 +217,7 @@ export function OpicHeader({
           )}
 
           {onToggleTestMode && (
-            <Tooltip title="Test Mode">
+            <Tooltip title="Test Mode (Ctrl + X)">
               <IconButton
                 color={testMode ? 'info' : 'default'}
                 onClick={onToggleTestMode}

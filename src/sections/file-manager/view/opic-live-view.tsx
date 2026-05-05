@@ -154,6 +154,19 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     setRevealedLines(newRevealed);
   }, [allRevealed, scriptData]);
 
+  const handleToggleTestMode = useCallback(() => {
+    setTestMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setAllRevealed(false);
+        setUserAnswers({});
+        setTestResults({});
+        setRevealedAnswers({});
+      }
+      return next;
+    });
+  }, [setAllRevealed, setUserAnswers]);
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -165,11 +178,15 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         event.preventDefault();
         onEdit();
       }
+      if (event.ctrlKey && event.key.toLowerCase() === 'x') {
+        event.preventDefault();
+        handleToggleTestMode();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onEdit, toggleAll]);
+  }, [onEdit, toggleAll, handleToggleTestMode]);
 
   const userAnswersRef = useRef(userAnswers);
   useEffect(() => {
@@ -287,15 +304,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         onBack={onBack}
         onToggleAllRevealed={toggleAll}
         onEdit={onEdit}
-        onToggleTestMode={() => {
-          setTestMode(!testMode);
-          if (!testMode) {
-            setAllRevealed(false);
-            setUserAnswers({});
-            setTestResults({});
-            setRevealedAnswers({});
-          }
-        }}
+        onToggleTestMode={handleToggleTestMode}
       />
 
       <Stack spacing={4}>
