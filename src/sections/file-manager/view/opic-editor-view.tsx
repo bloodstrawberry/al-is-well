@@ -125,6 +125,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
     stopListening,
     playRecordedAudio,
     toggleSpeak,
+    resetStates,
   } = useOpicSpeech();
 
   // Sync userAnswers from speech to scriptData
@@ -140,31 +141,32 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
   useEffect(() => {
     const loadScript = async () => {
       setLoading(true);
+      resetStates();
+      
       try {
         const data = await getFileScript(fileId);
-        if (data) {
-          let questions = data.questions;
-          if (!questions && (data.questionEn || data.question)) {
-            questions = [{
-              en: data.questionEn || data.question || '',
-              ko: data.questionKo || ''
-            }];
-          }
-          if (!questions || questions.length === 0) {
-            questions = [{ en: '', ko: '' }];
-          }
-
-          setScriptData({
-            questions,
-            audioUrl: data.audioUrl || '',
-            category: data.category || '',
-            subCategory: data.subCategory || '',
-            comboPositions: data.comboPositions || [],
-            lines: data.lines || [{ ko: '', en: '' }],
-          });
-          setAudioReady(false);
-          setAudioError(false);
+        
+        let questions = data?.questions;
+        if (data && !questions && (data.questionEn || data.question)) {
+          questions = [{
+            en: data.questionEn || data.question || '',
+            ko: data.questionKo || ''
+          }];
         }
+        if (!questions || questions.length === 0) {
+          questions = [{ en: '', ko: '' }];
+        }
+
+        setScriptData({
+          questions,
+          audioUrl: data?.audioUrl || '',
+          category: data?.category || '',
+          subCategory: data?.subCategory || '',
+          comboPositions: data?.comboPositions || [],
+          lines: data?.lines || [{ ko: '', en: '' }],
+        });
+        setAudioReady(false);
+        setAudioError(false);
       } catch (error) {
         console.error('Failed to load script', error);
       } finally {
@@ -172,7 +174,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
       }
     };
     loadScript();
-  }, [fileId]);
+  }, [fileId, resetStates]);
 
   const handleSave = async () => {
     try {

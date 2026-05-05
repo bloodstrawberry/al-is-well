@@ -66,6 +66,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     playRecordedAudio,
     toggleSpeak,
     stopAll,
+    resetStates,
   } = useOpicSpeech();
 
   const questionAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -86,11 +87,18 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     }
   }, []);
 
-
-
   useEffect(() => {
     const loadScript = async () => {
       setLoading(true);
+      // Clear previous file states
+      setScriptData(null);
+      setRevealedLines({});
+      setAllRevealed(false);
+      setShowKoQuestion(false);
+      setTestResults({});
+      setRevealedAnswers({});
+      resetStates();
+
       try {
         const data = await getFileScript(fileId);
         if (data && !data.questions && (data.questionEn || data.question)) {
@@ -99,10 +107,8 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             ko: data.questionKo || ''
           }];
         }
-        if (data) {
-          setScriptData(data);
-          setAudioReady(false);
-        }
+        setScriptData(data || null);
+        setAudioReady(false);
       } catch (error) {
         console.error('Failed to load script', error);
       } finally {
@@ -110,7 +116,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
       }
     };
     loadScript();
-  }, [fileId]);
+  }, [fileId, resetStates]);
 
   // Stop audio when page changes or component unmounts
   useEffect(() => {

@@ -218,9 +218,6 @@ const SidebarTreeItem = memo(
             onClick={(event) => {
               event.stopPropagation();
               onSelect(node.id);
-              if (node.type === 'file') {
-                onOpenFile?.(node.id);
-              }
             }}
           >
             <Iconify

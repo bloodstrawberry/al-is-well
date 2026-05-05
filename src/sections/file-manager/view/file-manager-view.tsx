@@ -359,14 +359,6 @@ export function FileManagerView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleNavigate = useCallback(
-    (id: string | null) => {
-      updateURL({ folder: id, view: 'list', fileId: null, fileName: null });
-      table.onResetPage();
-    },
-    [updateURL, table]
-  );
-
   const handleOpenFile = useCallback(
     async (id: string) => {
       const item = flattenedTree.find((f) => f.id === id);
@@ -375,6 +367,25 @@ export function FileManagerView() {
       }
     },
     [flattenedTree, updateURL]
+  );
+
+  const handleNavigate = useCallback(
+    (id: string | null) => {
+      if (id === null) {
+        updateURL({ folder: null, view: 'list', fileId: null, fileName: null });
+        table.onResetPage();
+        return;
+      }
+
+      const item = flattenedTree.find((f) => f.id === id);
+      if (item?.type === 'file') {
+        handleOpenFile(id);
+      } else {
+        updateURL({ folder: id, view: 'list', fileId: null, fileName: null });
+        table.onResetPage();
+      }
+    },
+    [updateURL, table, flattenedTree, handleOpenFile]
   );
 
   const handleCreateItem = useCallback(
@@ -911,7 +922,7 @@ export function FileManagerView() {
             data={treeData}
             isCollapsed={isCollapsed}
             onToggle={() => setIsCollapsed(!isCollapsed)}
-            selectedId={currentFolderId}
+            selectedId={viewMode === 'list' ? currentFolderId : (selectedFile?.id || null)}
             onSelectId={handleNavigate}
             onOpenFile={handleOpenFile}
             onUpdateName={handleUpdateItemName}
