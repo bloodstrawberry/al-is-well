@@ -109,7 +109,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
     const uWords = userAnswer.split(/\s+/);
     const cWords = correctAnswer.split(/\s+/);
-    const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
+    const clean = (str: string) => str?.toLowerCase().replace(/’/g, "'").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
     const uClean = uWords.map(clean);
     const cClean = cWords.map(clean);
 

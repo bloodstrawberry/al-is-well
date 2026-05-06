@@ -203,7 +203,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     const uWords = userAnswer.split(/\s+/);
     const cWords = correctAnswer.split(/\s+/);
 
-    const clean = (str: string) => str?.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
+    const clean = (str: string) => str?.toLowerCase().replace(/’/g, "'").replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") || "";
 
     // LCS-based Alignment
     const uClean = uWords.map(clean);
