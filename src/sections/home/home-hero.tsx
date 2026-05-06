@@ -218,7 +218,7 @@ export function HomeHero() {
           variant="contained"
           size="large"
           color="primary"
-          onClick={() => router.push(paths.fileManager)}
+          onClick={() => {}}
           endIcon={
             <Iconify
               icon="solar:arrow-right-linear"
