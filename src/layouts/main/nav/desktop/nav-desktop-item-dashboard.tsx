@@ -10,7 +10,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { CONFIG } from 'src/global-config';
 
-import { varTap, varHover, transitionTap } from 'src/components/animate';
+// import { varTap, varHover, transitionTap } from 'src/components/animate';
 
 // ----------------------------------------------------------------------
 
@@ -46,9 +46,9 @@ export function NavItemDashboard({ path, sx, ...other }: NavItemDashboardProps) 
       >
         <Box
           component={m.img}
-          whileTap={varTap(0.98)}
-          whileHover={varHover(1.02)}
-          transition={transitionTap()}
+          // whileTap={varTap(0.98)}
+          // whileHover={varHover(1.02)}
+          // transition={transitionTap()}
           alt="Dashboard illustration"
           src={`${CONFIG.assetsDir}/assets/illustrations/illustration-dashboard.webp`}
           sx={{ width: 640, objectFit: 'cover', aspectRatio: '4/3' }}
