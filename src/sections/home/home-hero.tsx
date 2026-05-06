@@ -12,7 +12,7 @@ import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
 
-import { HeroBackground } from './components/hero-background';
+
 
 // ----------------------------------------------------------------------
 
@@ -266,7 +266,7 @@ export function HomeHero() {
         alignItems: 'center',
       }}
     >
-      <HeroBackground />
+
 
       <Container sx={{ position: 'relative', zIndex: 9 }}>
         <Stack
