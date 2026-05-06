@@ -1,50 +1,14 @@
 'use client';
 
-import type { IconProps } from '@iconify/react';
-import type { IconifyName } from './register-icons';
+import Box from '@mui/material/Box';
 
-import { useId } from 'react';
-import { Icon } from '@iconify/react';
-import { mergeClasses } from 'minimal-shared/utils';
-
-import { styled } from '@mui/material/styles';
-
-import { iconifyClasses } from './classes';
-import { allIconNames, registerIcons } from './register-icons';
-
-// 모듈 로드 시 한 번만 아이콘 등록 (렌더마다 호출하지 않음)
-registerIcons();
-
-// ----------------------------------------------------------------------
-
-export type IconifyProps = React.ComponentProps<typeof IconRoot> &
-  Omit<IconProps, 'icon'> & {
-    icon: IconifyName | string;
-  };
-
-export function Iconify({ className, icon, width = 20, height, sx, ...other }: IconifyProps) {
-  const uniqueId = useId();
-
-  if (process.env.NODE_ENV === 'development' && !allIconNames.includes(icon as IconifyName)) {
-    console.warn(
-      [
-        `Icon "${icon}" is currently loaded online, which may cause flickering effects.`,
-        `To ensure a smoother experience, please register your icon collection for offline use.`,
-        `More information is available at: https://docs.minimals.cc/icons/`,
-      ].join('\n')
-    );
-  }
-
+export function Iconify({ width = 20, height, sx, ...other }: any) {
   return (
-    <IconRoot
-      ssr
-      id={uniqueId}
-      icon={icon}
-      className={mergeClasses([iconifyClasses.root, className])}
+    <Box
+      component="span"
       sx={[
         {
           width,
-          flexShrink: 0,
           height: height ?? width,
           display: 'inline-flex',
         },
@@ -54,7 +18,3 @@ export function Iconify({ className, icon, width = 20, height, sx, ...other }: I
     />
   );
 }
-
-// ----------------------------------------------------------------------
-
-const IconRoot = styled(Icon)``;
