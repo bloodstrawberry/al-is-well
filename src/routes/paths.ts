@@ -8,15 +8,4 @@ export const paths = {
   page500: '/error/500',
   home: '/home',
   fileManager: `/opic-drive`,
-  practice: {
-    root: `/practice`,
-    myTests: `/practice/my-tests`,
-    randomTest: `/practice/random-test`,
-  },
-  listening: {
-    root: `/listening`,
-    playlist: `/listening/playlist`,
-    random: `/listening/random`,
-  },
-  faq: `/faq`,
 };
