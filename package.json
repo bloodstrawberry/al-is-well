@@ -10,8 +10,8 @@
     }
   },
   "scripts": {
-    "dev": "next dev -p 8082 --turbopack",
-    "start": "next start -p 8082",
+    "dev": "next dev -p 8083 --turbopack",
+    "start": "next start -p 8083",
     "build": "next build",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",

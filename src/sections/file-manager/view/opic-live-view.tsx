@@ -162,10 +162,16 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
         setUserAnswers({});
         setTestResults({});
         setRevealedAnswers({});
+
+        // Focus first input when starting test mode
+        setTimeout(() => {
+          inputRefs.current[0]?.focus();
+          inputRefs.current[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
       }
       return next;
     });
-  }, [setAllRevealed, setUserAnswers]);
+  }, [setAllRevealed, setUserAnswers, inputRefs]);
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -264,7 +270,18 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
     if (isAllCorrect) {
       setRevealedAnswers(prev => ({ ...prev, [index]: true }));
     }
-  }, [scriptData?.lines]);
+
+    // Refocus and scroll if it's the last script
+    if (index === (scriptData?.lines?.length || 0) - 1) {
+      setTimeout(() => {
+        const input = inputRefs.current[index];
+        if (input) {
+          input.focus();
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    }
+  }, [scriptData?.lines, inputRefs]);
 
   const handleChangeAnswer = useCallback((index: number, value: string) => {
     setUserAnswers((prev) => (prev[index] === value ? prev : { ...prev, [index]: value }));
@@ -272,7 +289,18 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
 
   const handleToggleAnswerReveal = useCallback((index: number) => {
     setRevealedAnswers(prev => ({ ...prev, [index]: !prev[index] }));
-  }, []);
+
+    // Refocus and scroll if it's the last script
+    if (index === (scriptData?.lines?.length || 0) - 1) {
+      setTimeout(() => {
+        const input = inputRefs.current[index];
+        if (input) {
+          input.focus();
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    }
+  }, [scriptData?.lines, inputRefs]);
 
   const setInputRef = useCallback((index: number, el: any) => {
     inputRefs.current[index] = el;
