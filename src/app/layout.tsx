@@ -12,6 +12,8 @@ import { I18nProvider } from 'src/locales/i18n-provider';
 import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 
 import { Snackbar } from 'src/components/snackbar';
+import { ProgressBar } from 'src/components/progress-bar';
+import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { detectSettings } from 'src/components/settings/server';
 import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
 
@@ -83,7 +85,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
         {/* Force unregister any existing service workers to fix OOM issues from previous next-pwa installs */}
-        {/* Temporarily disabled for OOM debugging
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -122,7 +123,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `,
           }}
         />
-        */}
       </head>
       <body>
         <InitColorSchemeScript
@@ -143,8 +143,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                     modeStorageKey={themeConfig.modeStorageKey}
                     defaultMode={themeConfig.defaultMode}
                   >
+                    <MotionLazy>
                       <Snackbar />
+                      <ProgressBar />
                       {children}
+                    </MotionLazy>
                   </ThemeProvider>
                 </AppRouterCacheProvider>
               </LocalizationProvider>
