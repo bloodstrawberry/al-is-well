@@ -13,7 +13,7 @@ const ICONS = {
   folder: <FolderRoundedIcon fontSize="small" />,
   practice: <AssignmentRoundedIcon fontSize="small" />,
   listening: <HeadphonesRoundedIcon fontSize="small" />,
-  faq: <HelpRoundedIcon fontSize="small" />,
+
   home: <HomeRoundedIcon fontSize="small" />,
 };
 
@@ -61,7 +61,7 @@ export const navData: NavSectionProps['data'] = [
           { title: '랜덤 듣기', path: paths.listening.random },
         ],
       },
-      { title: 'FAQ', path: paths.faq, icon: ICONS.faq },
+
     ],
   },
 ];
@@ -103,9 +103,5 @@ export const mainNavData: NavMainProps['data'] = [
       },
     ],
   },
-  {
-    title: 'FAQ',
-    path: paths.faq,
-    icon: <HelpRoundedIcon sx={{ width: 22, height: 22 }} />,
-  },
+
 ];

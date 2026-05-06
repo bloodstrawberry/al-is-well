@@ -18,5 +18,5 @@ export const paths = {
     playlist: `/listening/playlist`,
     random: `/listening/random`,
   },
-  faq: `/faq`,
+
 };
