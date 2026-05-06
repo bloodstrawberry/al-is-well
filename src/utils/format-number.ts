@@ -1,3 +1,5 @@
+import { formatNumberLocale } from 'src/locales';
+
 // ----------------------------------------------------------------------
 
 /*
@@ -19,7 +21,7 @@ function processInput(inputValue: InputNumberValue): number | null {
 // ----------------------------------------------------------------------
 
 export function fNumber(inputValue: InputNumberValue, options?: Options) {
-  const locale = DEFAULT_LOCALE;
+  const locale = formatNumberLocale() || DEFAULT_LOCALE;
 
   const number = processInput(inputValue);
   if (number === null) return '';
@@ -36,7 +38,7 @@ export function fNumber(inputValue: InputNumberValue, options?: Options) {
 // ----------------------------------------------------------------------
 
 export function fCurrency(inputValue: InputNumberValue, options?: Options) {
-  const locale = DEFAULT_LOCALE;
+  const locale = formatNumberLocale() || DEFAULT_LOCALE;
 
   const number = processInput(inputValue);
   if (number === null) return '';
@@ -55,7 +57,7 @@ export function fCurrency(inputValue: InputNumberValue, options?: Options) {
 // ----------------------------------------------------------------------
 
 export function fPercent(inputValue: InputNumberValue, options?: Options) {
-  const locale = DEFAULT_LOCALE;
+  const locale = formatNumberLocale() || DEFAULT_LOCALE;
 
   const number = processInput(inputValue);
   if (number === null) return '';
@@ -73,7 +75,7 @@ export function fPercent(inputValue: InputNumberValue, options?: Options) {
 // ----------------------------------------------------------------------
 
 export function fShortenNumber(inputValue: InputNumberValue, options?: Options) {
-  const locale = DEFAULT_LOCALE;
+  const locale = formatNumberLocale() || DEFAULT_LOCALE;
 
   const number = processInput(inputValue);
   if (number === null) return '';
