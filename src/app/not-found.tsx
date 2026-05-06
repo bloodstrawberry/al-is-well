@@ -1,10 +1,12 @@
-'use client';
-
+import type { Metadata } from 'next';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { RouterLink } from 'src/routes/components';
+
+export const metadata: Metadata = { title: `404 page not found!` };
 
 export default function Page() {
   return (
