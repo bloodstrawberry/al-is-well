@@ -21,6 +21,12 @@ import { Iconify } from 'src/components/iconify';
 
 const LINKS = [
   {
+    headline: 'Minimal',
+    children: [
+      { name: 'FAQs', href: paths.faq },
+    ],
+  },
+  {
     headline: 'Legal',
     children: [
       { name: 'Terms and condition', href: '#' },
