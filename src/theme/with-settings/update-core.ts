@@ -37,24 +37,24 @@ export function applySettingsToTheme(
 
     const updatedPalette = {
       ...currentScheme?.palette,
-      ...(!isDefaultPrimaryColor && {
+      ...(isDefaultPrimaryColor ? {} : {
         primary: primaryColorPalette,
         // secondary: secondaryColorPalette,
       }),
-      ...(schemeName === 'light' && {
+      ...(schemeName === 'light' ? {
         background: {
           ...lightPalette?.background,
-          ...(!isDefaultContrast && {
+          ...(isDefaultContrast ? {} : {
             default: lightPalette.grey[200],
             defaultChannel: hexToRgbChannel(lightPalette.grey[200]),
           }),
         },
-      }),
+      } : {}),
     };
 
     const updatedCustomShadows = {
       ...currentScheme?.customShadows,
-      ...(!isDefaultPrimaryColor && {
+      ...(isDefaultPrimaryColor ? {} : {
         primary: createShadowColor(primaryColorPalette.mainChannel),
         // secondary: createShadowColor(secondaryColorPalette.mainChannel),
       }),

@@ -66,9 +66,9 @@ export function HeaderSection({
       className={mergeClasses([layoutClasses.header, className])}
       sx={[
         (theme) => ({
-          ...(isOffset && {
+          ...(isOffset ? {
             '--color': `var(--offset-color, ${theme.vars.palette.text.primary})`,
-          }),
+          } : {}),
         }),
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

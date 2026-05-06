@@ -72,12 +72,12 @@ export function DashboardLayout({
       container: {
         maxWidth: false,
         sx: {
-          ...(isNavVertical && { px: { [layoutQuery]: 5 } }),
-          ...(isNavHorizontal && {
+          ...(isNavVertical ? { px: { [layoutQuery]: 5 } } : {}),
+          ...(isNavHorizontal ? {
             bgcolor: 'var(--layout-nav-bg)',
             height: { [layoutQuery]: 'var(--layout-nav-horizontal-height)' },
             [`& .${iconButtonClasses.root}`]: { color: 'var(--layout-nav-text-secondary-color)' },
-          }),
+          } : {}),
         },
       },
     };

@@ -45,10 +45,10 @@ export function DashboardContent({
           pb: 'var(--layout-dashboard-content-pb)',
           [theme.breakpoints.up(layoutQuery)]: {
             px: 'var(--layout-dashboard-content-px)',
-            ...(isNavHorizontal && { '--layout-dashboard-content-pt': '40px' }),
+            ...(isNavHorizontal ? { '--layout-dashboard-content-pt': '40px' } : {}),
             ...({ maxWidth: '90%' }),
           },
-          ...(disablePadding && {
+          ...(disablePadding ? {
             p: {
               xs: 0,
               sm: 0,
@@ -56,7 +56,7 @@ export function DashboardContent({
               lg: 0,
               xl: 0,
             },
-          }),
+          } : {}),
         }),
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
