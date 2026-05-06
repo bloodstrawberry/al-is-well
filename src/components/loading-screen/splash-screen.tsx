@@ -1,14 +1,13 @@
 'use client';
 
 import type { Theme, SxProps } from '@mui/material/styles';
-import type { AnimateLogoProps } from '../animate';
-
 import { Fragment } from 'react';
+import { m } from 'framer-motion';
 
 import Portal from '@mui/material/Portal';
 import { styled } from '@mui/material/styles';
 
-import { AnimateLogoZoom } from '../animate';
+import { Logo } from 'src/components/logo';
 
 // ----------------------------------------------------------------------
 
@@ -20,7 +19,6 @@ export type SplashScreenProps = React.ComponentProps<'div'> & {
   };
   slotProps?: {
     wrapper?: React.ComponentProps<typeof LoadingWrapper>;
-    logo?: AnimateLogoProps;
   };
 };
 
@@ -31,7 +29,23 @@ export function SplashScreen({ portal = true, slots, slotProps, sx, ...other }: 
     <PortalWrapper>
       <LoadingWrapper {...slotProps?.wrapper}>
         <LoadingContent sx={sx} {...other}>
-          {slots?.logo ?? <AnimateLogoZoom {...slotProps?.logo} />}
+          {slots?.logo ?? (
+            <m.div
+              animate={{
+                scale: [1, 1.2, 1.2, 1, 1],
+                rotate: [0, 270, 270, 0, 0],
+                opacity: [1, 0.48, 0.48, 1, 1],
+              }}
+              transition={{
+                duration: 2,
+                ease: 'easeInOut',
+                repeatDelay: 1,
+                repeat: Infinity,
+              }}
+            >
+              <Logo disabled sx={{ width: 64, height: 64 }} />
+            </m.div>
+          )}
         </LoadingContent>
       </LoadingWrapper>
     </PortalWrapper>

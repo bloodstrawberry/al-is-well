@@ -20,7 +20,6 @@ import { VerticalDivider } from './content';
 import { NavVertical } from './nav-vertical';
 import { NavHorizontal } from './nav-horizontal';
 
-import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
 
 import { navData as dashboardNavData } from '../nav-config-dashboard';

@@ -5,8 +5,6 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 
 // MUI Date Pickers Locales
 import { enUS as enUSDate } from '@mui/x-date-pickers/locales';
-// MUI Data Grid Locales
-import { enUS as enUSDataGrid } from '@mui/x-data-grid/locales';
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +41,7 @@ export const allLangs: LangOption[] = [
     adapterLocale: 'en',
     numberFormat: { code: 'en-US', currency: 'USD' },
     systemValue: {
-      components: { ...enUSDate.components, ...enUSDataGrid.components },
+      components: { ...enUSDate.components },
     },
   },
 ];

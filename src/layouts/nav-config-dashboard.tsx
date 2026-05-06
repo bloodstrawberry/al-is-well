@@ -5,7 +5,6 @@ import { paths } from 'src/routes/paths';
 
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import HeadphonesRoundedIcon from '@mui/icons-material/HeadphonesRounded';
 
