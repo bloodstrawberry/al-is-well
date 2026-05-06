@@ -38,14 +38,7 @@ export function SettingsDrawer({ sx, defaultSettings }: SettingsDrawerProps) {
     primaryColor: hasKeys(defaultSettings, ['primaryColor']),
   };
 
-  const lastSyncedMode = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (mode !== undefined && mode !== settings.state.mode && mode !== lastSyncedMode.current) {
-      lastSyncedMode.current = mode;
-      settings.setState({ mode });
-    }
-  }, [mode, settings]);
+  // Mode synchronization removed as mode is no longer in settings state.
 
   const handleReset = useCallback(() => {
     settings.onReset();
