@@ -88,11 +88,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // 기존 service worker 및 캐시 전체 해제 (OOM 방지)
               if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                   for(let registration of registrations) {
                     registration.unregister();
                   }
+                });
+              }
+              // 오래된 캐시 삭제 (누적된 캐시가 OOM 원인이 될 수 있음)
+              if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                  cacheNames.forEach(function(cacheName) {
+                    caches.delete(cacheName);
+                  });
                 });
               }
 
