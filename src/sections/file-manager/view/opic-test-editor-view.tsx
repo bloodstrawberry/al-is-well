@@ -274,11 +274,19 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         event.preventDefault();
         handleSave();
       }
+      if (event.ctrlKey && event.key.toLowerCase() === 'x') {
+        event.preventDefault();
+        if (onStartTest) {
+          handleSave(true).then(() => {
+            onStartTest();
+          });
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave]);
+  }, [handleSave, onStartTest]);
 
   const handleRemoveFile = (idToRemove: string) => {
     setPlaylist((prev) => ({
@@ -361,7 +369,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
           </Tooltip>
 
           {onStartTest && (
-            <Tooltip title="Test 시작">
+            <Tooltip title="Test 시작 (Ctrl + X)">
               <IconButton
                 color="info"
                 onClick={async () => {
