@@ -101,7 +101,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const handleCheckAnswer = useCallback((index: number, text?: string) => {
     if (!scriptData?.lines?.[index]) return;
-    
+
     const currentAnswers = userAnswersRef.current;
     const userAnswer = (text !== undefined ? text : (currentAnswers[index] || '')).trim();
     const correctAnswer = (scriptData.lines[index].en || '').trim();
@@ -156,7 +156,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
     } else if (lastListeningIndexRef.current !== null) {
       const indexToCheck = lastListeningIndexRef.current;
       lastListeningIndexRef.current = null;
-      
+
       setTimeout(() => {
         handleCheckAnswer(indexToCheck);
       }, 300);
@@ -185,7 +185,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           audioUrlPriority: data.audioUrlPriority ?? true,
           randomPlay: data.randomPlay ?? false,
           playQuestion: data.playQuestion ?? true,
-        } : { 
+        } : {
           fileIds: [fileId],
           audioUrlPriority: true,
           randomPlay: false,
@@ -194,7 +194,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
         const ids = playlistWithDefaults.fileIds;
         let order = Array.from({ length: ids.length }, (_, i) => i);
-        
+
         if (playlistWithDefaults.randomPlay && ids.length > 1) {
           // Fisher-Yates Shuffle
           for (let i = order.length - 1; i > 0; i--) {
@@ -206,7 +206,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
         setPlayOrder(order);
         setPlaylist(playlistWithDefaults);
         setCurrentIndex(0);
-        
+
         // Ensure testMode is TRUE for listening mode to enable blur/reveal
         if (storageKey === 'listening') {
           setTestMode(true);
@@ -231,7 +231,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
       setAudioReady(false);
       setIsSwitching(true);
       sequenceRef.current = 'idle';
-      
+
       // Reset item-specific states when switching scripts
       setRevealedLines({});
       setAllRevealed(false);
@@ -242,11 +242,11 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
       try {
         const data = await getFileScript(currentId);
-        
+
         // Try current section tree first, then main DRIVE tree
         const treeSection = await getTreeData(storageKey);
         const treeMain = await getTreeData();
-        
+
         const findName = (nodes: any[]): string => {
           for (const node of nodes) {
             if (node.id === currentId) return node.label;
@@ -318,7 +318,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const handleNextPlaylist = useCallback(() => {
     const currentPlaylist = playlistRef.current;
     if (!currentPlaylist) return;
-    
+
     const { fileIds } = currentPlaylist;
     if (fileIds.length <= 1) return;
 
@@ -339,7 +339,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const playContent = useCallback(() => {
     if (!scriptData) return;
-    
+
     // Stop any existing speech/audio before starting
     window.speechSynthesis.cancel();
     if (audioRef.current) {
@@ -362,9 +362,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           const playPromise = audio.play();
           if (playPromise !== undefined) {
             playPromise.catch(error => {
-               console.warn("Audio play prevented or failed", error);
-               // If play fails (e.g. source error), fallback to speech
-               playLine(0);
+              console.warn("Audio play prevented or failed", error);
+              // If play fails (e.g. source error), fallback to speech
+              playLine(0);
             });
           }
         } catch (err) {
@@ -377,7 +377,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           const fallbackAudio = new Audio(scriptData.audioUrl);
           audioRef.current = fallbackAudio;
           setIsAudioPlaying(true);
-          
+
           fallbackAudio.onended = () => {
             audioRef.current = null;
             setIsAudioPlaying(false);
@@ -399,10 +399,10 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           const playPromise = fallbackAudio.play();
           if (playPromise !== undefined) {
             playPromise.catch(error => {
-               console.warn("Audio play prevented or failed", error);
-               if (audioRef.current === fallbackAudio) {
-                 fallbackAudio.onerror?.(error as any);
-               }
+              console.warn("Audio play prevented or failed", error);
+              if (audioRef.current === fallbackAudio) {
+                fallbackAudio.onerror?.(error as any);
+              }
             });
           }
         } catch (err) {
@@ -418,7 +418,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
 
   const playQuestion = useCallback(() => {
     if (!scriptData) return;
-    
+
     window.speechSynthesis.cancel();
     if (audioRef.current) {
       audioRef.current.pause();
@@ -558,20 +558,20 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   const toggleAll = useCallback(() => {
     const newState = !allRevealed;
     setAllRevealed(newState);
-    
+
     const newRevealedLines: Record<string, boolean> = {};
     const newRevealedAnswers: Record<number, boolean> = {};
 
     if (scriptData?.lines) {
-      scriptData.lines.forEach((_: any, index: number) => { 
+      scriptData.lines.forEach((_: any, index: number) => {
         newRevealedLines[index.toString()] = newState;
         newRevealedAnswers[index] = newState;
       });
     }
     if (scriptData?.questions) {
-      scriptData.questions.forEach((_: any, index: number) => { 
-        newRevealedLines[`q-en-${index}`] = newState; 
-        newRevealedLines[`q-ko-${index}`] = newState; 
+      scriptData.questions.forEach((_: any, index: number) => {
+        newRevealedLines[`q-en-${index}`] = newState;
+        newRevealedLines[`q-ko-${index}`] = newState;
       });
     }
     setRevealedLines(newRevealedLines);
@@ -581,8 +581,9 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'Enter') {
-        if (event.shiftKey) {
+      if (event.ctrlKey && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+        event.preventDefault();
+        if (event.key === 'ArrowLeft') {
           handlePrev();
         } else {
           handleNext();
