@@ -1,5 +1,5 @@
 import type { Theme, CSSObject } from '@mui/material/styles';
-import type { SettingsState } from 'src/components/settings';
+
 
 import { varAlpha } from 'minimal-shared/utils';
 
@@ -24,8 +24,8 @@ export function dashboardLayoutVars(theme: Theme) {
 
 export function dashboardNavColorVars(
   theme: Theme,
-  navColor: SettingsState['navColor'] = 'integrate',
-  navLayout: SettingsState['navLayout'] = 'vertical'
+  navColor: 'integrate' | 'apparent' = 'integrate',
+  navLayout: 'vertical' | 'horizontal' | 'mini' = 'vertical'
 ): Record<'layout' | 'section', CSSObject | undefined> {
   const {
     vars: { palette },
