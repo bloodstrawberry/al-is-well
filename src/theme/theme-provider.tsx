@@ -33,7 +33,7 @@ export function ThemeProvider({ themeOverrides, children, ...other }: ThemeProvi
   return (
     <ThemeVarsProvider disableTransitionOnChange theme={theme} {...other}>
       <CssBaseline />
-      <Rtl direction={settings.state.direction}>{children}</Rtl>
+      <Rtl direction="ltr">{children}</Rtl>
     </ThemeVarsProvider>
   );
 }

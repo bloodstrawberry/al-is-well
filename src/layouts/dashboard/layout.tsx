@@ -22,7 +22,6 @@ import { NavHorizontal } from './nav-horizontal';
 
 import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
-import { SettingsButton } from '../components/settings-button';
 
 import { navData as dashboardNavData } from '../nav-config-dashboard';
 import { dashboardLayoutVars, dashboardNavColorVars } from './css-vars';
@@ -56,15 +55,15 @@ export function DashboardLayout({
 
   const settings = useSettingsContext();
 
-  const navVars = dashboardNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
+  const navVars = dashboardNavColorVars(theme, 'integrate', 'vertical');
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
   const navData = slotProps?.nav?.data ?? dashboardNavData;
 
-  const isNavMini = true;
-  const isNavHorizontal = settings.state.navLayout === 'horizontal';
-  const isNavVertical = isNavMini || settings.state.navLayout === 'vertical';
+  const isNavMini = false;
+  const isNavHorizontal = false;
+  const isNavVertical = true;
 
   const canDisplayItemByRole = (allowedRoles: NavItemProps['allowedRoles']): boolean => true;
 
@@ -132,7 +131,6 @@ export function DashboardLayout({
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
           {/** @slot Settings button */}
-          <SettingsButton />
         </Box>
       ),
     };
@@ -156,12 +154,7 @@ export function DashboardLayout({
       layoutQuery={layoutQuery}
       cssVars={navVars.section}
       checkPermissions={canDisplayItemByRole}
-      onToggleNav={() =>
-        settings.setField(
-          'navLayout',
-          settings.state.navLayout === 'vertical' ? 'mini' : 'vertical'
-        )
-      }
+      onToggleNav={() => {}}
     />
   );
 

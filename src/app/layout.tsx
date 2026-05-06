@@ -63,7 +63,7 @@ async function getAppConfig() {
       lang: 'en',
       i18nLang: undefined,
       cookieSettings: undefined,
-      dir: defaultSettings.direction,
+      dir: 'ltr',
     };
   } else {
     const [lang, settings] = await Promise.all([detectLanguage(), detectSettings()]);
@@ -72,7 +72,7 @@ async function getAppConfig() {
       lang,
       i18nLang: lang,
       cookieSettings: settings,
-      dir: settings.direction,
+      dir: 'ltr',
     };
   }
 }
@@ -137,7 +137,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                     <MotionLazy>
                       <Snackbar />
                       <ProgressBar />
-                      <SettingsDrawer defaultSettings={defaultSettings} />
                       {children}
                     </MotionLazy>
                   </ThemeProvider>

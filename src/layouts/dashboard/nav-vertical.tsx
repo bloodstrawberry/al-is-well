@@ -94,7 +94,7 @@ export function NavVertical({
       sx={sx}
       {...other}
     >
-      {renderNavMini()}
+      {isNavMini ? renderNavMini() : renderNavVertical()}
     </NavRoot>
   );
 }

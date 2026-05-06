@@ -30,7 +30,7 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const settings = useSettingsContext();
 
-  const isNavHorizontal = settings.state.navLayout === 'horizontal';
+  const isNavHorizontal = false;
 
   return (
     <Container

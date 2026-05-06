@@ -27,9 +27,8 @@ export function useTranslate(namespace?: Namespace) {
 
   const updateDirection = useCallback(
     (lang: LangCode) => {
-      settings.setState({ direction: i18n.dir(lang) });
     },
-    [i18n, settings]
+    []
   );
 
   const updateDayjsLocale = useCallback((lang: LangCode) => {
@@ -81,14 +80,10 @@ export function useLocaleDirectionSync() {
   const { state, setState } = useSettingsContext();
 
   const handleSync = useCallback(async () => {
-    if (state.direction !== i18n.dir(currentLang.value)) {
-      setState({ direction: i18n.dir(currentLang.value) });
-    }
-
     if (i18n.resolvedLanguage !== currentLang.value) {
       await i18n.changeLanguage(currentLang.value);
     }
-  }, [currentLang.value, i18n, setState, state.direction]);
+  }, [currentLang.value, i18n]);
 
   useEffect(() => {
     handleSync();

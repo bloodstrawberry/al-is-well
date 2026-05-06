@@ -8,13 +8,7 @@ export type SettingsState = {
   version: string;
   fontSize: number;
   fontFamily: string;
-  compactLayout: boolean;
-  contrast: 'default' | 'hight';
   primaryColor: ThemeColorPreset;
-  mode: ThemeConfig['defaultMode'];
-  navColor: 'integrate' | 'apparent';
-  direction: ThemeConfig['direction'];
-  navLayout: 'vertical' | 'horizontal' | 'mini';
 };
 
 export type SettingsContextValue = {
