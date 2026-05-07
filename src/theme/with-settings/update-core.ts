@@ -4,7 +4,7 @@ import type { ThemeOptions, ThemeColorScheme } from '../types';
 
 import { setFont, hexToRgbChannel, createPaletteChannel } from 'minimal-shared/utils';
 
-import { primaryColorPresets } from './color-presets';
+import { primaryColorPresets, ThemeColorPreset } from './color-presets';
 import { createShadowColor } from '../core/custom-shadows';
 
 // ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ export function applySettingsToTheme(
 
   const lightPalette = theme.colorSchemes?.light?.palette as ColorSystem['palette'];
 
-  const primaryColorPalette = createPaletteChannel(primaryColorPresets[primaryColor]);
+  const primaryColorPalette = createPaletteChannel(primaryColorPresets[primaryColor as ThemeColorPreset]);
   // const secondaryColorPalette = createPaletteChannel(secondaryColorPresets[primaryColor]);
 
   const updateColorScheme = (schemeName: ThemeColorScheme) => {

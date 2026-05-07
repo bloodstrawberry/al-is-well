@@ -39,6 +39,7 @@ import { FileManagerFiltersResult } from '../file-manager-filters-result';
 import { FileManagerCreateFolderDialog } from '../file-manager-create-folder-dialog';
 import { OpicEditorView } from './opic-editor-view';
 import { OpicLiveView } from './opic-live-view';
+import TREE_DATA from 'src/api/dummy/default.json';
 
 // ----------------------------------------------------------------------
 
