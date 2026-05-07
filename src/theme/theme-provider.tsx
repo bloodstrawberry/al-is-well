@@ -7,8 +7,6 @@ import type { ThemeOptions } from './types';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider as ThemeVarsProvider } from '@mui/material/styles';
 
-import { useTranslate } from 'src/locales';
-
 import { defaultSettings } from './settings-defaults';
 
 import { createTheme } from './create-theme';
@@ -21,11 +19,8 @@ export type ThemeProviderProps = Partial<MuiThemeProviderProps<Theme>> & {
 };
 
 export function ThemeProvider({ themeOverrides, children, ...other }: ThemeProviderProps) {
-  const { currentLang } = useTranslate();
-
   const theme = createTheme({
     settingsState: defaultSettings,
-    localeComponents: currentLang?.systemValue,
     themeOverrides,
   });
 
