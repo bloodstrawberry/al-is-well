@@ -5,7 +5,6 @@ import { mergeClasses } from 'minimal-shared/utils';
 import { styled } from '@mui/material/styles';
 
 import { createClasses } from 'src/theme/create-classes';
-import { UploadIllustration } from 'src/assets/illustrations';
 
 // ----------------------------------------------------------------------
 
@@ -27,7 +26,6 @@ export function UploadPlaceholder({ sx, className, ...other }: UploadPlaceholder
       sx={sx}
       {...other}
     >
-      <UploadIllustration hideBackground sx={{ width: 200 }} />
       <PlaceholderContent>
         <div className={uploadPlaceholderClasses.title}>Drop or select file</div>
         <div className={uploadPlaceholderClasses.description}>

@@ -8,7 +8,6 @@ import Box from '@mui/material/Box';
 import { RouterLink } from 'src/routes/components';
 
 import { SimpleLayout } from 'src/layouts/simple';
-import { ServerErrorIllustration } from 'src/assets/illustrations';
 
 // ----------------------------------------------------------------------
 
@@ -29,7 +28,7 @@ export function View500() {
             There was an error, please try again later.
           </Typography>
 
-          <ServerErrorIllustration sx={{ my: { xs: 5, sm: 10 } }} />
+          <Box sx={{ my: { xs: 5, sm: 10 }, height: 260 }} />
 
           <Button component={RouterLink} href="/" size="large" variant="contained">
             Go to home

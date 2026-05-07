@@ -8,7 +8,6 @@ import Box from '@mui/material/Box';
 import { RouterLink } from 'src/routes/components';
 
 import { SimpleLayout } from 'src/layouts/simple';
-import { PageNotFoundIllustration } from 'src/assets/illustrations';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +29,7 @@ export function NotFoundView() {
             sure to check your spelling.
           </Typography>
 
-          <PageNotFoundIllustration sx={{ my: { xs: 5, sm: 10 } }} />
+          <Box sx={{ my: { xs: 5, sm: 10 }, height: 260 }} />
 
           <Button component={RouterLink} href="/" size="large" variant="contained">
             Go to home
