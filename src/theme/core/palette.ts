@@ -88,7 +88,7 @@ export const primary = createPaletteChannel({
   dark: '#007867',
   darker: '#004B50',
   contrastText: '#FFFFFF',
-});
+}) as any;
 export const secondary = createPaletteChannel({
   lighter: '#EFD6FF',
   light: '#C684FF',
@@ -96,7 +96,7 @@ export const secondary = createPaletteChannel({
   dark: '#5119B7',
   darker: '#27097A',
   contrastText: '#FFFFFF',
-});
+}) as any;
 export const info = createPaletteChannel({
   lighter: '#CAFDF5',
   light: '#61F3F3',
@@ -104,7 +104,7 @@ export const info = createPaletteChannel({
   dark: '#006C9C',
   darker: '#003768',
   contrastText: '#FFFFFF',
-});
+}) as any;
 export const success = createPaletteChannel({
   lighter: '#D3FCD2',
   light: '#77ED8B',
@@ -112,7 +112,7 @@ export const success = createPaletteChannel({
   dark: '#118D57',
   darker: '#065E49',
   contrastText: '#ffffff',
-});
+}) as any;
 export const warning = createPaletteChannel({
   lighter: '#FFF5CC',
   light: '#FFD666',
@@ -120,7 +120,7 @@ export const warning = createPaletteChannel({
   dark: '#B76E00',
   darker: '#7A4100',
   contrastText: '#1C252E',
-});
+}) as any;
 export const error = createPaletteChannel({
   lighter: '#FFE9D5',
   light: '#FFAC82',
@@ -128,11 +128,11 @@ export const error = createPaletteChannel({
   dark: '#B71D18',
   darker: '#7A0916',
   contrastText: '#FFFFFF',
-});
+}) as any;
 export const common = createPaletteChannel({
   black: '#000000',
   white: '#FFFFFF',
-});
+}) as any;
 export const grey = createPaletteChannel({
   50: '#FCFDFD',
   100: '#F9FAFB',
@@ -144,7 +144,7 @@ export const grey = createPaletteChannel({
   700: '#454F5B',
   800: '#1C252E',
   900: '#141A21',
-});
+}) as any;
 
 /**
  * ➤

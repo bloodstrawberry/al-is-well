@@ -29,7 +29,7 @@ export function applySettingsToTheme(
 
   const lightPalette = theme.colorSchemes?.light?.palette as ColorSystem['palette'];
 
-  const primaryColorPalette = createPaletteChannel(primaryColorPresets[primaryColor as ThemeColorPreset]);
+  const primaryColorPalette = createPaletteChannel(primaryColorPresets[primaryColor as ThemeColorPreset]) as any;
   // const secondaryColorPalette = createPaletteChannel(secondaryColorPresets[primaryColor]);
 
   const updateColorScheme = (schemeName: ThemeColorScheme) => {
@@ -45,8 +45,8 @@ export function applySettingsToTheme(
         background: {
           ...lightPalette?.background,
           ...(isDefaultContrast ? {} : {
-            default: lightPalette.grey[200],
-            defaultChannel: hexToRgbChannel(lightPalette.grey[200]),
+            default: (lightPalette as any).grey[200],
+            defaultChannel: hexToRgbChannel((lightPalette as any).grey[200]),
           }),
         },
       } : {}),
