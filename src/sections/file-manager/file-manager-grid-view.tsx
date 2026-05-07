@@ -15,7 +15,6 @@ import { CustomPopover } from 'src/components/custom-popover';
 import { FileManagerPanel } from './file-manager-panel';
 import { FileManagerFileItem } from './file-manager-file-item';
 import { FileManagerFolderItem } from './file-manager-folder-item';
-import { FileManagerShareDialog } from './file-manager-share-dialog';
 import { FileManagerActionSelected } from './file-manager-action-selected';
 import { EmptyContent } from 'src/components/empty-content';
 import { FileManagerCreateFolderDialog } from './file-manager-create-folder-dialog';
@@ -62,19 +61,11 @@ export function FileManagerGridView({
 
   const containerRef = useRef(null);
 
-  const shareDialog = useBoolean();
-
   const newFilesDialog = useBoolean();
 
   const newFolderDialog = useBoolean();
 
   const menuActions = usePopover();
-
-  const [inviteEmail, setInviteEmail] = useState('');
-
-  const handleChangeInvite = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setInviteEmail(event.target.value);
-  }, []);
 
   const [createType, setCreateType] = useState<'folder' | 'file'>(hideFolder ? 'file' : 'folder');
 
@@ -89,18 +80,6 @@ export function FileManagerGridView({
       return a.name.localeCompare(b.name);
     });
   }, [dataFiltered]);
-
-  const renderShareDialog = () => (
-    <FileManagerShareDialog
-      open={shareDialog.value}
-      inviteEmail={inviteEmail}
-      onChangeInvite={handleChangeInvite}
-      onClose={() => {
-        shareDialog.onFalse();
-        setInviteEmail('');
-      }}
-    />
-  );
 
   const renderUploadFilesDialog = () => (
     <FileManagerCreateFolderDialog open={newFilesDialog.value} onClose={newFilesDialog.onFalse} />
@@ -251,7 +230,6 @@ export function FileManagerGridView({
         {renderSelectedActions()}
       </Box>
 
-      {renderShareDialog()}
       {renderUploadFilesDialog()}
       {renderCreateFolderDialog()}
       {renderMenuActions()}

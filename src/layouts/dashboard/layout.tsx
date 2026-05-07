@@ -10,7 +10,6 @@ import { useBoolean } from 'minimal-shared/hooks';
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
-import { iconButtonClasses } from '@mui/material/IconButton';
 
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
@@ -18,7 +17,6 @@ import { useSettingsContext } from 'src/components/settings';
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
 import { NavVertical } from './nav-vertical';
-import { NavHorizontal } from './nav-horizontal';
 
 import { MenuButton } from '../components/menu-button';
 
@@ -61,7 +59,6 @@ export function DashboardLayout({
   const navData = slotProps?.nav?.data ?? dashboardNavData;
 
   const isNavMini = false;
-  const isNavHorizontal = false;
   const isNavVertical = true;
 
   const canDisplayItemByRole = (allowedRoles: NavItemProps['allowedRoles']): boolean => true;
@@ -72,11 +69,6 @@ export function DashboardLayout({
         maxWidth: false,
         sx: {
           ...(isNavVertical ? { px: { [layoutQuery]: 5 } } : {}),
-          ...(isNavHorizontal ? {
-            bgcolor: 'var(--layout-nav-bg)',
-            height: { [layoutQuery]: 'var(--layout-nav-horizontal-height)' },
-            [`& .${iconButtonClasses.root}`]: { color: 'var(--layout-nav-text-secondary-color)' },
-          } : {}),
         },
       },
     };
@@ -87,14 +79,7 @@ export function DashboardLayout({
           This is an info Alert.
         </Alert>
       ),
-      bottomArea: isNavHorizontal ? (
-        <NavHorizontal
-          data={navData}
-          layoutQuery={layoutQuery}
-          cssVars={navVars.section}
-          checkPermissions={canDisplayItemByRole}
-        />
-      ) : null,
+      bottomArea: null,
       leftArea: (
         <>
           {/** @slot Nav mobile */}
@@ -110,21 +95,6 @@ export function DashboardLayout({
             cssVars={navVars.section}
             checkPermissions={canDisplayItemByRole}
           />
-
-          {/** @slot Logo */}
-          {isNavHorizontal && (
-            <Logo
-              sx={{
-                display: 'none',
-                [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
-              }}
-            />
-          )}
-
-          {/** @slot Divider */}
-          {isNavHorizontal && (
-            <VerticalDivider sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }} />
-          )}
         </>
       ),
       rightArea: (
@@ -170,7 +140,7 @@ export function DashboardLayout({
       /** **************************************
        * @Sidebar
        *************************************** */
-      sidebarSection={isNavHorizontal ? null : renderSidebar()}
+      sidebarSection={renderSidebar()}
       /** **************************************
        * @Footer
        *************************************** */

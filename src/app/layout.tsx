@@ -14,8 +14,7 @@ import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 import { Snackbar } from 'src/components/snackbar';
 import { ProgressBar } from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
-import { detectSettings } from 'src/components/settings/server';
-import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
+import { defaultSettings, SettingsProvider } from 'src/components/settings';
 
 
 
@@ -66,12 +65,12 @@ async function getAppConfig() {
       dir: 'ltr',
     };
   } else {
-    const [lang, settings] = await Promise.all([detectLanguage(), detectSettings()]);
+    const lang = await detectLanguage();
 
     return {
       lang,
       i18nLang: lang,
-      cookieSettings: settings,
+      cookieSettings: undefined,
       dir: 'ltr',
     };
   }
