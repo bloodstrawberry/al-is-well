@@ -7,7 +7,9 @@ import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { Iconify } from '../../iconify';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import { createNavItem } from '../utils';
 import { navItemStyles, navSectionClasses } from '../styles';
 
@@ -99,10 +101,11 @@ export function NavItem({
       {hasChild && (
         <ItemArrow
           {...ownerState}
-          icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
           className={navSectionClasses.item.arrow}
           sx={slotProps?.arrow}
-        />
+        >
+          {open ? <ExpandMoreIcon sx={{ width: 16, height: 16 }} /> : <ChevronRightIcon sx={{ width: 16, height: 16 }} />}
+        </ItemArrow>
       )}
     </ItemRoot>
   );
@@ -238,6 +241,9 @@ const ItemInfo = styled('span', { shouldForwardProp })<StyledState>(({ theme }) 
 /**
  * @slot arrow
  */
-const ItemArrow = styled(Iconify, { shouldForwardProp })<StyledState>(({ theme }) => ({
+const ItemArrow = styled('span', { shouldForwardProp })<StyledState>(({ theme }) => ({
   ...navItemStyles.arrow(theme),
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 }));

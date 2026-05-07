@@ -24,6 +24,8 @@ const nextConfig: any = {
   experimental: {
     cpus: 1,
     workerThreads: false,
+    serverSourceMaps: false,
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'minimal-shared'],
   },
   webpack(config: any, { isServer }: { isServer: boolean }) {
     // SVG 처리

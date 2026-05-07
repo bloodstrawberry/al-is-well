@@ -6,7 +6,8 @@ import { varAlpha } from 'minimal-shared/utils';
 import ButtonBase from '@mui/material/ButtonBase';
 import IconButton from '@mui/material/IconButton';
 
-import { Iconify } from '../iconify';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import CloseIcon from '@mui/icons-material/Close';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +38,7 @@ export function DownloadButton({ sx, ...other }: ButtonBaseProps) {
       ]}
       {...other}
     >
-      <Iconify width={24} icon="eva:cloud-download-fill" />
+      <CloudDownloadIcon sx={{ width: 24, height: 24 }} />
     </ButtonBase>
   );
 }
@@ -62,7 +63,7 @@ export function RemoveButton({ sx, ...other }: IconButtonProps) {
       ]}
       {...other}
     >
-      <Iconify icon="mingcute:close-line" width={12} />
+      <CloseIcon sx={{ width: 12, height: 12 }} />
     </IconButton>
   );
 }

@@ -6,7 +6,8 @@ import { styled } from '@mui/material/styles';
 import ListSubheader from '@mui/material/ListSubheader';
 
 import { navSectionClasses } from '../styles';
-import { Iconify, iconifyClasses } from '../../iconify';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 // ----------------------------------------------------------------------
 
@@ -19,10 +20,9 @@ export const NavSubheader = styled(({ open, children, className, ...other }: Nav
     {...other}
     className={mergeClasses([navSectionClasses.subheader, className])}
   >
-    <Iconify
-      width={16}
-      icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
-    />
+    <span className="subheader-icon">
+      {open ? <ExpandMoreIcon sx={{ width: 16, height: 16 }} /> : <ChevronRightIcon sx={{ width: 16, height: 16 }} />}
+    </span>
     {children}
   </ListSubheader>
 ))(({ theme }) => ({
@@ -39,9 +39,10 @@ export const NavSubheader = styled(({ open, children, className, ...other }: Nav
   transition: theme.transitions.create(['color', 'padding-left'], {
     duration: theme.transitions.duration.standard,
   }),
-  [`& .${iconifyClasses.root}`]: {
+  [`& .subheader-icon`]: {
     left: -4,
     opacity: 0,
+    lineHeight: 0,
     position: 'absolute',
     transition: theme.transitions.create(['opacity'], {
       duration: theme.transitions.duration.standard,
@@ -50,6 +51,6 @@ export const NavSubheader = styled(({ open, children, className, ...other }: Nav
   '&:hover': {
     paddingLeft: theme.spacing(2),
     color: 'var(--nav-subheader-hover-color)',
-    [`& .${iconifyClasses.root}`]: { opacity: 1 },
+    [`& .subheader-icon`]: { opacity: 1 },
   },
 }));

@@ -2,7 +2,10 @@
 
 import Portal from '@mui/material/Portal';
 
-import { Iconify } from '../iconify';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
 import { SnackbarRoot } from './styles';
 import { snackbarClasses } from './classes';
 
@@ -43,12 +46,10 @@ export function Snackbar() {
         }}
         icons={{
           loading: <span className={snackbarClasses.loadingIcon} />,
-          info: <Iconify className={snackbarClasses.iconSvg} icon="solar:info-circle-bold" />,
-          success: <Iconify className={snackbarClasses.iconSvg} icon="solar:check-circle-bold" />,
-          warning: (
-            <Iconify className={snackbarClasses.iconSvg} icon="solar:danger-triangle-bold" />
-          ),
-          error: <Iconify className={snackbarClasses.iconSvg} icon="solar:danger-bold" />,
+          info: <InfoIcon className={snackbarClasses.iconSvg} />,
+          success: <CheckCircleIcon className={snackbarClasses.iconSvg} />,
+          warning: <WarningIcon className={snackbarClasses.iconSvg} />,
+          error: <ErrorIcon className={snackbarClasses.iconSvg} />,
         }}
       />
     </Portal>

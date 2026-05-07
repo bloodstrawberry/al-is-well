@@ -17,7 +17,6 @@ import { usePathname } from 'src/routes/hooks';
 import { Logo } from 'src/components/logo';
 
 import { NavMobile } from './nav/mobile';
-import { NavDesktop } from './nav/desktop';
 import { Footer, HomeFooter } from './footer';
 import { MenuButton } from '../components/menu-button';
 import { mainNavData } from '../nav-config-dashboard';
