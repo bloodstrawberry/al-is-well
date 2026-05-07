@@ -7,7 +7,6 @@ import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { Image } from '../image';
 import { Iconify } from '../iconify';
 import { uploadClasses } from './classes';
 import { RejectionFiles } from './components/rejection-files';
@@ -46,7 +45,12 @@ export function UploadAvatar({
 
   const renderPreview = () =>
     hasFile && (
-      <Image alt="Avatar" src={preview} sx={{ width: 1, height: 1, borderRadius: '50%' }} />
+      <Box
+        component="img"
+        alt="Avatar"
+        src={preview}
+        sx={{ width: 1, height: 1, objectFit: 'cover', borderRadius: '50%' }}
+      />
     );
 
   const renderPlaceholder = () => (
