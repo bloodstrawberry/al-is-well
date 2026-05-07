@@ -7,7 +7,7 @@ import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import { Iconify } from '../iconify';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { uploadClasses } from './classes';
 import { RejectionFiles } from './components/rejection-files';
 
@@ -87,7 +87,7 @@ export function UploadAvatar({
         }),
       })}
     >
-      <Iconify icon="solar:camera-add-bold" width={32} />
+      <AddAPhotoIcon sx={{ width: 32, height: 32 }} />
 
       <Typography variant="caption">{hasFile ? 'Update photo' : 'Upload photo'}</Typography>
     </Box>

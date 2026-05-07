@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 
-import { Iconify } from '../iconify';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { uploadClasses } from './classes';
 import { UploadPlaceholder } from './components/placeholder';
 import { RejectionFiles } from './components/rejection-files';
@@ -62,7 +62,7 @@ export function Upload({
                 size="small"
                 variant="contained"
                 onClick={onUpload}
-                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+                startIcon={<CloudUploadIcon />}
               >
                 Upload
               </Button>

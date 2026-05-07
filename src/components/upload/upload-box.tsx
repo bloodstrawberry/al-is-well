@@ -5,7 +5,7 @@ import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 
-import { Iconify } from '../iconify';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { uploadClasses } from './classes';
 
 // ----------------------------------------------------------------------
@@ -49,7 +49,7 @@ export function UploadBox({ placeholder, error, disabled, className, sx, ...othe
     >
       <input {...getInputProps()} />
 
-      {placeholder || <Iconify icon="eva:cloud-upload-fill" width={28} />}
+      {placeholder || <CloudUploadIcon sx={{ width: 28, height: 28 }} />}
     </Box>
   );
 }

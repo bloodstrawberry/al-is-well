@@ -15,7 +15,6 @@ import { RouterLink } from 'src/routes/components';
 const _socials: any[] = [];
 
 import { Logo } from 'src/components/logo';
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -94,14 +93,6 @@ export function Footer({
                 [theme.breakpoints.up(layoutQuery)]: { mb: 0, justifyContent: 'flex-start' },
               })}
             >
-              {_socials.map((social) => (
-                <IconButton key={social.label}>
-                  {social.value === 'twitter' && <Iconify icon="socials:twitter" />}
-                  {social.value === 'facebook' && <Iconify icon="socials:facebook" />}
-                  {social.value === 'instagram' && <Iconify icon="socials:instagram" />}
-                  {social.value === 'linkedin' && <Iconify icon="socials:linkedin" />}
-                </IconButton>
-              ))}
             </Box>
           </Grid>
 

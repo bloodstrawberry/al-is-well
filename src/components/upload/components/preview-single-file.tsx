@@ -6,7 +6,7 @@ import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 
-import { Iconify } from '../../iconify';
+import CloseIcon from '@mui/icons-material/Close';
 import { uploadClasses } from '../classes';
 
 // ----------------------------------------------------------------------
@@ -64,7 +64,7 @@ export function DeleteButton({ sx, ...other }: IconButtonProps) {
       ]}
       {...other}
     >
-      <Iconify icon="mingcute:close-line" width={18} />
+      <CloseIcon sx={{ width: 18, height: 18 }} />
     </IconButton>
   );
 }

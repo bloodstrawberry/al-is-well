@@ -8,7 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { fData } from 'src/utils/format-number';
 
-import { Iconify } from '../../iconify';
+import CloseIcon from '@mui/icons-material/Close';
 import { uploadClasses } from '../classes';
 import { fileData, FileThumbnail } from '../../file-thumbnail';
 
@@ -73,7 +73,7 @@ export function MultiFilePreview({
 
             {onRemove && (
               <IconButton size="small" onClick={() => onRemove(file)}>
-                <Iconify width={16} icon="mingcute:close-line" />
+                <CloseIcon sx={{ width: 16, height: 16 }} />
               </IconButton>
             )}
           </ItemRow>
