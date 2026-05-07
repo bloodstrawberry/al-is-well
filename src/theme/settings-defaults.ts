@@ -1,12 +1,13 @@
 import { themeConfig } from './theme-config';
 import { CONFIG } from 'src/global-config';
+import type { ThemeColorPreset } from './with-settings/color-presets';
 
 // ----------------------------------------------------------------------
 
 export type SettingsState = {
   fontSize: number;
   fontFamily: string;
-  primaryColor: string;
+  primaryColor: ThemeColorPreset;
   version: string;
 };
 
