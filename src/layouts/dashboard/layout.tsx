@@ -12,7 +12,6 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 
 import { Logo } from 'src/components/logo';
-import { useSettingsContext } from 'src/components/settings';
 
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
@@ -50,7 +49,6 @@ export function DashboardLayout({
 
   const user = null;
 
-  const settings = useSettingsContext();
 
   const navVars = dashboardNavColorVars(theme, 'integrate', 'vertical');
 

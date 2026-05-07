@@ -1,5 +1,5 @@
 import type { Theme, Components } from '@mui/material/styles';
-import type { SettingsState } from 'src/components/settings';
+import type { SettingsState } from '../settings-defaults';
 
 import { cardClasses } from '@mui/material/Card';
 

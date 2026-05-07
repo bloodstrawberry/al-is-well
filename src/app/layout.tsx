@@ -14,7 +14,7 @@ import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 import { Snackbar } from 'src/components/snackbar';
 import { ProgressBar } from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
-import { defaultSettings, SettingsProvider } from 'src/components/settings';
+import { defaultSettings } from 'src/theme/settings-defaults';
 
 
 
@@ -132,10 +132,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
         <I18nProvider lang={appConfig.i18nLang}>
 
-            <SettingsProvider
-              defaultSettings={defaultSettings}
-              cookieSettings={appConfig.cookieSettings}
-            >
               <LocalizationProvider>
                 <AppRouterCacheProvider options={{ key: 'css' }}>
                   <ThemeProvider
@@ -150,7 +146,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   </ThemeProvider>
                 </AppRouterCacheProvider>
               </LocalizationProvider>
-            </SettingsProvider>
 
         </I18nProvider>
       </body>

@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'src/routes/hooks';
 
 import { toast } from 'src/components/snackbar';
-import { useSettingsContext } from 'src/components/settings';
 
 import { fallbackLng, getCurrentLang } from './locales-config';
 
@@ -18,7 +17,6 @@ import { fallbackLng, getCurrentLang } from './locales-config';
 
 export function useTranslate(namespace?: Namespace) {
   const router = useRouter();
-  const settings = useSettingsContext();
 
   const { t, i18n } = useTranslation(namespace);
   const { t: tMessages } = useTranslation('messages');
@@ -76,18 +74,5 @@ export function useTranslate(namespace?: Namespace) {
 // ----------------------------------------------------------------------
 
 export function useLocaleDirectionSync() {
-  const { i18n, currentLang } = useTranslate();
-  const { state, setState } = useSettingsContext();
-
-  const handleSync = useCallback(async () => {
-    if (i18n.resolvedLanguage !== currentLang.value) {
-      await i18n.changeLanguage(currentLang.value);
-    }
-  }, [currentLang.value, i18n]);
-
-  useEffect(() => {
-    handleSync();
-  }, [handleSync]);
-
   return null;
 }

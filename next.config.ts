@@ -11,6 +11,7 @@ const nextConfig: any = {
   images: {
     unoptimized: true,
   },
+  productionBrowserSourceMaps: false,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -44,6 +45,9 @@ const nextConfig: any = {
           },
         },
       };
+      
+      // 메모리 최적화: 빌드 시 메모리 사용량 감소를 위해 source-map 비활성화 및 최적화
+      config.devtool = false;
     }
 
     return config;
