@@ -5,20 +5,23 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useTheme, alpha } from '@mui/material/styles';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
+import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
+import KeyboardVoiceRoundedIcon from '@mui/icons-material/KeyboardVoiceRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import { Iconify } from 'src/components/iconify';
 
 
 
 // ----------------------------------------------------------------------
 
 const FEATURES = [
-  { icon: 'solar:document-text-bold-duotone', label: '스크립트 관리', desc: '오픽 스크립트를 체계적으로 정리' },
-  { icon: 'solar:pen-new-round-bold-duotone', label: '암기 연습', desc: '테스트 모드로 반복 학습' },
-  { icon: 'solar:microphone-3-bold-duotone', label: '음성 지원', desc: 'TTS/STT로 발음 연습' },
+  { icon: <DescriptionRoundedIcon />, label: '스크립트 관리', desc: '오픽 스크립트를 체계적으로 정리' },
+  { icon: <EditNoteRoundedIcon />, label: '암기 연습', desc: '테스트 모드로 반복 학습' },
+  { icon: <KeyboardVoiceRoundedIcon />, label: '음성 지원', desc: 'TTS/STT로 발음 연습' },
 ];
 
 // ----------------------------------------------------------------------
@@ -194,7 +197,9 @@ export function HomeHero() {
                 background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)} 0%, ${alpha(theme.palette.primary.main, 0.04)} 100%)`,
               }}
             >
-              <Iconify icon={item.icon} width={22} sx={{ color: 'primary.main' }} />
+              <Box sx={{ color: 'primary.main', display: 'inline-flex' }}>
+                {item.icon}
+              </Box>
             </Box>
             <Stack spacing={0}>
               <Typography variant="subtitle2" sx={{ fontSize: '0.8rem' }}>
@@ -219,11 +224,13 @@ export function HomeHero() {
           color="primary"
           onClick={() => router.push(paths.fileManager)}
           endIcon={
-            <Iconify
-              icon="solar:arrow-right-linear"
-              width={20}
+            <ArrowForwardRoundedIcon
               sx={{
-                transition: 'transform 0.3s',
+                width: 20,
+                height: 20,
+                ml: 1,
+                transition: 'transform 0.3s ease',
+                '.MuiButton-root:hover &': { transform: 'translateX(4px)' },
               }}
             />
           }

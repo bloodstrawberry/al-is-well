@@ -7,8 +7,8 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { alpha } from '@mui/material/styles';
-
-import { Iconify } from 'src/components/iconify';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 
 // ----------------------------------------------------------------------
 
@@ -115,10 +115,7 @@ export function OpicQuestionSection({
                       color={isSpeaking ? 'primary' : 'default'}
                       sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), flexShrink: 0 }}
                     >
-                      <Iconify
-                        icon={isSpeaking ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'}
-                        width={20}
-                      />
+                      {isSpeaking ? <StopCircleIcon /> : <VolumeUpIcon />}
                     </IconButton>
                   )}
                 </Stack>
@@ -179,10 +176,7 @@ export function OpicQuestionSection({
                       display: { xs: 'none', md: 'inline-flex' }
                     }}
                   >
-                    <Iconify
-                      icon={isSpeaking ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'}
-                      width={24}
-                    />
+                    {isSpeaking ? <StopCircleIcon /> : <VolumeUpIcon />}
                   </IconButton>
                 )}
               </Stack>

@@ -16,7 +16,16 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 
-import { Iconify } from 'src/components/iconify';
+import FolderIcon from '@mui/icons-material/Folder';
+import DescriptionIcon from '@mui/icons-material/Description';
+import StorageIcon from '@mui/icons-material/Storage';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 // ----------------------------------------------------------------------
 
@@ -220,18 +229,11 @@ const SidebarTreeItem = memo(
               onSelect(node.id);
             }}
           >
-            <Iconify
-              icon={
-                node.type === 'folder'
-                  ? 'solar:folder-2-bold-duotone'
-                  : 'solar:document-text-bold-duotone'
-              }
-              width={14}
-              sx={{
-                flexShrink: 0,
-                color: node.type === 'folder' ? 'warning.main' : 'text.disabled',
-              }}
-            />
+            {node.type === 'folder' ? (
+              <FolderIcon sx={{ width: 14, height: 14, color: 'warning.main' }} />
+            ) : (
+              <DescriptionIcon sx={{ width: 14, height: 14, color: 'text.disabled' }} />
+            )}
             {isEditing ? (
               <InputBase
                 fullWidth
@@ -575,7 +577,7 @@ export function FileManagerSidebar({
                     ...params.InputProps,
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                        <SearchIcon sx={{ color: 'text.disabled' }} />
                       </InputAdornment>
                     ),
                   },
@@ -592,18 +594,11 @@ export function FileManagerSidebar({
                     spacing={1.5}
                     sx={{ width: 1, minWidth: 0, overflow: 'hidden' }}
                   >
-                    <Iconify
-                      icon={
-                        option.type === 'folder'
-                          ? 'solar:folder-2-bold-duotone'
-                          : 'solar:document-text-bold-duotone'
-                      }
-                      width={18}
-                      sx={{
-                        flexShrink: 0,
-                        color: option.type === 'folder' ? 'warning.main' : 'text.disabled',
-                      }}
-                    />
+                    {option.type === 'folder' ? (
+                      <FolderIcon sx={{ width: 18, height: 18, color: 'warning.main' }} />
+                    ) : (
+                      <DescriptionIcon sx={{ width: 18, height: 18, color: 'text.disabled' }} />
+                    )}
                     <Box sx={{ minWidth: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                       <Typography variant="body2" noWrap sx={{ display: 'block', width: 1 }}>
                         {option.label}
@@ -681,10 +676,7 @@ export function FileManagerSidebar({
           opacity: isMounted && !isResizing ? 1 : 0,
         }}
       >
-        <Iconify
-          icon={displayCollapsed ? 'eva:arrow-ios-forward-fill' : 'eva:arrow-ios-back-fill'}
-          width={16}
-        />
+        {displayCollapsed ? <ArrowForwardIosIcon sx={{ width: 16, height: 16 }} /> : <ArrowBackIosIcon sx={{ width: 16, height: 16 }} />}
       </IconButton>
 
       {isMounted && document.getElementById('file-manager-sidebar-portal') && createPortal(
@@ -697,10 +689,7 @@ export function FileManagerSidebar({
             height: 32,
           }}
         >
-          <Iconify
-            icon={displayCollapsed ? 'solar:sidebar-minimalistic-bold-duotone' : 'solar:sidebar-minimalistic-outline'}
-            width={24}
-          />
+          <ViewSidebarIcon sx={{ width: 24, height: 24 }} />
         </IconButton>,
         document.getElementById('file-manager-sidebar-portal')!
       )}

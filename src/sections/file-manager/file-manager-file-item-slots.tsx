@@ -16,7 +16,11 @@ import FolderIcon from '@mui/icons-material/Folder';
 
 import { CONFIG } from 'src/global-config';
 
-import { Iconify } from 'src/components/iconify';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import StarIcon from '@mui/icons-material/Star';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { FileThumbnail } from 'src/components/file-thumbnail';
 
 // ----------------------------------------------------------------------
@@ -102,8 +106,8 @@ export function FileItemIcon({
         <Checkbox
           checked={checked}
           onChange={onChange}
-          icon={<Iconify icon="eva:radio-button-off-fill" width={22} />}
-          checkedIcon={<Iconify icon="solar:check-circle-bold" width={22} />}
+          icon={<RadioButtonUncheckedIcon sx={{ width: 22, height: 22 }} />}
+          checkedIcon={<CheckCircleIcon sx={{ width: 22, height: 22 }} />}
           slotProps={{
             input: {
               id: `${id}-checkbox`,
@@ -241,8 +245,8 @@ export function FileItemActions({
     >
       <Checkbox
         color="warning"
-        icon={<Iconify icon="eva:star-outline" />}
-        checkedIcon={<Iconify icon="eva:star-fill" />}
+        icon={<StarOutlineIcon />}
+        checkedIcon={<StarIcon />}
         checked={checked}
         onChange={onChange}
         slotProps={{
@@ -254,7 +258,7 @@ export function FileItemActions({
       />
 
       <IconButton color={openMenu ? 'inherit' : 'default'} onClick={onOpenMenu}>
-        <Iconify icon="eva:more-vertical-fill" />
+        <MoreVertIcon />
       </IconButton>
     </Box>
   );

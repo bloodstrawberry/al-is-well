@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { Iconify } from 'src/components/iconify';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { getFileScript, getTreeData, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
@@ -746,7 +746,7 @@ export function OpicTestLiveView({ fileId, fileName, onBack, onEdit, storageKey 
           </Stack>
         ) : (
           <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
-            <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+            <DescriptionIcon sx={{ color: 'text.disabled', mb: 2, width: 48, height: 48 }} />
             <Typography variant="body1" sx={{ color: 'text.disabled' }}>스크립트 정보가 없습니다.</Typography>
           </Box>
         )}

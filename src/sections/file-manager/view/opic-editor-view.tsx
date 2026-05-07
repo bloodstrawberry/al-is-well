@@ -30,7 +30,17 @@ import { alpha, useTheme } from '@mui/material/styles';
 
 import { OpicEditorItem } from '../opic';
 
-import { Iconify } from 'src/components/iconify';
+import SaveIcon from '@mui/icons-material/Save';
+import AddIcon from '@mui/icons-material/Add';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { getFileScript, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 
@@ -293,7 +303,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
         }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
-          <Iconify icon="eva:arrow-ios-back-fill" />
+          <ArrowBackIosIcon sx={{ width: 16, height: 16, ml: 0.5 }} />
         </IconButton>
 
         <Typography
@@ -314,7 +324,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
             variant="contained"
             color="primary"
             onClick={handleSave}
-            startIcon={<Iconify icon="solar:diskette-bold" />}
+            startIcon={<SaveIcon />}
             sx={{ boxShadow: (theme) => theme.customShadows?.primary }}
           >
             Save
@@ -533,7 +543,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                                   onClick={() => handleSwapQuestion(index)}
                                   title="Swap Korean and English"
                                 >
-                                  <Iconify icon="solar:transfer-vertical-bold" />
+                                  <SwapVertIcon />
                                 </IconButton>
                               </InputAdornment>
                             )
@@ -563,7 +573,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                       }}
                       sx={{ mt: 1 }}
                     >
-                      <Iconify icon="solar:trash-bin-trash-bold" />
+                      <DeleteIcon />
                     </IconButton>
                   </Stack>
                   {index < scriptData.questions.length - 1 && <Divider sx={{ borderStyle: 'dotted' }} />}
@@ -574,7 +584,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                 size="large"
                 variant="outlined"
                 fullWidth
-                startIcon={<Iconify icon="mingcute:add-line" />}
+                startIcon={<AddIcon />}
                 onClick={() => {
                   setScriptData({
                     ...scriptData,
@@ -610,7 +620,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Iconify icon="solar:music-note-bold" sx={{ color: 'text.disabled' }} />
+                      <MusicNoteIcon sx={{ color: 'text.disabled' }} />
                     </InputAdornment>
                   ),
                 },
@@ -664,7 +674,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
               size="small"
               variant="soft"
               color="info"
-              startIcon={<Iconify icon="solar:import-bold" />}
+              startIcon={<ImportExportIcon />}
               onClick={() => {
                 const text = scriptData.lines
                   .filter((line) => line.ko || line.en)
@@ -702,7 +712,7 @@ export function OpicEditorView({ fileId, fileName, onBack, onSaveSuccess, onSave
           </Stack>
 
           <Button
-            startIcon={<Iconify icon="mingcute:add-line" />}
+            startIcon={<AddIcon />}
             onClick={handleAddLine}
             variant="outlined"
             fullWidth

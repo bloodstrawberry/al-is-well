@@ -11,8 +11,15 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha } from '@mui/material/styles';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import MicIcon from '@mui/icons-material/Mic';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -144,13 +151,11 @@ export const OpicScriptItem = memo(({
           }),
         }}
       >
-        <Iconify
-          icon={
-            isListening
-              ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold')
-              : 'solar:microphone-bold'
-          }
-        />
+        {isListening ? (
+          isPreparing ? <RefreshIcon /> : <StopCircleIcon />
+        ) : (
+          <MicIcon />
+        )}
       </IconButton>
       {!isMobile && (
         <IconButton
@@ -162,11 +167,11 @@ export const OpicScriptItem = memo(({
             bgcolor: (theme) => (playingIndex || recordedAudio) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
           }}
         >
-          <Iconify icon={playingIndex ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
+          {playingIndex ? <StopCircleIcon /> : <PlayArrowIcon />}
         </IconButton>
       )}
       <IconButton onClick={() => handleAction('check')} size="small" color="success">
-        <Iconify icon="solar:check-read-bold" />
+        <DoneAllIcon />
       </IconButton>
     </>
   );
@@ -431,7 +436,7 @@ export const OpicScriptItem = memo(({
                       onClick={() => onToggleAnswerReveal(index)}
                       sx={{ ml: 0.5, p: 0.5, color: isAnswerRevealed ? 'primary.main' : 'text.disabled' }}
                     >
-                      <Iconify icon={isAnswerRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} width={16} />
+                      {isAnswerRevealed ? <VisibilityIcon sx={{ fontSize: 16 }} /> : <VisibilityOffIcon sx={{ fontSize: 16 }} />}
                     </IconButton>
                   )}
 
@@ -440,7 +445,7 @@ export const OpicScriptItem = memo(({
                     onClick={() => onToggleSpeak(line.en, `line-${index}`)}
                     sx={{ ml: 0.5, p: 0.5, color: speakingIndex ? 'primary.main' : 'primary.main' }}
                   >
-                    <Iconify icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} width={16} />
+                    {speakingIndex ? <StopCircleIcon sx={{ fontSize: 16 }} /> : <VolumeUpIcon sx={{ fontSize: 16 }} />}
                   </IconButton>
                 </Box>
               </Box>
@@ -490,10 +495,11 @@ export const OpicScriptItem = memo(({
                 '&:hover': { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) },
               }}
             >
-              <Iconify
-                icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'}
-                sx={{ width: { xs: 18, md: 20 }, height: { xs: 18, md: 20 } }}
-              />
+              {speakingIndex ? (
+                <StopCircleIcon sx={{ width: { xs: 18, md: 20 }, height: { xs: 18, md: 20 } }} />
+              ) : (
+                <VolumeUpIcon sx={{ width: { xs: 18, md: 20 }, height: { xs: 18, md: 20 } }} />
+              )}
             </IconButton>
           </Stack>
         )}

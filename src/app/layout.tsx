@@ -13,7 +13,6 @@ import { themeConfig, ThemeProvider, primary as primaryColor } from 'src/theme';
 
 import { Snackbar } from 'src/components/snackbar';
 import { ProgressBar } from 'src/components/progress-bar';
-import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { defaultSettings } from 'src/theme/settings-defaults';
 
 
@@ -138,11 +137,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                     modeStorageKey={themeConfig.modeStorageKey}
                     defaultMode={themeConfig.defaultMode}
                   >
-                    <MotionLazy>
-                      <Snackbar />
-                      <ProgressBar />
-                      {children}
-                    </MotionLazy>
+                    <Snackbar />
+                    <ProgressBar />
+                    {children}
                   </ThemeProvider>
                 </AppRouterCacheProvider>
               </LocalizationProvider>

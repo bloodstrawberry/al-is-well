@@ -21,6 +21,10 @@ const nextConfig: any = {
   env: {
     BUILD_STATIC_EXPORT: JSON.stringify(isStaticExport),
   },
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
   webpack(config: any, { isServer }: { isServer: boolean }) {
     // SVG 처리
     config.module.rules.push({

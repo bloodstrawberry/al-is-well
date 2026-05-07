@@ -34,7 +34,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import { Iconify } from 'src/components/iconify';
+import SaveIcon from '@mui/icons-material/Save';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SearchIcon from '@mui/icons-material/Search';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import { getTreeData, getFileScript, saveFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 
@@ -136,7 +146,7 @@ function SortableScriptItem({ file, index, onRemove }: SortableScriptItemProps) 
         }}
         onPointerDown={(e) => e.stopPropagation()} // Important for dnd-kit with buttons
       >
-        <Iconify icon="solar:trash-bin-trash-bold" />
+        <DeleteIcon />
       </IconButton>
     </Card>
   );
@@ -336,7 +346,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
         }}
       >
         <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral' }}>
-          <Iconify icon="eva:arrow-ios-back-fill" />
+          <ArrowBackIosIcon sx={{ width: 16, height: 16, ml: 0.5 }} />
         </IconButton>
 
         <Typography
@@ -364,7 +374,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                 '&:hover': { bgcolor: 'primary.dark' }
               }}
             >
-              <Iconify icon="solar:diskette-bold" />
+              <SaveIcon />
             </IconButton>
           </Tooltip>
 
@@ -383,7 +393,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                   '&:hover': { bgcolor: 'info.dark' }
                 }}
               >
-                <Iconify icon="solar:play-bold" />
+                <PlayArrowIcon />
               </IconButton>
             </Tooltip>
           )}
@@ -439,8 +449,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                         </Typography>
                       </Stack>
                       {selected && (
-                        <Iconify
-                          icon="eva:checkmark-circle-2-fill"
+                        <CheckCircleIcon
                           sx={{ color: 'primary.main', width: 20, height: 20 }}
                         />
                       )}
@@ -464,7 +473,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                          <SearchIcon sx={{ color: 'text.disabled' }} />
                         </InputAdornment>
                       ),
                     },
@@ -489,7 +498,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
               spacing={1.5}
             >
               <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
-                <Iconify icon="solar:tuning-bold-duotone" sx={{ color: 'info.main', width: 20 }} />
+                <SettingsIcon sx={{ color: 'info.main', width: 20, height: 20 }} />
                 <Typography 
                   variant="subtitle2" 
                   sx={{ 
@@ -542,7 +551,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                         border: (theme) => `solid 1px ${playlist.randomPlay ? alpha(theme.palette.primary.main, 0.2) : 'transparent'}`
                       }}
                     >
-                      <Iconify icon="solar:shuffle-bold" width={16} />
+                      <ShuffleIcon sx={{ width: 16, height: 16 }} />
                     </IconButton>
                   </Tooltip>
 
@@ -558,7 +567,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                         border: (theme) => `solid 1px ${playlist.playQuestion ? alpha(theme.palette.info.main, 0.2) : 'transparent'}`
                       }}
                     >
-                      <Iconify icon="solar:chat-round-call-bold" width={16} />
+                      <QuestionAnswerIcon sx={{ width: 16, height: 16 }} />
                     </IconButton>
                   </Tooltip>
                 </Stack>
@@ -590,7 +599,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                     }
                   }}
                 >
-                  <Iconify icon="solar:shuffle-bold" width={20} />
+                  <ShuffleIcon sx={{ width: 20, height: 20 }} />
                 </IconButton>
               </Tooltip>
             )}
@@ -628,7 +637,7 @@ export function OpicTestEditorView({ fileId, fileName, onBack, onSaveSuccess, on
                 border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
               }}
             >
-              <Iconify icon="solar:document-add-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+              <NoteAddIcon sx={{ color: 'text.disabled', mb: 2, width: 48, height: 48 }} />
               <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                 추가된 스크립트가 없습니다. 위에서 검색하여 추가해 주세요.
               </Typography>

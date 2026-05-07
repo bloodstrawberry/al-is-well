@@ -2,7 +2,7 @@
 
 import type { Theme, SxProps } from '@mui/material/styles';
 import { Fragment } from 'react';
-import { m } from 'framer-motion';
+import Box from '@mui/material/Box';
 
 import Portal from '@mui/material/Portal';
 import { styled } from '@mui/material/styles';
@@ -30,21 +30,22 @@ export function SplashScreen({ portal = true, slots, slotProps, sx, ...other }: 
       <LoadingWrapper {...slotProps?.wrapper}>
         <LoadingContent sx={sx} {...other}>
           {slots?.logo ?? (
-            <m.div
-              animate={{
-                scale: [1, 1.2, 1.2, 1, 1],
-                rotate: [0, 270, 270, 0, 0],
-                opacity: [1, 0.48, 0.48, 1, 1],
-              }}
-              transition={{
-                duration: 2,
-                ease: 'easeInOut',
-                repeatDelay: 1,
-                repeat: Infinity,
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                animation: 'pulse 2s ease-in-out infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                  '50%': { opacity: 0.48, transform: 'scale(1.1)' },
+                },
               }}
             >
               <Logo disabled sx={{ width: 64, height: 64 }} />
-            </m.div>
+            </Box>
           )}
         </LoadingContent>
       </LoadingWrapper>

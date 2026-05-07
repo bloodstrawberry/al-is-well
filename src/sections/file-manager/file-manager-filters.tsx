@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import CardActionArea from '@mui/material/CardActionArea';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { Iconify } from 'src/components/iconify';
+import SearchIcon from '@mui/icons-material/Search';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ export function FileManagerFilters({
         input: {
           startAdornment: (
             <InputAdornment position="start">
-              <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         },

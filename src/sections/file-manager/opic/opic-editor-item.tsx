@@ -10,7 +10,13 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha } from '@mui/material/styles';
 
-import { Iconify } from 'src/components/iconify';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MicIcon from '@mui/icons-material/Mic';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // ----------------------------------------------------------------------
 
@@ -218,7 +224,7 @@ export const OpicEditorItem = memo(({
                         onClick={handleSwap}
                         title="Swap Korean and English"
                       >
-                        <Iconify icon="solar:transfer-vertical-bold" />
+                        <SwapVertIcon />
                       </IconButton>
                     )}
                     <IconButton
@@ -226,7 +232,7 @@ export const OpicEditorItem = memo(({
                       color={speakingIndex ? 'primary' : 'default'}
                       onClick={() => handleAction('speak')}
                     >
-                      <Iconify icon={speakingIndex ? 'solar:stop-circle-bold' : 'solar:volume-loud-bold'} />
+                      {speakingIndex ? <StopCircleIcon /> : <VolumeUpIcon />}
                     </IconButton>
                     <IconButton
                       size="small"
@@ -250,13 +256,9 @@ export const OpicEditorItem = memo(({
                         }),
                       }}
                     >
-                      <Iconify 
-                        icon={
-                          isListening 
-                            ? (isPreparing ? 'solar:refresh-linear' : 'solar:stop-circle-bold') 
-                            : 'solar:microphone-bold'
-                        } 
-                      />
+                        {isListening 
+                          ? (isPreparing ? <RefreshIcon /> : <StopCircleIcon />) 
+                          : <MicIcon />}
                     </IconButton>
                     {!isMobile && (
                       <IconButton
@@ -268,7 +270,7 @@ export const OpicEditorItem = memo(({
                           bgcolor: (theme) => (playingIndex || recordedAudio) ? alpha(theme.palette.info.main, 0.08) : 'transparent',
                         }}
                       >
-                        <Iconify icon={playingIndex ? 'solar:stop-circle-bold' : 'solar:play-bold'} />
+                        {playingIndex ? <StopCircleIcon /> : <PlayArrowIcon />}
                       </IconButton>
                     )}
                   </InputAdornment>
@@ -290,7 +292,7 @@ export const OpicEditorItem = memo(({
             '&:hover': { bgcolor: (theme) => alpha(theme.palette.error.main, 0.16) }
           }}
         >
-          <Iconify icon="solar:trash-bin-trash-bold" />
+          <DeleteIcon />
         </IconButton>
       </Stack>
     </Card>

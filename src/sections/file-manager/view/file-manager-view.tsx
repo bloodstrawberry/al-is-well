@@ -13,6 +13,10 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 import { fIsBetween } from 'src/utils/format-time';
 
@@ -20,7 +24,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 
 import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
 import { fileFormat } from 'src/components/file-thumbnail';
 import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -28,7 +31,6 @@ import { useTable, rowInPage, getComparator } from 'src/components/table';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
-import TREE_DATA from 'src/api/dummy/default.json';
 import { getTreeData, saveTreeData, getFileScript, clearAllScripts, getFullData, saveFullData, deleteFileScripts, deleteTreeItems } from 'src/api/indexDB';
 import { FileManagerFilters } from '../file-manager-filters';
 import { FileManagerSidebar } from '../file-manager-sidebar';
@@ -870,7 +872,7 @@ export function FileManagerView() {
     const pathNodes = currentFolder?.parentIds.map((pid: string) => flattenedTree.find((f) => f.id === pid)) || [];
 
     return (
-      <Breadcrumbs separator={<Iconify icon="eva:chevron-right-fill" width={16} />} sx={{ mb: 2 }}>
+      <Breadcrumbs separator={<ChevronRightIcon sx={{ width: 16, height: 16 }} />} sx={{ mb: 2 }}>
         <DroppableBreadcrumbItem
           id={null}
           label="Root"
@@ -972,7 +974,7 @@ export function FileManagerView() {
                         '&:hover': { bgcolor: 'error.dark' },
                       }}
                     >
-                      <Iconify icon="solar:restart-bold" />
+                      <RestartAltIcon />
                     </IconButton>
 
                     <IconButton
@@ -980,7 +982,7 @@ export function FileManagerView() {
                       onClick={() => fileInputRef.current?.click()}
                       sx={{ bgcolor: 'info.main', color: 'info.contrastText', '&:hover': { bgcolor: 'info.dark' } }}
                     >
-                      <Iconify icon="eva:cloud-upload-fill" />
+                      <CloudUploadIcon />
                     </IconButton>
 
                     <input
@@ -1000,7 +1002,7 @@ export function FileManagerView() {
                         '&:hover': { bgcolor: 'success.dark' },
                       }}
                     >
-                      <Iconify icon="eva:download-fill" />
+                      <CloudDownloadIcon />
                     </IconButton>
                   </Stack>
                 </Box>

@@ -11,7 +11,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
 import { Upload } from 'src/components/upload';
-import { Iconify } from 'src/components/iconify';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 // ----------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ export function FileManagerCreateFolderDialog({
         {!hideUpload && (
           <Button
             variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+            startIcon={<CloudUploadIcon />}
             onClick={handleUpload}
           >
             Upload

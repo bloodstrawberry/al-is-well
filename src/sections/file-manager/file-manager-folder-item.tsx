@@ -15,7 +15,11 @@ import { fData } from 'src/utils/format-number';
 import { getIsMobile } from 'src/utils/is-mobile';
 
 import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
@@ -110,7 +114,7 @@ export const FileManagerFolderItem = memo(({
             onNavigate?.();
           }}
         >
-          <Iconify icon="solar:eye-bold" />
+          <VisibilityIcon sx={{ mr: 1, width: 18, height: 18 }} />
           Open
         </MenuItem>
 
@@ -120,7 +124,7 @@ export const FileManagerFolderItem = memo(({
             onEdit();
           }}
         >
-          <Iconify icon="solar:pen-bold" />
+          <EditIcon sx={{ mr: 1, width: 18, height: 18 }} />
           Rename
         </MenuItem>
         
@@ -130,7 +134,7 @@ export const FileManagerFolderItem = memo(({
             onCopy?.();
           }}
         >
-          <Iconify icon="solar:copy-bold" />
+          <ContentCopyIcon sx={{ mr: 1, width: 18, height: 18 }} />
           Copy
         </MenuItem>
 
@@ -143,7 +147,7 @@ export const FileManagerFolderItem = memo(({
           }}
           sx={{ color: 'error.main' }}
         >
-          <Iconify icon="solar:trash-bin-trash-bold" />
+          <DeleteIcon sx={{ mr: 1, width: 18, height: 18 }} />
           Delete
         </MenuItem>
       </MenuList>

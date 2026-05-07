@@ -9,7 +9,10 @@ import Button from '@mui/material/Button';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 
-import { Iconify } from 'src/components/iconify';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { FileManagerPanel } from './file-manager-panel';
@@ -119,7 +122,7 @@ export function FileManagerGridView({
               menuActions.onClose();
             }}
           >
-            <Iconify icon="solar:folder-plus-bold" />
+            <CreateNewFolderIcon sx={{ mr: 1 }} />
             New folder
           </MenuItem>
         )}
@@ -131,7 +134,7 @@ export function FileManagerGridView({
             menuActions.onClose();
           }}
         >
-          <Iconify icon="solar:file-plus-bold" />
+          <NoteAddIcon sx={{ mr: 1 }} />
           New file
         </MenuItem>
       </MenuList>
@@ -162,7 +165,7 @@ export function FileManagerGridView({
                 size="small"
                 color="error"
                 variant="contained"
-                startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                startIcon={<DeleteIcon />}
                 onClick={onOpenConfirm}
                 sx={{ mr: 1 }}
               >

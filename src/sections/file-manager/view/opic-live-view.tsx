@@ -14,8 +14,8 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, useTheme } from '@mui/material/styles';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 
-import { Iconify } from 'src/components/iconify';
 import { getFileScript } from 'src/api/indexDB';
 import { toast } from 'src/components/snackbar';
 import { getIsMobile } from 'src/utils/is-mobile';
@@ -399,7 +399,7 @@ export function OpicLiveView({ fileId, fileName, onBack, onEdit }: Props) {
             />
           )) || (
               <Box sx={{ py: 10, textAlign: 'center', bgcolor: 'background.neutral', borderRadius: 2 }}>
-                <Iconify icon="solar:document-text-bold-duotone" width={48} sx={{ color: 'text.disabled', mb: 2 }} />
+                <DescriptionRoundedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
                 <Typography variant="body2" sx={{ color: 'text.disabled' }}>
                   No script lines available.
                 </Typography>

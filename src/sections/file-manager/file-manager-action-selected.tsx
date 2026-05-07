@@ -5,7 +5,9 @@ import Box from '@mui/material/Box';
 import Portal from '@mui/material/Portal';
 import Checkbox from '@mui/material/Checkbox';
 
-import { Iconify } from 'src/components/iconify';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox';
 
 // ----------------------------------------------------------------------
 
@@ -53,9 +55,9 @@ export const FileManagerActionSelected = memo(({
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
             onSelectAllItems(event.target.checked)
           }
-          icon={<Iconify icon="eva:radio-button-off-fill" width={22} />}
-          checkedIcon={<Iconify icon="solar:check-circle-bold" width={22} />}
-          indeterminateIcon={<Iconify icon="eva:minus-circle-fill" width={22} />}
+          icon={<RadioButtonUncheckedIcon sx={{ width: 22, height: 22 }} />}
+          checkedIcon={<CheckCircleIcon sx={{ width: 22, height: 22 }} />}
+          indeterminateIcon={<IndeterminateCheckBoxIcon sx={{ width: 22, height: 22 }} />}
           slotProps={{
             input: { id: 'items-selected-checkbox' },
           }}

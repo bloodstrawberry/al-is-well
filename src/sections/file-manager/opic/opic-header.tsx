@@ -7,8 +7,16 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { alpha } from '@mui/material/styles';
-
-import { Iconify } from 'src/components/iconify';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import EditIcon from '@mui/icons-material/Edit';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 // ----------------------------------------------------------------------
 
@@ -88,7 +96,7 @@ export function OpicHeader({
       }}
     >
       <IconButton onClick={onBack} sx={{ bgcolor: 'background.neutral', mt: { xs: 0.5, md: 0 } }}>
-        <Iconify icon="eva:arrow-ios-back-fill" />
+        <ArrowBackIcon />
       </IconButton>
 
       <Stack
@@ -179,7 +187,7 @@ export function OpicHeader({
                   onClick={onPrev}
                   sx={{ bgcolor: 'background.neutral' }}
                 >
-                  <Iconify icon="solar:alt-arrow-left-bold" />
+                  <ArrowBackIcon />
                 </IconButton>
               </span>
             </Tooltip>
@@ -194,7 +202,7 @@ export function OpicHeader({
                   onClick={onNext}
                   sx={{ bgcolor: 'background.neutral' }}
                 >
-                  <Iconify icon="solar:alt-arrow-right-bold" />
+                  <ArrowForwardIcon />
                 </IconButton>
               </span>
             </Tooltip>
@@ -210,7 +218,7 @@ export function OpicHeader({
                   onClick={onToggleRandom}
                   sx={{ bgcolor: (theme) => (randomPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
                 >
-                  <Iconify icon="solar:shuffle-bold" />
+                  <ShuffleIcon />
                 </IconButton>
               </Tooltip>
             </>
@@ -225,7 +233,7 @@ export function OpicHeader({
                   bgcolor: (theme) => (testMode ? alpha(theme.palette.info.main, 0.16) : 'background.neutral'),
                 }}
               >
-                <Iconify icon="solar:clipboard-check-bold" />
+                <AssignmentTurnedInIcon />
               </IconButton>
             </Tooltip>
           )}
@@ -237,13 +245,13 @@ export function OpicHeader({
               onClick={onToggleAllRevealed}
               sx={{ bgcolor: (theme) => (allRevealed ? alpha(theme.palette.warning.main, 0.16) : alpha(theme.palette.success.main, 0.16)) }}
             >
-              <Iconify icon={allRevealed ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              {allRevealed ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Edit (Ctrl + E)">
             <IconButton size="small" color="primary" onClick={onEdit} sx={{ bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16) }}>
-              <Iconify icon="solar:pen-bold" />
+              <EditIcon />
             </IconButton>
           </Tooltip>
 
@@ -255,13 +263,11 @@ export function OpicHeader({
                 onClick={onToggleAutoPlay}
                 sx={{ bgcolor: (theme) => (autoPlay ? alpha(theme.palette.primary.main, 0.16) : 'background.neutral') }}
               >
-                <Iconify 
-                  icon={
-                    storageKey === 'listening' 
-                      ? (autoPlay ? "solar:stop-circle-bold" : "solar:play-circle-bold")
-                      : (autoPlay ? "solar:play-circle-bold" : "solar:play-circle-linear")
-                  } 
-                />
+                {storageKey === 'listening' ? (
+                  autoPlay ? <StopCircleIcon /> : <PlayCircleFilledIcon />
+                ) : (
+                  autoPlay ? <PlayCircleFilledIcon /> : <PlayCircleOutlineIcon />
+                )}
               </IconButton>
             </Tooltip>
           )}

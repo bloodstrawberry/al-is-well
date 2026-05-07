@@ -6,7 +6,10 @@ import IconButton from '@mui/material/IconButton';
 
 import { RouterLink } from 'src/routes/components';
 
-import { Iconify } from 'src/components/iconify';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // ----------------------------------------------------------------------
 
@@ -64,7 +67,7 @@ export function FileManagerPanel({
               '&:hover': { bgcolor: 'primary.dark' },
             }}
           >
-            <Iconify width={16} icon="mingcute:add-line" />
+            <AddIcon sx={{ width: 16, height: 16 }} />
           </IconButton>
         </Box>
 
@@ -79,7 +82,7 @@ export function FileManagerPanel({
           component={RouterLink}
           size="small"
           color="inherit"
-          endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ ml: -0.5 }} />}
+          endIcon={<ArrowForwardIosIcon sx={{ width: 18, height: 18, ml: -0.5 }} />}
         >
           View all
         </Button>
@@ -87,7 +90,7 @@ export function FileManagerPanel({
 
       {onCollapse && (
         <IconButton onClick={onCollapse}>
-          <Iconify icon={collapse ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-upward-fill'} />
+          {collapse ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
         </IconButton>
       )}
     </Box>
