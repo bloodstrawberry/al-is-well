@@ -444,7 +444,36 @@
           "type": "folder",
           "createdAt": "2026-04-29T15:37:52.545Z",
           "modifiedAt": "2026-04-29T16:11:51.359Z",
-          "children": []
+          "children": [
+            {
+              "id": "1778854137717",
+              "label": "01. 사물 묘사 - 우리나라 지형",
+              "type": "file",
+              "createdAt": "2026-05-15T14:08:57.717Z",
+              "modifiedAt": "2026-05-15T14:10:21.374Z"
+            },
+            {
+              "id": "1778854144885",
+              "label": "02. 묘사 - 일본",
+              "type": "file",
+              "createdAt": "2026-05-15T14:09:04.885Z",
+              "modifiedAt": "2026-05-15T14:10:52.198Z"
+            },
+            {
+              "id": "1778854157573",
+              "label": "03, 04. 활동 묘사 - 우리나라 사람 활동",
+              "type": "file",
+              "createdAt": "2026-05-15T14:09:17.573Z",
+              "modifiedAt": "2026-05-15T14:11:32.447Z"
+            },
+            {
+              "id": "1778854191446",
+              "label": "05, 06, 07. 장소 묘사 - 국내 추억 장소",
+              "type": "file",
+              "createdAt": "2026-05-15T14:09:51.446Z",
+              "modifiedAt": "2026-05-15T14:13:58.019Z"
+            }
+          ]
         },
         {
           "id": "1777477171162",
@@ -531,6 +560,13 @@
               "type": "file",
               "createdAt": "2026-05-10T13:39:28.934Z",
               "modifiedAt": "2026-05-10T13:44:07.258Z"
+            },
+            {
+              "id": "1778430341179-dsicat4ve",
+              "label": "04. 특별한 경험 - 교통",
+              "type": "file",
+              "createdAt": "2026-05-10T16:25:41.179Z",
+              "modifiedAt": "2026-05-10T16:27:40.510Z"
             }
           ]
         },
@@ -766,7 +802,36 @@
           "type": "folder",
           "createdAt": "2026-04-29T16:03:30.751Z",
           "modifiedAt": "2026-04-29T16:03:30.751Z",
-          "children": []
+          "children": [
+            {
+              "id": "1778429878214",
+              "label": "01. 인물 묘사 - 가족, 친구",
+              "type": "file",
+              "createdAt": "2026-05-10T16:17:58.214Z",
+              "modifiedAt": "2026-05-10T16:18:48.220Z"
+            },
+            {
+              "id": "1778429884646",
+              "label": "02. 활동 묘사 - 가족, 친구",
+              "type": "file",
+              "createdAt": "2026-05-10T16:18:04.646Z",
+              "modifiedAt": "2026-05-10T16:19:15.508Z"
+            },
+            {
+              "id": "1778429895702",
+              "label": "03. 최근 경험 - 양자 컴퓨터",
+              "type": "file",
+              "createdAt": "2026-05-10T16:18:15.702Z",
+              "modifiedAt": "2026-05-10T16:19:43.691Z"
+            },
+            {
+              "id": "1778429903253",
+              "label": "04, 06. 특별한 경험 - 월드컵",
+              "type": "file",
+              "createdAt": "2026-05-10T16:18:23.253Z",
+              "modifiedAt": "2026-05-10T16:22:29.351Z"
+            }
+          ]
         }
       ],
       "createdAt": "2026-04-29T12:53:05.952Z",
@@ -774,33 +839,6 @@
     }
   ],
   "scripts": {
-    "13": {
-      "questionEn": "DDD",
-      "questionKo": "ㅁㄴㅇㄹ",
-      "audioUrl": "https://blog.kakaocdn.net/dna/xS6z9/dJMcaiCPPqo/AAAAAAAAAAAAAAAAAAAAAEVPfPvagz10Vvfeh9sNEj8CiIK5uSqCoh3_kUx1EinD/tfile.mp3?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&allow_ip=&allow_referer=&signature=Iflwj2vIGSe4sv4eSDKo0j%2BGn9c%3D",
-      "lines": [
-        {
-          "ko": "내가 주로 가는 미용실에 대해 이야기 해볼게.",
-          "en": "Let me tell you about my go-to hair salon."
-        },
-        {
-          "ko": "나는 우리집에 가까운 미용실을 이용해 세달에 한번씩",
-          "en": "It’s right by my place. I go there every three months."
-        },
-        {
-          "ko": "이 미용실에는 미용사가 한 명밖에 없어서 매우 조용해.",
-          "en": "It’s a one-man shop, so it’s very quiet and chill."
-        },
-        {
-          "ko": "그리고 가장 나를 기쁘게 하는 것은 미용사가 나한테 아무말도 안 걸어준다는 거지",
-          "en": "The best part is, there's no small talk at all."
-        },
-        {
-          "ko": "아마 남자라면 공감할거야. 조용한 미용실이 얼마나 편안한지를",
-          "en": "It’s a guy thing, you know? The silence is so relaxing."
-        }
-      ]
-    },
     "1777443579253": {
       "questions": [
         {
@@ -1031,193 +1069,6 @@
         {
           "ko": "그래서 이제는 재활용을 할 때 칼을 사용하지 않아.",
           "en": "So from now on? No more knives for me. Never again!"
-        }
-      ]
-    },
-    "1777545125920-o78wwl1a7": {
-      "questions": [
-        {
-          "en": "Tell me about the furniture you have in your home.\nIs there a piece that is your favorite?",
-          "ko": "당신 집에 있는 가구에 대해서 이야기해 주세요.\n가장 좋아한다고 할 만한 가구가 있나요?"
-        }
-      ],
-      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-01%20%EA%B0%80%EA%B5%AC-%EC%82%AC%EB%AC%BC%20%EB%AC%98%EC%82%AC-1.mp3",
-      "category": "콤보 세트",
-      "subCategory": "사물 묘사",
-      "comboPositions": [
-        1
-      ],
-      "lines": [
-        {
-          "ko": "내가 소개하고자 하는 가구는 바로 만화책을 모아둔 책장이야.",
-          "en": "Let's talk about my bookshelf, where I keep my entire comic book collection."
-        },
-        {
-          "ko": "내가 집에서 가장 좋아하는 가구야.",
-          "en": "It is actually my favorite piece of furniture in my home."
-        },
-        {
-          "ko": "나는 매달 월급이 나오면 만화책을 구매해",
-          "en": "Every month when I get paid, I buy new comic books."
-        },
-        {
-          "ko": "책장에 꽂아넣는 재미로 살아",
-          "en": "I live for the moment I put new comics on the shelf in my room."
-        },
-        {
-          "ko": "이 책장은 내 키보다 10인치 정도 더 큰 하얀색 슬라이딩 책장이야.",
-          "en": "It is a white sliding shelf, and it’s actually about 10 inches taller than me!"
-        },
-        {
-          "ko": "문을 잡아서 당기면 드르륵 하고 선반이 나와",
-          "en": "When I pull the handle, the shelves slide out with a nice 'click-clack.' sound."
-        },
-        {
-          "ko": "무려 첫월급으로 1000달러나 주고 샀어!!",
-          "en": "Believe it or not, I spent 1,000 bucks from my very first paycheck on this!"
-        },
-        {
-          "ko": "나는 은퇴를 하고 나면 내가 모은 만화책을 보면서 여생을 보내는게 꿈이거든.",
-          "en": "My ultimate dream is to just read my entire collection after I retire."
-        },
-        {
-          "ko": "내 방에서 힘들 때 마다 만화책이 쌓여가는 책장을 보기만 해도 즐거워",
-          "en": "It makes me so happy just to look at my growing collection in my room."
-        }
-      ]
-    },
-    "1777545125920-931f56v20": {
-      "questions": [
-        {
-          "en": "Tell me about how you use your furniture on a typical day.\nWhat kinds of things do you do with your furniture?",
-          "ko": "평소 가구를 어떻게 사용하는지 이야기해 주세요.\n가구를 이용해서 어떤 일을 하시나요?"
-        }
-      ],
-      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-02%20%EA%B0%80%EA%B5%AC-%ED%99%9C%EB%8F%99%20%EB%AC%98%EC%82%AC.mp3",
-      "category": "콤보 세트",
-      "subCategory": "활동 묘사",
-      "comboPositions": [
-        2
-      ],
-      "lines": [
-        {
-          "ko": "아까 말했듯이, 나는 만화책을 보관할 때, 책장을 써,",
-          "en": "Going back to my bookshelf, I usually use my bookshelf to store my comics."
-        },
-        {
-          "ko": "당연히 보관만 하지 않지!, 주로 책을 집어서 가까이 있는 소파에서 보기도 해",
-          "en": "But of course, it's not just for storage! I usually grab a book and hit the sofa nearby."
-        },
-        {
-          "ko": "우리 집에 만화책이 많아서, 사실 만화책 성지야.",
-          "en": "Since I have so many comics, my room is basically a comic sanctuary."
-        },
-        {
-          "ko": "그래서  매주 나의 친구들은 주말마다 놀러오곤 해. 책장이 있는 내 방에서 하루종일 만화책을 보고 놀곤 하지.",
-          "en": "That's why my friends love coming over every weekend. And we just get lost in comics all day."
-        },
-        {
-          "ko": "가장 좋은 점은 친구들이 항상 치킨이랑 맥주를 들고오는거야",
-          "en": "The best part is, they always bring chicken and beer."
-        },
-        {
-          "ko": "나도 친구들이 오는게 아주 좋아, 최고야.",
-          "en": "So, I love having them over! It's the best."
-        }
-      ]
-    },
-    "1777545125920-3orik5vgn": {
-      "questions": [
-        {
-          "en": "Tell me about the furniture that you had in your childhood home.\nWas there anything different from the furniture that you have today?\nDescribe for me what your home looked like at that time.",
-          "ko": "어렸을 때 집에 있었던 가구에 대해서 이야기 해 주세요.\n현재 사용하고 있는 가구에 비해 다른 점이 뭔가 있었나요?\n당시에 집이 어떤 모습을 하고 있었는지 묘사해주세요."
-        }
-      ],
-      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-03%20%EB%B9%84%EA%B5%90-%EA%B0%80%EA%B5%AC.mp3",
-      "category": "콤보 세트",
-      "subCategory": "비교",
-      "comboPositions": [
-        2,
-        3
-      ],
-      "lines": [
-        {
-          "ko": "과거에는, 즉 내가 어렸을 땐, 테이블은 그냥 테이블이었어.",
-          "en": "In the past, I mean, when I was a kid, a table was just... a table."
-        },
-        {
-          "ko": "나무로 만들었거나 플라스틱으로 만들었거나 그런 차이가 있을 뿐이지",
-          "en": "Whether it was made of wood or plastic. That was it!"
-        },
-        {
-          "ko": "하지만 현재 우리집에 있는 테이블은 변신이 가능해. 이 테이블의 이름은 리프트업 테이블이야.",
-          "en": "But the table I have now can transform! It is called a 'lift-up table.'"
-        },
-        {
-          "ko": "평소에는 바닥에 앉아서 사용하다가  필요할 때 위로 쓱 올리면 높이가 올라가서 책상처럼 쓸 수 있어.",
-          "en": "Usually, I sit on the floor to use it, but I can just lift the top, and it becomes a desk!"
-        },
-        {
-          "ko": "그럼 소파에서 사용하기 엄청 편해지지",
-          "en": "It’s perfect for using on the sofa."
-        },
-        {
-          "ko": "TV를 보면서 밥먹기 편하려고 산 테이블인데 아주 만족하고 있어.",
-          "en": "I got it to eat while watching TV, and I totally love it. It’s so worth it!"
-        }
-      ]
-    },
-    "1777545125920-uec40qpgu": {
-      "questions": [
-        {
-          "en": "Sometimes, problems arise when it comes to furniture.\nThings might break, the fabric might get stained or ripped.\nTell me about a time when you had a problem with a piece of furniture.\nTell me everything that happened and how you fixed the problem.",
-          "ko": "가끔 가구에 문제가 생기는 경우가 있습니다.\n뭔가 부러진다든가, 겉섬유에 얼룩이 진다든가 찢긴다든가 할 수 있죠.\n가구 때문에 문제가 생겼던 때에 대해서 이야기해 주세요.\n어떤 일이 있었는지 전부 알려 주시고, 어떻게 그 문제를 해결했는지 알려 주세요."
-        }
-      ],
-      "audioUrl": "https://github.com/bloodstrawberry/mp3/raw/refs/heads/main/01-04%20%ED%8A%B9%EB%B3%84%ED%95%9C%20%EA%B2%BD%ED%97%98-%EA%B0%80%EA%B5%AC,%20%EC%A7%91.mp3",
-      "category": "콤보 세트",
-      "subCategory": "특별한 경험",
-      "comboPositions": [],
-      "lines": [
-        {
-          "ko": "내가 작년에 산 테이블에 대해 이야기해볼게.",
-          "en": "Let me tell you about my new table, a total nightmare."
-        },
-        {
-          "ko": "TV도 보고 공부도 할겸 거실에 테이블을 샀어",
-          "en": "I got it for my living room to watch TV and study at the same time."
-        },
-        {
-          "ko": "그런데 움직이다보니 모서리에 부딪혀서 무릎에 멍이 많이 들었어.",
-          "en": "But I kept hitting my knees on the corners. I had so many bruises!"
-        },
-        {
-          "ko": "집이 아니라 완전 재앙이었지",
-          "en": "It was a complete disaster in my own home."
-        },
-        {
-          "ko": "바보같이 한두번도 아니고 무려 세번이나!",
-          "en": "And seriously, not once, not twice, but three times!"
-        },
-        {
-          "ko": "너무 짜증나고 화나고 테이블을 버릴 수도 없고...",
-          "en": "I was so annoyed and angry. I couldn’t just throw the table away, right?"
-        },
-        {
-          "ko": "그런데 한국의 아마존인 다이소에 들어가보니",
-          "en": "But then, I went to Daiso, which is basically the Korean Amazon."
-        },
-        {
-          "ko": "테이블 보호재가 있더라구",
-          "en": "And you know what? They had table corner guards!"
-        },
-        {
-          "ko": "그래서 보호재를 사서 붙인 후에는 무릎에 멍이 들 일이 없어졌어",
-          "en": "So I taped them on and problem solved!"
-        },
-        {
-          "ko": "고작 1달로로 해결할 수 있었지.",
-          "en": "No more bruises since then, and the best part? just one buck."
         }
       ]
     },
@@ -3719,6 +3570,392 @@
         {
           "ko": "이걸로 돈 10배 벌어서 한강뷰가 보이는 집을 사기로.",
           "en": "We agreed on a 10x goal for that Han River view!"
+        }
+      ]
+    },
+    "1778429878214": {
+      "questions": [
+        {
+          "en": "Can you describe a friend or a family member you see often?\nWho is he or she? What is he or she like?",
+          "ko": "자주 보는 친구나 가족을 묘사해 주실 수 있나요?\n누구인가요? 어떤 분인가요?"
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "인물 묘사",
+      "comboPositions": [
+        1
+      ],
+      "lines": [
+        {
+          "ko": "내 여자친구 릴리에 대해 이야기해볼게.",
+          "en": "Let me tell you about my girlfriend, Lily."
+        },
+        {
+          "ko": "릴리는 내가 가장 시간을 보내고 싶은 사람 중 첫번째 사람이야.",
+          "en": "She’s my number one person to be around."
+        },
+        {
+          "ko": "릴리는 열정적이고 창의적이며, 사람들 사이에서 활기찬 에너지를 발산해.",
+          "en": "She’s so passionate, creative and such a people person."
+        },
+        {
+          "ko": "여자친구랑 나는 취미가 꽤 일치해. 만화책 보기, 넷플릭스, 집에서 빈둥대기..",
+          "en": "We’re a perfect match. Like, we love reading comics, watching Netflix, and just chilling at home."
+        },
+        {
+          "ko": "그래서 내가 푹 빠졌어.",
+          "en": "That’s why I’m totally hooked on her."
+        },
+        {
+          "ko": "그녀와 함께 있다보면 정말 시간 가는 줄 몰라",
+          "en": "Time flies when I’m with her."
+        }
+      ]
+    },
+    "1778429884646": {
+      "questions": [
+        {
+          "en": "When you get together with friends or family, \nwhat kinds of things do you like to do together and why?",
+          "ko": "친구나 가족과 모이면 함께 무엇을 하는 것을 좋아하고, 그 이유는 무엇인가요?"
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "활동 묘사",
+      "comboPositions": [
+        2
+      ],
+      "lines": [
+        {
+          "ko": "내가 친구들과 하고 싶은 일들에 대해 묘사 해볼게",
+          "en": "Let me describe what I want to do with my friends."
+        },
+        {
+          "ko": "당연히, 친구와 만화책을 보거나, 넷플릭스를 보거나 또는 등등을 할거야.",
+          "en": "Of course, I’ll watch Netflix or read comics with my friends, and so on."
+        },
+        {
+          "ko": "하지만 요즘 가장 하고 싶은 것은 함께 재테크 공부하는거야",
+          "en": "But these days, we’re really into studying stocks."
+        },
+        {
+          "ko": "요즘 주식 시장이 워낙 핫해서, 주식 얘기만 해도 너무 자극적이고 도파민이 터져.",
+          "en": "You know, the market is so crazy, just talking about it is a total dopamine rush."
+        },
+        {
+          "ko": "그래서 현재 목표는 재테크 열심히해서 새 집을 사는 거야.",
+          "en": "So now, my goal is to save up for a new house."
+        }
+      ]
+    },
+    "1778429895702": {
+      "questions": [
+        {
+          "en": "Tell me about the last time when you got together with your friends or family.\nWho was there and when was it?\nTell me everything you did that day from beginning to end.",
+          "ko": "마지막으로 친구나 가족과 함께 했던 자리에 대해 이야기해 주세요.\n누가 그 자리에 있었고 언제였나요?\n그날 있었던 일을 처음부터 끝까지 모두 말해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "특별한 경험",
+      "comboPositions": [
+        2,
+        3
+      ],
+      "lines": [
+        {
+          "ko": "지난번에 여자친구와 함께 했던 날에 대해 이야기 해볼게",
+          "en": "Let me tell you about a day I spent with my girlfriend."
+        },
+        {
+          "ko": "나는 여자친구 릴리와 같이 재테크 공부를 했어.",
+          "en": "I studied investing with my girlfriend, Lily."
+        },
+        {
+          "ko": "요즘 양자 컴퓨터 테마가 핫하다고 하더라구.",
+          "en": "I heard that quantum computing is a really hot topic these days."
+        },
+        {
+          "ko": "여자친구와 같이 관련 유튜브를 보고, 양자역학 책도 사서 봤지.",
+          "en": "We watched some YouTube videos about it and even read a book on quantum mechanics."
+        },
+        {
+          "ko": "그리고 저녁에 스파게티를 먹으면서 어떻게 투자할 지 토론도 했어.",
+          "en": "Then, we talked about our investment plan over spaghetti."
+        },
+        {
+          "ko": "이걸로 돈 10배 벌어서 한강뷰가 보이는 집을 사기로.",
+          "en": "We agreed on a 10x goal for that Han River view!"
+        }
+      ]
+    },
+    "1778429903253": {
+      "questions": [
+        {
+          "en": "Could you tell me about a special event or a holiday you celebrated with your family or friends?\nTell me all about that event or the holiday from beginning to end.",
+          "ko": "가족이나 친구들과 함께 했던 특별한 이벤트 또는 휴일에 대해 이야기해 주실 수 있나요?\n그 이벤트나 휴일에 대해 처음부터 끝까지 모두 말해 주세요."
+        },
+        {
+          "en": "Could you tell me about a special event or a holiday you celebrated with your family or friends?\nTell me all about that event or the holiday from beginning to end.",
+          "ko": "가족이나 친구들과 함께 했던 특별한 이벤트 또는 휴일에 대해 이야기해 주실 수 있나요?\n그 이벤트나 휴일에 대해 처음부터 끝까지 모두 말해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "특별한 경험",
+      "comboPositions": [
+        3
+      ],
+      "lines": [
+        {
+          "ko": "2018년 러시아 월드컵 이야기를 해볼게, 정말 레전드였지.",
+          "en": "I’d like to tell you about the 2018 Russia World Cup. It was legendary."
+        },
+        {
+          "ko": "* 나는 그때 단골 바에서 친구들과 함께 한국과 독일전을 봤어. *",
+          "en": "I watched the Korea-Germany match with my friends at our favorite bar."
+        },
+        {
+          "ko": "독일은 축구 최강국이라 솔직히 기대를 안했었어,",
+          "en": "You know, Germany is such a beast, so I had zero expectations."
+        },
+        {
+          "ko": "그리고 경기도 꽤 지루했었어.",
+          "en": "Plus, the game was pretty boring at first."
+        },
+        {
+          "ko": "그런데 우리나라가 마지막에 두 골이나 넣었어.",
+          "en": "But then, We scored twice in the end. It was insane."
+        },
+        {
+          "ko": "내 인생 최고의 경기였었고, 축구 최강국 독일의 굴욕이 너무 재밌었어.",
+          "en": "It was the best match ever! Watching a giant like Germany lose was so satisfying."
+        },
+        {
+          "ko": "훗날 이걸 카잔의 기적이라고 불렀었지.",
+          "en": "It would come to be known as the time Miracle of Kazan."
+        },
+        {
+          "ko": "가끔 어딘가에서 축구 경기를 보면 이날이 떠오르곤 해",
+          "en": "Watching soccer always reminds me of that day."
+        }
+      ]
+    },
+    "1778430341179-dsicat4ve": {
+      "questions": [
+        {
+          "en": "Traveling can lead to many kinds of interesting, funny and unexpected experiences.\nTell me about one travel experience you had that was unforgettable.\nStart by telling me when this happened, where you were, and who you were with.\nThen, tell me about all the things that happened that made this experience so unforgettable.",
+          "ko": "여행 중에 흥미롭거나 웃기거나 예기치 못한 일들이 많이 일어날 수 있습니다.\n잊을 수 없는 여행 경험에 대해 이야기해 주세요.\n언제 있었던 일이고, 어디에 있었고, 누구와 있었는지 이야기를 시작해보세요.\n그리고 그렇게 기억에 남게 만든 모든 일들에 대해 말해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "특별한 경험",
+      "comboPositions": [
+        2,
+        3
+      ],
+      "lines": [
+        {
+          "ko": "여행에서 있었던 최악의 일을 얘기해볼게.",
+          "en": "Let me tell you about my worst traveling story."
+        },
+        {
+          "ko": "저는 요즘 테슬라 같은 차에 익숙해서, 모든 게 자동일 거라 생각했어요.",
+          "en": "You know, I’m used to cars like Tesla, so I thought everything would be easy."
+        },
+        {
+          "ko": "그런데 양양에서 빌린 렌터카가 정말 '석기 시대' 수준이었어요.",
+          "en": "But the rental car in Yangyang was like the Stone Age."
+        },
+        {
+          "ko": "가장 큰 문제는 네비게이션이 없었다는 거예요!",
+          "en": "The biggest problem was... there was no GPS!"
+        },
+        {
+          "ko": "길을 잃었을 때, 전 정말 멘붕이었죠. 어떻게 해야 할지 몰랐거든요.",
+          "en": "When I got lost, I was so confused. I didn’t know what to do."
+        },
+        {
+          "ko": "그래서 옛날 우리 아버지처럼 했어요. 종이 지도를 보고 택시 기사님들께 길을 물어봤죠.",
+          "en": "So, I did what my father used to do. I checked a paper map and asked taxi drivers for help."
+        },
+        {
+          "ko": "다행히 현지인들이 정말 열정적이고 친절해서 무사히 도착할 수 있었어요.",
+          "en": "Luckily, The locals were so passionate and such people persons, so I finally made it."
+        },
+        {
+          "ko": "정말 미친 하루였지만, 지금은 좋은 추억이에요",
+          "en": "It was a crazy day, but it’s a great memory now."
+        }
+      ]
+    },
+    "1778854137717": {
+      "questions": [
+        {
+          "en": "Describe your country's geography for me.\nAre there mountains, lakes, or rivers?\nWhat is your country like?",
+          "ko": "당신 나라의 지형을 묘사해보세요.\n산이나 호수 혹은 강이 있나요?\n당신 나라는 어떠한 모습을 하고 있나요?"
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "사물 묘사",
+      "comboPositions": [
+        1
+      ],
+      "lines": [
+        {
+          "ko": "우리나라의 지형적 특징에 대해 묘사해볼게.",
+          "en": "Let me talk about Korea's geography."
+        },
+        {
+          "ko": "우리나라는 산이 아주 많기 때문에 계절마다 보는 재미가 있어",
+          "en": "There are mountains everywhere! So it’s never boring to see them change."
+        },
+        {
+          "ko": "우리나라는 사계절이 뚜렷한 나라야. (봄, 여름, 가을, 겨울)",
+          "en": "We have four very distinct seasons. You know... spring, summer, fall, and winter."
+        },
+        {
+          "ko": "그래서 봄에는 노랗고, 여름에는 푸르고, 가을에는 붉고, 겨울에는 ...해서 산을 항상 보기가 좋아.",
+          "en": "That's why the mountains change colors!"
+        },
+        {
+          "ko": "They are yellow in spring, green in summer, red in fall, and white in winter.",
+          "en": "It’s a beautiful view all year round."
+        },
+        {
+          "ko": "결론은 우리나라는 아주 산이 많고 볼만해서 좋아",
+          "en": "Bottom line is, I never get tired of the view. I love it!"
+        }
+      ]
+    },
+    "1778854144885": {
+      "questions": [
+        {
+          "en": "Tell me a little bit about a country close to your own country.\nTell me what the country looks like, about its people and some of its traditions.",
+          "ko": "당신 나라의 인접국에 대해 조금 이야기해보세요.\n그 나라는 어떠한 모습을 하고 있고, 그 나라 국민들과 전통에 대해서도 이야기해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "사물 묘사",
+      "comboPositions": [
+        1
+      ],
+      "lines": [
+        {
+          "ko": "우리나라 주변에 있는 일본에 대해 이야기 해보죠.",
+          "en": "Let’s talk about Japan, our neighbor."
+        },
+        {
+          "ko": "일본은 피카츄, 슈퍼마리오, 그리고 헬로 키티 같은걸로 유명해요.",
+          "en": "Japan is famous for characters like Pikachu, Mario, and Hello Kitty."
+        },
+        {
+          "ko": "일본은 귀여운 나라인것 같아요.",
+          "en": "I think the whole country is just so adorable."
+        },
+        {
+          "ko": "그리고 일본은 섬나라라서 해변이 아주 많죠.",
+          "en": "Plus, it's an island,so there are beaches everywhere."
+        },
+        {
+          "ko": "왠지 일본은 스포츠바가 많아서 경기를 보면서 술을 먹기 딱 좋아요.",
+          "en": "So, Japan has many great sports bars. It’s the perfect spot to grab a beer and watch a game."
+        },
+        {
+          "ko": "그래서 제가 일본을 좋아해요.",
+          "en": "That's why I love it."
+        }
+      ]
+    },
+    "1778854157573": {
+      "questions": [
+        {
+          "en": "Tell me about the outdoor activities that are popular in your country.\nDo people go hiking, bike or swim?\nWhat do people typically do outdoors?",
+          "ko": "당신 나라에서 즐겨하는 야외 활동에 대해 이야기 해 주세요.\n사람들은 등산을 가거나 자전거를 타거나 수영을 하나요?\n사람들은 보편적으로 야외에서 어떤 활동을 하나요?"
+        },
+        {
+          "en": "Please tell me about what kinds of free time activities people in your country do.",
+          "ko": "당신 나라 사람들이 시간이 날 때 어떤 활동을 하는지에 대해 이야기해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "활동 묘사",
+      "comboPositions": [
+        2
+      ],
+      "lines": [
+        {
+          "ko": "우리나라 사람들이 하는 활동에 대해 이야기해 볼게.",
+          "en": "Let me talk about activities people do in my country."
+        },
+        {
+          "ko": "나는 사실 우리나라 사람들이 이 주제에 대해 잘 몰라. 크게 관심이 없거든.",
+          "en": "Actually, I don’t care about this topic at all. It’s not my thing."
+        },
+        {
+          "ko": "하지만 우리나라 사람들이 SNS 유행에 민감하다는건 잘 알아.",
+          "en": "But people here are super sensitive to social media trends."
+        },
+        {
+          "ko": "그래서 많은 사람들이 SNS에 비슷한 활동이 나오고 있다면 나는 그게 요즘 인스타그램에서 유행하고 있다고 짐작하지.",
+          "en": "If I see the same activities all over social media, it’s totally an Instagram trend."
+        },
+        {
+          "ko": "하여튼 남들이 하는걸 따라하는걸 참 좋아하는 사람들인것같아.",
+          "en": "Basically, everyone just loves to copy each other."
+        }
+      ]
+    },
+    "1778854191446": {
+      "questions": [
+        {
+          "en": "I'd like you to pick a favorite place in your country from your childhood \nand describe that place for me.\nWhat are your memories of that place?\nWhat was it like when you were a child?",
+          "ko": "어렸을 때 가 본 당신 나라에 있는 장소 중에 가장 좋았던 곳을 하나 골라 묘사해 주세요.\n그 장소에 대한 어떤 추억이 있나요?\n당신이 어렸을 때 그 장소는 어떤 모습을 하고 있었나요?"
+        },
+        {
+          "en": "Tell me about an early memory of your country's geography.\nPerhaps, you visited a special place or went to an important natural landmark.\nDescribe what you saw when you visited that special place.",
+          "ko": "어렸을 때 당신 나라의 지형에 대해 기억이 나는 추억을 말해 주세요.\n특별한 장소에 방문을 했거나 중요한 천연 명소에 갔을 수 있겠죠.\n그 특별한 장소에 갔을 때 무엇을 보았는지 설명해 주세요."
+        },
+        {
+          "en": "People often have memorable and moving experiences when they explore their country's geography.\nYou might climb a famous mountain or swim at a beautiful beach.\nTell me the story of a memorable time you had while visiting a natural place in your country.",
+          "ko": "사람들은 자국의 여러 가지 지형을 탐색하며, 인상적이거나 감동적인 경험을 합니다.\n유명한 산을 등반할 수도 있고 아름다운 해변에서 수영을 할 수도 있어요.\n당신 나라에서 천연 장소를 방문한 경험 중에, 기억에 남는 추억에 대해 이야기해 주세요."
+        }
+      ],
+      "audioUrl": "",
+      "category": "콤보 세트",
+      "subCategory": "사물 묘사",
+      "comboPositions": [
+        3
+      ],
+      "lines": [
+        {
+          "ko": "내가 가장 좋아하는 나라인 양양 쏠 비치에 대해 말해볼게.",
+          "en": "Let me tell you about my favorite place, Yangyagn sol beach."
+        },
+        {
+          "ko": "거긴 내가 어렸을 때 가족과 처음으로 가봤던 나라야.",
+          "en": "I first went there with my family when I was young."
+        },
+        {
+          "ko": "거기 해변이 정말 멋있었고, 음식도 정말 맛있었어.",
+          "en": "The beaches were amazing, and the local food was just incredible."
+        },
+        {
+          "ko": "그리고 현지인들은 열정적이고 창의적이며, 사람들 사이에서 활기찬 에너지를 발산해.",
+          "en": "Also, the locals were so passionate, creative and such people persons."
+        },
+        {
+          "ko": "모든게 초록색이고 평화로워. 지구에 있는 천국이야",
+          "en": "Everything is so green and peaceful. It’s like a paradise on earth."
+        },
+        {
+          "ko": "그때 기억이 좋아서 나는 매년 여기에 가고 있어.",
+          "en": "I’ve loved it ever since, so I go there every year."
         }
       ]
     }
